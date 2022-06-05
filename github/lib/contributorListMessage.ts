@@ -8,26 +8,24 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 
 export async function contributorListMessage({
-    context,
+    repository,
+    room,
     read,
     persistence,
     modify,
     http,
 }: {
-    context: SlashCommandContext;
+    repository : String,
+    room: IRoom;
     read: IRead;
     persistence: IPersistence;
     modify: IModify;
     http: IHttp;
 }) {
-    const command = context.getArguments();
-    const repository = command[0];
-
     const gitResponse = await http.get(
         `https://api.github.com/repos/${repository}/contributors`
     );
     const resData = gitResponse.data;
-    const room: IRoom = context.getRoom();
     const textSender = await modify
         .getCreator()
         .startMessage()

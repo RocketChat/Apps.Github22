@@ -1,11 +1,10 @@
-
 import {
     IHttp,
     IMessageBuilder,
     IModify,
     IModifyCreator,
     IPersistence,
-    IRead
+    IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { ButtonStyle } from "@rocket.chat/apps-engine/definition/uikit";
 
@@ -23,10 +22,10 @@ export async function initiatorMessage({
     http: IHttp;
 }) {
     const greetBuilder = await modify
-    .getCreator()
-    .startMessage()
-    .setRoom(data.room)
-    .setText(`Hey _${data.sender.username}_ !`);
+        .getCreator()
+        .startMessage()
+        .setRoom(data.room)
+        .setText(`Hey _${data.sender.username}_ !`);
 
     if (data.room.type !== "l") {
         await modify
@@ -41,7 +40,9 @@ export async function initiatorMessage({
     const block = modify.getCreator().getBlockBuilder();
 
     block.addSectionBlock({
-        text: block.newPlainTextObject(`Choose Action for ${data.arguments[0]} 👇 ?`),
+        text: block.newPlainTextObject(
+            `Choose Action for ${data.arguments[0]} 👇 ?`
+        ),
     });
 
     block.addActionsBlock({
@@ -50,7 +51,7 @@ export async function initiatorMessage({
             block.newButtonElement({
                 actionId: "githubDataSelect",
                 text: block.newPlainTextObject("Overview"),
-                value: `${data.arguments[0]}`,
+                value: `${data.arguments[0]}/repo`,
                 style: ButtonStyle.PRIMARY,
             }),
             block.newButtonElement({
@@ -76,10 +77,5 @@ export async function initiatorMessage({
 
     builder.setBlocks(block);
 
-    await modify
-    .getNotifier()
-    .notifyUser(data.sender, builder.getMessage());
-
-    
-
+    await modify.getNotifier().notifyUser(data.sender, builder.getMessage());
 }

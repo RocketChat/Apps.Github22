@@ -46,7 +46,7 @@ export class GithubCommand implements ISlashCommand {
             sender: sender,
             arguments: command,
         };
-
+        const repository = command[0]; 
         if (Array.isArray(command) && command.length === 1) {
 
             await initiatorMessage({ data, read, persistence, modify, http });
@@ -57,19 +57,19 @@ export class GithubCommand implements ISlashCommand {
 
             switch (subcommand2) {
                 case "issues": {
-                    await issueListMessage({context,read,persistence,modify,http});
+                    await issueListMessage({repository,room,read,persistence,modify,http});
                     break;
                 }
                 case "contributors": {
-                   await contributorListMessage({context,read,persistence,modify,http});
+                   await contributorListMessage({repository,room,read,persistence,modify,http});
                     break;
                 }
                 case "pulls": {
-                    await pullRequestListMessage({context,read,persistence,modify,http});
+                    await pullRequestListMessage({repository,room,read,persistence,modify,http});
                     break;
                 }
                 case "repo": {
-                    await repoDataMessage({context,read,persistence,modify,http})
+                    await repoDataMessage({repository,room,read,persistence,modify,http})
                     break;
                 }
                 default: 

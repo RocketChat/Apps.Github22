@@ -13,25 +13,25 @@ import {
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 
 export async function issueListMessage({
-    context,
+    repository,
+    room,
     read,
     persistence,
     modify,
     http,
 }: {
-    context: SlashCommandContext;
+    repository : String,
+    room: IRoom;
     read: IRead;
     persistence: IPersistence;
     modify: IModify;
     http: IHttp;
 }) {
-    const command = context.getArguments();
-    const repository = command[0];
+    
     const gitResponse = await http.get(
         `https://api.github.com/repos/${repository}/issues`
     );
     const resData = gitResponse.data;
-    const room: IRoom = context.getRoom();
     const textSender = await modify
         .getCreator()
         .startMessage()
