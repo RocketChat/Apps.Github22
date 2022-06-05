@@ -20,6 +20,7 @@ import { issueListMessage } from "../lib/issuesListMessage";
 import { contributorListMessage } from "../lib/contributorListMessage";
 import { pullRequestListMessage } from "../lib/pullReqeustListMessage";
 import { repoDataMessage } from "../lib/repoDataMessage";
+import { helperMessage } from "../lib/helperMessage";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -46,13 +47,18 @@ export class GithubCommand implements ISlashCommand {
             sender: sender,
             arguments: command,
         };
-        const repository = command[0]; 
-        if (Array.isArray(command) && command.length === 1) {
+        
+        if(Array.isArray(command) && command.length === 0 ){
+
+            await helperMessage({room,read, persistence, modify, http});
+
+        }else if (Array.isArray(command) && command.length === 1) {
 
             await initiatorMessage({ data, read, persistence, modify, http });
             
         } else if (Array.isArray(command) && command.length === 2) {
            
+            const repository = command[0]; 
             const subcommand2 = command[1];
 
             switch (subcommand2) {
