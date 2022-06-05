@@ -25,7 +25,7 @@ export async function helperMessage({
     1) See Interactive Button interface to fetch repository data -> /github GithubUsername/RepositoryName
     2) Get details of a Repository -> /github  GithubUsername/RepositoryName repo
     3) Get Issues of a Repository -> /github  GithubUsername/RepositoryName issues
-    4) Get Comtributors of a Repository -> /github  GithubUsername/RepositoryName contributors
+    4) Get Contributors of a Repository -> /github  GithubUsername/RepositoryName contributors
     5) Get Recent Pull Request of a Repository -> /github  GithubUsername/RepositoryName pulls
 
     `;
