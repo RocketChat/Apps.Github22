@@ -1,8 +1,6 @@
 import {
     IHttp,
-    IMessageBuilder,
     IModify,
-    IModifyCreator,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
@@ -11,6 +9,7 @@ import { issueListMessage } from "../lib/issuesListMessage";
 import { contributorListMessage } from "../lib/contributorListMessage";
 import { pullRequestListMessage } from "../lib/pullReqeustListMessage";
 import { repoDataMessage } from "../lib/repoDataMessage";
+import { helperMessage } from "../lib/helperMessage";
 
 export async function basicQueryMessage({
     query,
@@ -48,6 +47,6 @@ export async function basicQueryMessage({
             break;
         }
         default: 
-            throw new Error("Error!");
+            await helperMessage({room,read,persistence,modify,http});
     }
 }

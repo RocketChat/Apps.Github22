@@ -4,9 +4,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 import {
     IHttp,
-    IMessageBuilder,
     IModify,
-    IModifyCreator,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";

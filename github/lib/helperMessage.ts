@@ -1,8 +1,6 @@
 import {
     IHttp,
-    IMessageBuilder,
     IModify,
-    IModifyCreator,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
@@ -22,7 +20,7 @@ export async function helperMessage({
     http: IHttp;
 }) {
     let helperMessageString = `
-    Github App Cheet Sheet
+    Github App
     
     1) See Interactive Button interface to fetch repository data -> /github GithubUsername/RepositoryName
     2) Get details of a Repository -> /github  GithubUsername/RepositoryName repo

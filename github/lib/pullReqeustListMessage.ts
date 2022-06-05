@@ -7,10 +7,6 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import {
-    ISlashCommand,
-    SlashCommandContext,
-} from "@rocket.chat/apps-engine/definition/slashcommands";
 
 export async function pullRequestListMessage({
     repository,
