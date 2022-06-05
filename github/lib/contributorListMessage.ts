@@ -7,7 +7,7 @@ import {
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 
-export async function issueListMessage({
+export async function contributorListMessage({
     context,
     read,
     persistence,

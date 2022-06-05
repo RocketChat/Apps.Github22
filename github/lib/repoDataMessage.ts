@@ -9,7 +9,7 @@ import {
     SlashCommandContext,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
 
-export async function pullRequestListMessage({
+export async function repoDataMessage({
     context,
     read,
     persistence,
