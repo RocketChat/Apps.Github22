@@ -12,14 +12,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/accessors";
 
 import { GithubApp } from "../GithubApp";
-import { IMessage } from "@rocket.chat/apps-engine/definition/messages";
-import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { initiatorMessage } from "../lib/initiatorMessage";
-import { issueListMessage } from "../lib/issuesListMessage";
-import { contributorListMessage } from "../lib/contributorListMessage";
-import { pullRequestListMessage } from "../lib/pullReqeustListMessage";
-import { repoDataMessage } from "../lib/repoDataMessage";
 import { helperMessage } from "../lib/helperMessage";
 import { basicQueryMessage } from "../helpers/basicQueryMessage";
 
