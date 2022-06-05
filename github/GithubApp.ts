@@ -10,14 +10,13 @@ import {
 import { App } from "@rocket.chat/apps-engine/definition/App";
 import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
 import { GithubCommand } from "./commands/GithubCommand";
-import {
-    UIKitBlockInteractionContext,
-} from "@rocket.chat/apps-engine/definition/uikit";
+import { UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { pullRequestListMessage } from "./lib/pullReqeustListMessage";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { issueListMessage } from "./lib/issuesListMessage";
 import { contributorListMessage } from "./lib/contributorListMessage";
 import { repoDataMessage } from "./lib/repoDataMessage";
+import { basicQueryMessage } from "./helpers/basicQueryMessage";
 
 export class GithubApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -39,7 +38,7 @@ export class GithubApp extends App {
             case "githubDataSelect": {
                 try {
                     const param = data.value;
-                    let paramVal = "";
+                    let query:String = "";
                     let lengthOfRepoString: number = 0;
                     if (param && param.length) {
                         let i = param.length - 1;
@@ -48,7 +47,7 @@ export class GithubApp extends App {
                             i >= 0 && data.value && data.value[i] != "/";
                             i--
                         ) {
-                            paramVal = data.value[i] + paramVal;
+                            query = data.value[i] + query;
                         }
                         lengthOfRepoString = i;
                     }
@@ -60,43 +59,7 @@ export class GithubApp extends App {
                     const room: IRoom = context.getInteractionData()
                         .room as IRoom;
 
-                    if (paramVal === "pulls") {
-                        await pullRequestListMessage({
-                            repository,
-                            room,
-                            read,
-                            persistence,
-                            modify,
-                            http,
-                        });
-                    } else if (paramVal === "issues") {
-                        await issueListMessage({
-                            repository,
-                            room,
-                            read,
-                            persistence,
-                            modify,
-                            http,
-                        });
-                    } else if (paramVal === "contributors") {
-                        await contributorListMessage({
-                            repository,
-                            room,
-                            read,
-                            persistence,
-                            modify,
-                            http,
-                        });
-                    } else {
-                        await repoDataMessage({
-                            repository,
-                            room,
-                            read,
-                            persistence,
-                            modify,
-                            http,
-                        });
-                    }
+                    await basicQueryMessage ({query,repository,room,read,persistence,modify,http});
 
                     return {
                         success: true,

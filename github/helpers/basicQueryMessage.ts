@@ -1,0 +1,53 @@
+import {
+    IHttp,
+    IMessageBuilder,
+    IModify,
+    IModifyCreator,
+    IPersistence,
+    IRead,
+} from "@rocket.chat/apps-engine/definition/accessors";
+import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
+import { issueListMessage } from "../lib/issuesListMessage";
+import { contributorListMessage } from "../lib/contributorListMessage";
+import { pullRequestListMessage } from "../lib/pullReqeustListMessage";
+import { repoDataMessage } from "../lib/repoDataMessage";
+
+export async function basicQueryMessage({
+    query,
+    repository,
+    room,
+    read,
+    persistence,
+    modify,
+    http,
+}: {
+    query: String,
+    repository:String,
+    room: IRoom;
+    read: IRead;
+    persistence: IPersistence;
+    modify: IModify;
+    http: IHttp;
+}) {
+
+    switch (query) {
+        case "issues": {
+            await issueListMessage({repository,room,read,persistence,modify,http});
+            break;
+        }
+        case "contributors": {
+           await contributorListMessage({repository,room,read,persistence,modify,http});
+            break;
+        }
+        case "pulls": {
+            await pullRequestListMessage({repository,room,read,persistence,modify,http});
+            break;
+        }
+        case "repo": {
+            await repoDataMessage({repository,room,read,persistence,modify,http})
+            break;
+        }
+        default: 
+            throw new Error("Error!");
+    }
+}

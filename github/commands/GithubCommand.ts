@@ -21,6 +21,7 @@ import { contributorListMessage } from "../lib/contributorListMessage";
 import { pullRequestListMessage } from "../lib/pullReqeustListMessage";
 import { repoDataMessage } from "../lib/repoDataMessage";
 import { helperMessage } from "../lib/helperMessage";
+import { basicQueryMessage } from "../helpers/basicQueryMessage";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -59,28 +60,9 @@ export class GithubCommand implements ISlashCommand {
         } else if (Array.isArray(command) && command.length === 2) {
            
             const repository = command[0]; 
-            const subcommand2 = command[1];
+            const query = command[1];
 
-            switch (subcommand2) {
-                case "issues": {
-                    await issueListMessage({repository,room,read,persistence,modify,http});
-                    break;
-                }
-                case "contributors": {
-                   await contributorListMessage({repository,room,read,persistence,modify,http});
-                    break;
-                }
-                case "pulls": {
-                    await pullRequestListMessage({repository,room,read,persistence,modify,http});
-                    break;
-                }
-                case "repo": {
-                    await repoDataMessage({repository,room,read,persistence,modify,http})
-                    break;
-                }
-                default: 
-                    throw new Error("Error!");
-            }
+            await basicQueryMessage ({query,repository,room,read,persistence,modify,http});
         }
 
         
