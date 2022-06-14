@@ -10,9 +10,12 @@ import {
 import { App } from "@rocket.chat/apps-engine/definition/App";
 import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
 import { GithubCommand } from "./commands/GithubCommand";
-import { UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { basicQueryMessage } from "./helpers/basicQueryMessage";
+import { ModalsEnum } from "./enum/Modals";
+import { fileCodeModal } from "./modals/fileCodeModal";
+import { IUIKitInteractionHandler, IUIKitResponse, UIKitBlockInteractionContext, UIKitViewCloseInteractionContext, UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { ExecuteViewClosedHandler } from "./handlers/ExecuteViewClosedHandler";
 
 export class GithubApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -29,7 +32,7 @@ export class GithubApp extends App {
         const data = context.getInteractionData();
 
         const { actionId } = data;
-        console.log(data);
+       
         switch (actionId) {
             case "githubDataSelect": {
                 try {
@@ -74,12 +77,23 @@ export class GithubApp extends App {
                         success: false,
                     };
                 }
+                break;
             }
+            case ModalsEnum.VIEW_FILE_ACTION:{
+                const codeModal = await fileCodeModal({data,modify,read,persistence,http,uikitcontext:context});
+                return context.getInteractionResponder().openModalViewResponse(codeModal);
+            }
+            
         }
 
         return {
             success: false,
         };
+    }
+
+    public async executeViewClosedHandler(context: UIKitViewCloseInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
+        const handler = new ExecuteViewClosedHandler(this, read, http, modify, persistence);
+        return await handler.run(context);
     }
 
     public async extendConfiguration(

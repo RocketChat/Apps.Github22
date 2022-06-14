@@ -13,6 +13,7 @@ import { GithubApp } from "../GithubApp";
 import { initiatorMessage } from "../lib/initiatorMessage";
 import { helperMessage } from "../lib/helperMessage";
 import { basicQueryMessage } from "../helpers/basicQueryMessage";
+import { pullDetailsModal } from "../modals/pullDetailsModal";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -34,28 +35,52 @@ export class GithubCommand implements ISlashCommand {
         const sender = context.getSender();
         const room = context.getRoom();
 
-        const data = {
-            room: room,
-            sender: sender,
-            arguments: command,
-        };
-        
-        if(Array.isArray(command) && command.length === 0 ){
-
-            await helperMessage({room,read, persistence, modify, http});
-
-        }else if (Array.isArray(command) && command.length === 1) {
-
-            await initiatorMessage({ data, read, persistence, modify, http });
-            
-        } else if (Array.isArray(command) && command.length === 2) {
-           
-            const repository = command[0]; 
-            const query = command[1];
-
-            await basicQueryMessage ({query,repository,room,read,persistence,modify,http});
+        if(!Array.isArray(command)){
+            return;
         }
-
         
+        switch (command?.length) {
+            case 0:{
+                await helperMessage({room,read, persistence, modify, http});
+                break;      
+            }
+            case 1 : {
+                const data = {
+                    room: room,
+                    sender: sender,
+                    arguments: command,
+                };
+                await initiatorMessage({ data, read, persistence, modify, http });
+                break;
+            }
+            case 2 : {
+                const repository = command[0]; 
+                const query = command[1];
+                await basicQueryMessage ({query,repository,room,read,persistence,modify,http});
+                break;
+            }
+            case 3 :{
+                const data = {
+                    repository:command[0],
+                    query:command[1],
+                    number:command[2]
+                }
+                const triggerId= context.getTriggerId();
+                if(triggerId){
+                    console.log(triggerId);
+                    const modal = await pullDetailsModal({data,modify,read,persistence,http,slashcommandcontext:context});
+                    await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+                }else{
+                    console.log("Inavlid Trigger ID !");
+                }
+                break;
+            }
+            default:{
+                await helperMessage({room,read, persistence, modify, http});
+                break;
+            }
+            
+        }
+    
     }
 }
