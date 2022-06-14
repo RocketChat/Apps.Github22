@@ -27,7 +27,8 @@ export async function helperMessage({
     3) Get Issues of a Repository -> /github  GithubUsername/RepositoryName issues
     4) Get Contributors of a Repository -> /github  GithubUsername/RepositoryName contributors
     5) Get Recent Pull Request of a Repository -> /github  GithubUsername/RepositoryName pulls
-
+    6) Review a Pull Request -> /github  GithubUsername/RepositoryName pulls pullNumber
+    
     `;
 
     const textSender = await modify
