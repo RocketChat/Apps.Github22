@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+#RC Server and APP Testing
+RC_SERVER
+TESTING_APPS
