@@ -1,6 +1,8 @@
 export enum ModalsEnum {
     PULL_VIEW = 'pull-view',
     CODE_VIEW = 'code-view',
+    CODE_VIEW_LABEL = 'Code Changes',
+    CODE_INPUT='code-input',
     VIEW_FILE_ACTION = 'view-file-task',
     VIEW_FILE_ACTION_LABEL = 'View File',
     VIEW_DIFFS_ACTION_LABEL = 'View Changes',

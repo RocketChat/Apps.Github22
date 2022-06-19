@@ -32,18 +32,18 @@ export async function fileCodeModal({ data, modify, read, persistence, http, sla
            
         })
 
-        //shows indentations in input blocks but not inn section block
+        // shows indentations in input blocks but not inn section block
         // block.addInputBlock({
-        //     blockId: ModalsEnum.TASK_BLOCK,
-        //     label: { text: ModalsEnum.TASK_INPUT_LABEL, type: TextObjectType.PLAINTEXT },
+        //     blockId: ModalsEnum.CODE_VIEW,
+        //     label: { text: ModalsEnum.CODE_VIEW_LABEL, type: TextObjectType.PLAINTEXT },
         //     element: block.newPlainTextInputElement({
         //         initialValue : `${pullData}`,
         //         multiline:true,
-        //         actionId: ModalsEnum.TASK_INPUT,
+        //         actionId: ModalsEnum.CODE_INPUT,
         //     })
         // });
 
-        block.addDividerBlock();
+      
         
        
     }
