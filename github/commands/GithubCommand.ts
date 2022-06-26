@@ -14,6 +14,8 @@ import { initiatorMessage } from "../lib/initiatorMessage";
 import { helperMessage } from "../lib/helperMessage";
 import { basicQueryMessage } from "../helpers/basicQueryMessage";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
+import { authorize } from "../helpers/authentication";
+import { SubcommandEnum } from "../enum/Subcommands";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -50,7 +52,20 @@ export class GithubCommand implements ISlashCommand {
                     sender: sender,
                     arguments: command,
                 };
-                await initiatorMessage({ data, read, persistence, modify, http });
+                if(command[0].includes('/')){
+                    await initiatorMessage({ data, read, persistence, modify, http });
+                }else{
+                    switch(command[0]){
+                        case SubcommandEnum.LOGIN : {
+                            await authorize(this.app, read, modify, context.getSender(), persistence);
+                            break;
+                        }
+                        default:{
+                            await helperMessage({room,read, persistence, modify, http});
+                            break;
+                        }
+                    }
+                }               
                 break;
             }
             case 2 : {
