@@ -8,14 +8,18 @@ import {
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
+import { ProcessorsEnum } from "../enum/Processors";
 
 import { GithubApp } from "../GithubApp";
 import { initiatorMessage } from "../lib/initiatorMessage";
 import { helperMessage } from "../lib/helperMessage";
 import { basicQueryMessage } from "../helpers/basicQueryMessage";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
-import { authorize } from "../helpers/authentication";
+import { authorize } from "../oath2/authentication";
 import { SubcommandEnum } from "../enum/Subcommands";
+import { getAccessTokenForUser } from "../persistance/auth";
+import { IUser } from "@rocket.chat/apps-engine/definition/users";
+import { removeToken } from "../persistance/auth";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -60,6 +64,10 @@ export class GithubCommand implements ISlashCommand {
                             await authorize(this.app, read, modify, context.getSender(), persistence);
                             break;
                         }
+                        case SubcommandEnum.TEST : {
+                           //test command
+                            break;
+                        }
                         default:{
                             await helperMessage({room,read, persistence, modify, http});
                             break;
@@ -97,5 +105,4 @@ export class GithubCommand implements ISlashCommand {
             
         }
     
-    }
-}
+    }}//rc-apps deploy --url https://community.liaison.edge.rocketchat.digital --username samad.yar.khan --password samad --update

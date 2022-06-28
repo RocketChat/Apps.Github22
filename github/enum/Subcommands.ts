@@ -1,5 +1,6 @@
 export enum SubcommandEnum {
 	LOGIN = 'login',
     HELP = 'help',
-    CONNECT = 'connect'
+    CONNECT = 'connect',
+    TEST = 'test'
 }

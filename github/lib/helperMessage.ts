@@ -22,12 +22,13 @@ export async function helperMessage({
     let helperMessageString = `
     Github App
     
-    1) See Interactive Button interface to fetch repository data -> /github GithubUsername/RepositoryName
-    2) Get details of a Repository -> /github  GithubUsername/RepositoryName repo
-    3) Get Issues of a Repository -> /github  GithubUsername/RepositoryName issues
-    4) Get Contributors of a Repository -> /github  GithubUsername/RepositoryName contributors
-    5) Get Recent Pull Request of a Repository -> /github  GithubUsername/RepositoryName pulls
-    6) Review a Pull Request -> /github  GithubUsername/RepositoryName pulls pullNumber
+    1) See Interactive Button interface to fetch repository data -> /github Username/RepositoryName
+    2) Get details of a Repository -> /github  Username/RepositoryName repo
+    3) Get Issues of a Repository -> /github  Username/RepositoryName issues
+    4) Get Contributors of a Repository -> /github  Username/RepositoryName contributors
+    5) Get Recent Pull Request of a Repository -> /github  Username/RepositoryName pulls
+    6) Review a Pull Request -> /github  Username/RepositoryName pulls pullNumber
+    7) Login to GitHub -> /github login
     
     `;
 
