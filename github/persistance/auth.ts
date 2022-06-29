@@ -1,4 +1,4 @@
-import { IHttp, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
+import { IHttp, IHttpRequest, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
 import { IAuthData, IOAuth2ClientOptions } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
@@ -98,23 +98,26 @@ export async function revokeUserAccessToken(read:IRead,user: IUser, persis: IPer
         if (!tokenInfo?.token) {
             throw new Error('No access token available for this user.');
         }
-
-        //fix revoking token
-
-        // let client_id = await read.getEnvironmentReader().getSettings().getValueById(`${config.alias}-oauth-client-id`);
-        // const url = new URL(`https://api.github.com/applications/${client_id}/token`);
-
-        // url.searchParams.set('token', tokenInfo?.token);
-        // console.log(client_id);
-        // const result = await http.del(url.href);
+        /*****fix revoking token***** 
+        let client_id = await read.getEnvironmentReader().getSettings().getValueById(`${config.alias}-oauth-client-id`);
+        let client_secret = await read.getEnvironmentReader().getSettings().getValueById(`github-app-oauth-clientsecret`);
+        const url = new URL(`https://api.github.com/applications/${client_id}/token`);
+        // https://docs.github.com/en/rest/apps/oauth-applications
+        const headers: any = {
+            Accept: "application/vnd.github.v3+json",
+            Authorization: `Bearer ${tokenInfo?.token}`,
+        };
+        const body : any= {
+            "access_token":`${tokenInfo?.token}`
+        }
+        const result = await http.del(url.href,{headers,data:body});
         
-        // if (result.statusCode !== 200) {
-        //     console.log(result.content);
-        //     throw new Error('Provider did not allow token to be revoked');
-        // }
-        
+        if (result.statusCode !== 200) {
+            console.log(result.content);
+            throw new Error('Provider did not allow token to be revoked');
+        }
+        ******/
         await removeToken({ userId: user.id, persis,config });
-
         return true;
     } catch (error) {
        console.log('revokeTokenError : ',error);
