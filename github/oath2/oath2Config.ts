@@ -3,7 +3,6 @@ import { GithubApp } from "../GithubApp";
 import authorizationCallback from "./oath2callback"
 
 export default function getOauth2Config(app:GithubApp):IOAuth2ClientOptions{
-
     let oauth2Config: IOAuth2ClientOptions = {
         alias: "github-app",
         accessTokenUri: "https://github.com/login/oauth/access_token",
@@ -13,8 +12,6 @@ export default function getOauth2Config(app:GithubApp):IOAuth2ClientOptions{
         authorizationCallback: authorizationCallback.bind(app),
         defaultScopes: ["users", "repo"],
     };
-    
     return oauth2Config;
-
 }
 

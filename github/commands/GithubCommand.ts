@@ -20,6 +20,8 @@ import { SubcommandEnum } from "../enum/Subcommands";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { removeToken } from "../persistance/auth";
+import { getWebhookUrl } from "../helpers/getWebhookURL";
+import { githubWebHooks } from "../endpoints/githubEndpoints";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -65,9 +67,19 @@ export class GithubCommand implements ISlashCommand {
                             break;
                         }
                         case SubcommandEnum.TEST : {
+                            let a = await getWebhookUrl(this.app);
+                            console.log(a);
                            //test command
                             break;
                         }
+                        case SubcommandEnum.SUBSCRIBE :{
+                            //modal
+                            break;
+                        } 
+                        case SubcommandEnum.UNSUBSCRIBE :{
+                            //modal
+                            break;
+                        } 
                         default:{
                             await helperMessage({room,read, persistence, modify, http});
                             break;
@@ -77,10 +89,26 @@ export class GithubCommand implements ISlashCommand {
                 break;
             }
             case 2 : {
+                
                 const repository = command[0]; 
                 const query = command[1];
-                await basicQueryMessage ({query,repository,room,read,persistence,modify,http});
+
+                switch(query){
+                    case SubcommandEnum.SUBSCRIBE : {
+                        //sub
+                        break;
+                    }
+                    case SubcommandEnum.UNSUBSCRIBE : {
+                        //unsub
+                        break;
+                    }
+                    default:{
+                        await basicQueryMessage ({query,repository,room,read,persistence,modify,http});
+                        break;
+                    }
+                }
                 break;
+                
             }
             case 3 :{
                 const data = {
