@@ -103,6 +103,7 @@ export class GithubCommand implements ISlashCommand {
                             try {
                                 let url = await getWebhookUrl(this.app);
                                 await createSubscription(http,repository,url,accessToken.token,["pull_request","push","issues"]);
+                                
                             } catch (error) {
                                 console.log("SubcommandError",error);
                             }
