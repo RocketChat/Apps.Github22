@@ -30,7 +30,6 @@ export class ExecuteBlockActionHandler {
         const data = context.getInteractionData();
 
         const { actionId } = data;
-
         switch (actionId) {
             case "githubDataSelect": {
                 try {
@@ -55,7 +54,7 @@ export class ExecuteBlockActionHandler {
 
                     const room: IRoom = context.getInteractionData()
                         .room as IRoom;
-
+                        console.log("PRESS",query);
                     await basicQueryMessage({
                         query,
                         repository,

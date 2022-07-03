@@ -22,8 +22,10 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { removeToken } from "../persistance/auth";
 import { getWebhookUrl } from "../helpers/getWebhookURL";
 import { githubWebHooks } from "../endpoints/githubEndpoints";
-import { sendDirectMessage } from "../lib/message";
+import { sendDirectMessage, sendNotification } from "../lib/message";
 import { createSubscription } from "../helpers/githubSDK";
+import { Subscription } from "../persistance/subscriptions";
+
 
 
 export class GithubCommand implements ISlashCommand {
@@ -101,9 +103,23 @@ export class GithubCommand implements ISlashCommand {
                         let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
                         if(accessToken){
                             try {
+                                let events: Array<string> =["pull_request","push","issues"];
                                 let url = await getWebhookUrl(this.app);
-                                await createSubscription(http,repository,url,accessToken.token,["pull_request","push","issues"]);
+                                let response = await createSubscription(http,repository,url,accessToken.token,events);
+                                let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader())
                                 
+                                let createdEntry = false ;
+                                for(let event of events){
+                                    createdEntry= await subsciptionStorage.createSubscription(repository,event,response?.id,room,context.getSender());
+                                }
+                                if(!createdEntry){
+                                    throw new Error("Error creating new susbcription entry");
+                                }
+                               
+
+                                await sendNotification(read,modify,context.getSender(),room,`Subscibed to ${repository} ✔️`);
+
+
                             } catch (error) {
                                 console.log("SubcommandError",error);
                             }

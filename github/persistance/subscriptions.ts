@@ -5,21 +5,21 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ISubscription } from '../definitions/subscription';
 
 export class Subscription {
-    constructor(private readonly persistence: IPersistence, private readonly persistenceRead: IPersistenceRead, private readonly user: IUser) { }
+    constructor(private readonly persistence: IPersistence, private readonly persistenceRead: IPersistenceRead) { }
 
-    public async createSubscription(repoName: string, event: string, webhookId: string, room: IRoom): Promise<boolean> {
+    public async createSubscription(repoName: string, event: string, webhookId: string, room: IRoom, user: IUser): Promise<boolean> {
 
         try {
             const associations: Array<RocketChatAssociationRecord> = [
-                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subsciption`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subscription`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `repo:${repoName}`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, room.id),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, event),
-                new RocketChatAssociationRecord(RocketChatAssociationModel.USER, `${this.user.id}`)
+                new RocketChatAssociationRecord(RocketChatAssociationModel.USER, `${user.id}`)
             ];
             let subscriptionRecord: ISubscription = {
                 webhookId: webhookId,
-                user: this.user.id,
+                user: user.id,
                 repoName: repoName,
                 room: room.id,
                 event: event
@@ -36,7 +36,7 @@ export class Subscription {
     public async getSubscribedRooms(repoName: string, event: string): Promise<Array<ISubscription>> {
         try {
             const associations: Array<RocketChatAssociationRecord> = [
-                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subsciption`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subscription`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `repo:${repoName}`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, event),
             ];
@@ -52,7 +52,7 @@ export class Subscription {
     public async getSubscriptions(roomId: string): Promise<Array<ISubscription>> {
         try {
             const associations: Array<RocketChatAssociationRecord> = [
-                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subsciption`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subscription`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),
             ];
             let subsciptions: Array<ISubscription> = await this.persistenceRead.readByAssociations(associations) as Array<ISubscription>;
@@ -67,7 +67,7 @@ export class Subscription {
     public async deleteSubscriptions(repoName: string, event: string): Promise<boolean> {
         try {
             const associations: Array<RocketChatAssociationRecord> = [
-                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subsciption`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subscription`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `repo:${repoName}`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, event),
             ];
@@ -82,7 +82,7 @@ export class Subscription {
     public async deleteAllRoomSubscriptions(roomId: string): Promise<boolean> {
         try {
             const associations: Array<RocketChatAssociationRecord> = [
-                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subsciption`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subscription`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),
             ];
             await this.persistence.removeByAssociations(associations);
