@@ -22,6 +22,8 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { removeToken } from "../persistance/auth";
 import { getWebhookUrl } from "../helpers/getWebhookURL";
 import { githubWebHooks } from "../endpoints/githubEndpoints";
+import { sendDirectMessage } from "../lib/message";
+import { createSubscription } from "../helpers/githubSDK";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -67,9 +69,9 @@ export class GithubCommand implements ISlashCommand {
                             break;
                         }
                         case SubcommandEnum.TEST : {
-                            let a = await getWebhookUrl(this.app);
-                            console.log(a);
-                           //test command
+                            // let a = await getWebhookUrl(this.app);
+                            // console.log(a);
+                            //test command
                             break;
                         }
                         case SubcommandEnum.SUBSCRIBE :{
@@ -96,6 +98,17 @@ export class GithubCommand implements ISlashCommand {
                 switch(query){
                     case SubcommandEnum.SUBSCRIBE : {
                         //sub
+                        let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
+                        if(accessToken){
+                            try {
+                                let url = await getWebhookUrl(this.app);
+                                await createSubscription(http,repository,url,accessToken.token,["pull_request","push","issues"]);
+                            } catch (error) {
+                                console.log("SubcommandError",error);
+                            }
+                        } else{
+                            await sendDirectMessage(read,modify,context.getSender(),"Login to subscribe to repository events ! `/github login`",persistence);
+                        }
                         break;
                     }
                     case SubcommandEnum.UNSUBSCRIBE : {
@@ -107,11 +120,10 @@ export class GithubCommand implements ISlashCommand {
                         break;
                     }
                 }
-                break;
-                
+                break;                
             }
-            case 3 :{
-                const data = {
+            case 3 : {
+               const data = {
                     repository:command[0],
                     query:command[1],
                     number:command[2]
