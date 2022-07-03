@@ -23,8 +23,9 @@ import { removeToken } from "../persistance/auth";
 import { getWebhookUrl } from "../helpers/getWebhookURL";
 import { githubWebHooks } from "../endpoints/githubEndpoints";
 import { sendDirectMessage, sendNotification } from "../lib/message";
-import { createSubscription } from "../helpers/githubSDK";
+import { createSubscription, deleteSubscription } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
+import { ISubscription } from "../definitions/subscription";
 
 
 
@@ -130,6 +131,38 @@ export class GithubCommand implements ISlashCommand {
                     }
                     case SubcommandEnum.UNSUBSCRIBE : {
                         //unsub
+                        let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
+                        if(accessToken){
+                            try {
+                                let events: Array<string> =["pull_request","push","issues"];
+                                let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader())
+                                let roomSubscriptions: Array<ISubscription>  = await subsciptionStorage.getSubscriptions(room.id);
+                                let hooksMap=new Map<string,boolean>;
+                                for(let event of events){
+                                    for(let subscription of roomSubscriptions){
+                                        let webhookId = subscription.webhookId;
+                                        if(subscription.repoName!==repository || subscription.event!==event || hooksMap.has(webhookId)){
+                                            //skip entry if event and repo name doesnt match or if hook has been deleted 
+                                            continue;
+                                        }
+                                        
+                                        hooksMap.set(webhookId,true);
+                                        await deleteSubscription(http,repository,accessToken.token,webhookId);
+                                        let deleted = await subsciptionStorage.deleteSubscriptions(repository,event,room.id);
+                                        if(!deleted){
+                                            console.log("Cant delete unsubsribed hook");
+                                        }
+                                    }
+                                }
+                                
+                                await sendNotification(read,modify,context.getSender(),room,`Unsubscibed ${repository} ✔️`);
+
+                            } catch (error) {
+                                console.log("SubcommandError",error);
+                            }
+                        } else{
+                            await sendDirectMessage(read,modify,context.getSender(),"Login to subscribe to repository events ! `/github login`",persistence);
+                        }
                         break;
                     }
                     default:{

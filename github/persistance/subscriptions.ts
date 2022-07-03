@@ -64,12 +64,13 @@ export class Subscription {
         }
     }
 
-    public async deleteSubscriptions(repoName: string, event: string): Promise<boolean> {
+    public async deleteSubscriptions(repoName: string, event: string, roomId: string): Promise<boolean> {
         try {
             const associations: Array<RocketChatAssociationRecord> = [
                 new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subscription`),
                 new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `repo:${repoName}`),
-                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, event),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, event)
             ];
             await this.persistence.removeByAssociations(associations);
         } catch (error) {
