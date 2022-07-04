@@ -15,12 +15,8 @@ export class githubWebHooks extends ApiEndpoint {
         http: IHttp,
         persis: IPersistence,
     ): Promise<IApiResponse> {
-        console.log(request.content.toString());
-
         let event: string = request.headers['x-github-event'] as string;
-
         let payload: any;
-
         if (request.headers['content-type'] === 'application/x-www-form-urlencoded') {
             payload = JSON.parse(request.content.payload);
         } else {

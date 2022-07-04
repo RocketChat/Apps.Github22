@@ -7,7 +7,7 @@ import { getInteractionRoomData } from '../persistance/roomInteraction';
 import { Subscription } from '../persistance/subscriptions';
 import { GithubApp } from '../GithubApp';
 import { getWebhookUrl } from '../helpers/getWebhookURL';
-import { createSubscription } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription } from '../helpers/githubSDK';
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
 
@@ -43,11 +43,43 @@ export class ExecuteViewSubmitHandler {
                                   
                                     await sendNotification(this.read,this.modify,user,room,"Login To Github !");
                                 }else{
+                                    //if we have a webhook for the repo and our room requires the same event,we just make our entries to the apps storage instead of making a new hook
+                                    //if we have a hook but we dont have all the events, we send in a patch request,
+                                
                                     let url = await getWebhookUrl(this.app);
-                                    let response = await createSubscription(this.http,repository,url,accessToken.token,events);
-                                    let subsciptionStorage = new Subscription(this.persistence,this.read.getPersistenceReader())
-                                    
+
+                                    let subsciptionStorage = new Subscription(this.persistence,this.read.getPersistenceReader());
+                                    let subscribedEvents=new Map<string,boolean>;
+                                    let hookId= "";
+                                    for(let event of events){
+                                        subscribedEvents.set(event,false);
+                                        let subscriptions = await subsciptionStorage.getSubscribedRooms(repository,event);
+                                        if(subscriptions && subscriptions.length){
+                                            subscribedEvents.set(event,true);
+                                            for(let subscription of subscriptions ){
+                                                if(hookId==""){
+                                                    hookId=subscription.webhookId;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    let response:any;
+                                    //if hook is null we create a new hook, else we add more events to the new hook
+                                    if(hookId == ""){
+                                        response = await createSubscription(this.http,repository,url,accessToken.token,events);
+                                    }else{
+                                        let newEvents:Array<string> = [];
+                                        for(let [event,present] of subscribedEvents){
+                                            if(!present){
+                                                newEvents.push(event);
+                                            }
+                                        }
+                                        if(newEvents.length){
+                                            response = await addSubscribedEvents(this.http,repository,accessToken.token,hookId,events);
+                                        }
+                                    }
                                     let createdEntry = false ;
+                                    //subscribe rooms to hook events
                                     for(let event of events){
                                         createdEntry= await subsciptionStorage.createSubscription(repository,event,response?.id,room,user);
                                     }

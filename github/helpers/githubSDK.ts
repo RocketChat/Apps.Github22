@@ -47,6 +47,29 @@ async function deleteReqeust(
     return JSON.parse(response.content || "{}");
 }
 
+async function patchReqeust(
+    http: IHttp,
+    accessToken: String,
+    url: string,
+    data: any
+): Promise<any> {
+    const response = await http.patch(url, {
+        headers: {
+            Authorization: `token ${accessToken}`,
+            "Content-Type": "application/json",
+            "User-Agent": "Rocket.Chat-Apps-Engine",
+        },
+        data,
+    });
+
+    // If it isn't a 2xx code, something wrong happened
+    if (!response.statusCode.toString().startsWith("2")) {
+        throw response;
+    }
+
+    return JSON.parse(response.content || "{}");
+}
+
 export async function createSubscription(
     http: IHttp,
     repoName: string,
@@ -71,4 +94,31 @@ export async function deleteSubscription(
     hookId: string
 ) {
     return deleteReqeust(http, access_token, BaseApiHost + repoName + "/hooks/" +  hookId,);
+}
+
+
+export async function updateSubscription(
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    hookId: string,
+    events: Array<String>
+) {
+    return patchReqeust(http, access_token, BaseApiHost + repoName + "/hooks/" +  hookId,{
+        active: true,
+        events: events
+    });
+}
+
+export async function addSubscribedEvents(
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    hookId: string,
+    events: Array<String>
+) {
+    return patchReqeust(http, access_token, BaseApiHost + repoName + "/hooks/" +  hookId,{
+        active: true,
+        add_events: events
+    });
 }
