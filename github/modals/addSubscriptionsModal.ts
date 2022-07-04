@@ -128,7 +128,7 @@ export async function AddSubscriptionModal({ modify, read, persistence, http, sl
             actionId: ModalsEnum.ADD_SUBSCRIPTION_ACTION,
             text: {
                 type: TextObjectType.PLAINTEXT,
-                text: 'Close',
+                text: 'Subscribe',
             },
         }),
         blocks: block.getBlocks()

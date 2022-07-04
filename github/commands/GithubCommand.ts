@@ -149,13 +149,14 @@ export class GithubCommand implements ISlashCommand {
                                 for(let event of events){
                                     for(let subscription of roomSubscriptions){
                                         let webhookId = subscription.webhookId;
-                                        if(subscription.repoName!==repository || subscription.event!==event || hooksMap.has(webhookId)){
+                                        if(subscription.repoName!==repository || subscription.event!==event){
                                             //skip entry if event and repo name doesnt match or if hook has been deleted 
                                             continue;
                                         }
-                                        
-                                        hooksMap.set(webhookId,true);
-                                        await deleteSubscription(http,repository,accessToken.token,webhookId);
+                                        if(!hooksMap.has(webhookId)){
+                                            hooksMap.set(webhookId,true);
+                                            await deleteSubscription(http,repository,accessToken.token,webhookId);
+                                        }
                                         let deleted = await subsciptionStorage.deleteSubscriptions(repository,event,room.id);
                                         if(!deleted){
                                             console.log("Cant delete unsubsribed hook");

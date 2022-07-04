@@ -5,7 +5,7 @@ import {
     ILogger,
     IModify,
     IPersistence,
-    IRead
+    IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { App } from "@rocket.chat/apps-engine/definition/App";
 import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
@@ -14,9 +14,11 @@ import {
     IUIKitResponse,
     UIKitBlockInteractionContext,
     UIKitViewCloseInteractionContext,
+    UIKitViewSubmitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { ExecuteViewClosedHandler } from "./handlers/ExecuteViewClosedHandler";
 import { ExecuteBlockActionHandler } from "./handlers/ExecuteBlockActionHandler";
+import { ExecuteViewSubmitHandler } from "./handlers/ExecuteViewSubmitHandler";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import {
     IAuthData,
@@ -29,8 +31,11 @@ import { sendDirectMessage } from "./lib/message";
 import { OAuth2Client } from "@rocket.chat/apps-engine/server/oauth2/OAuth2Client";
 import { deleteOathToken } from "./processors/deleteOAthToken";
 import { ProcessorsEnum } from "./enum/Processors";
-import getOauth2Config  from './oath2/oath2Config';
-import { ApiSecurity, ApiVisibility} from '@rocket.chat/apps-engine/definition/api';
+import getOauth2Config from "./oath2/oath2Config";
+import {
+    ApiSecurity,
+    ApiVisibility,
+} from "@rocket.chat/apps-engine/definition/api";
 import { githubWebHooks } from "./endpoints/githubEndpoints";
 import { IJobContext } from "@rocket.chat/apps-engine/definition/scheduler";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
@@ -39,7 +44,7 @@ export class GithubApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
     }
-    
+
     public async authorizationCallback(
         token: IAuthData,
         user: IUser,
@@ -50,14 +55,14 @@ export class GithubApp extends App {
     ) {
         const deleteTokenTask = {
             id: ProcessorsEnum.REMOVE_GITHUB_LOGIN,
-            when: '7 days',
-            data: { 
-               'user':user,
-               'config' : this.oauth2Config
+            when: "7 days",
+            data: {
+                user: user,
+                config: this.oauth2Config,
             },
-        }; 
+        };
         let text = `GitHub Authentication Succesfull 🚀`;
-       
+
         if (token) {
             // await registerAuthorizedUser(read, persistence, user);
             await modify.getScheduler().scheduleOnce(deleteTokenTask);
@@ -120,6 +125,23 @@ export class GithubApp extends App {
         return await handler.run(context);
     }
 
+    public async executeViewSubmitHandler(
+        context: UIKitViewSubmitInteractionContext,
+        read: IRead,
+        http: IHttp,
+        persistence: IPersistence,
+        modify: IModify
+    ) {
+        const handler = new ExecuteViewSubmitHandler(
+            this,
+            read,
+            http,
+            modify,
+            persistence
+        );
+        return await handler.run(context);
+    }
+
     public async extendConfiguration(
         configuration: IConfigurationExtend
     ): Promise<void> {
@@ -131,23 +153,34 @@ export class GithubApp extends App {
         configuration.scheduler.registerProcessors([
             {
                 id: ProcessorsEnum.REMOVE_GITHUB_LOGIN,
-                processor: async (jobContext,read,modify,http,persis) => {
+                processor: async (jobContext, read, modify, http, persis) => {
                     let user = jobContext.user as IUser;
                     let config = jobContext.config as IOAuth2ClientOptions;
                     try {
-                        await deleteOathToken({user,config,read,modify,http,persis});
+                        await deleteOathToken({
+                            user,
+                            config,
+                            read,
+                            modify,
+                            http,
+                            persis,
+                        });
                     } catch (e) {
-                        await sendDirectMessage(read,modify,user,e.message,persis);
+                        await sendDirectMessage(
+                            read,
+                            modify,
+                            user,
+                            e.message,
+                            persis
+                        );
                     }
-                }
+                },
             },
         ]);
         configuration.api.provideApi({
-            visibility : ApiVisibility.PUBLIC,
-            security : ApiSecurity.UNSECURE,
-            endpoints : [
-                new githubWebHooks(this)
-            ]
-        })
+            visibility: ApiVisibility.PUBLIC,
+            security: ApiSecurity.UNSECURE,
+            endpoints: [new githubWebHooks(this)],
+        });
     }
 }
