@@ -14,6 +14,7 @@ export enum ModalsEnum {
 
     SUBSCRIPTION_TITLE='GitHub Subscriptions',
     SUBSCRIPTION_VIEW = 'subscriptions-view',
+    ADD_SUBSCRIPTION_VIEW = 'add-subscription-view',
     OPEN_ADD_SUBSCRIPTIONS_MODAL='open-add-subscriptions',
     OPEN_UPDATE_SUBSCRIPTIONS_MODAL='open-update-subscriptions',
     OPEN_DELETE_SUBSCRIPTIONS_MODAL='open-update-subscriptions',
@@ -26,8 +27,20 @@ export enum ModalsEnum {
     ADD_SUBSCRIPTION_LABEL='Subscribe',
     UPDATE_SUBSCRIPTION_ACTION='update-subscription',
     UPDATE_SUBSCRIPTION_LABEL='Update',
+    
 
     OPEN_REPO_ACTION='open-repo',
-    OPEN_REPO_LABEL='Open'
+    OPEN_REPO_LABEL='Open',
+
+    REPO_NAME_INPUT='repo-name-input',
+    REPO_NAME_LABEL='Enter Full Repository Name',
+    REPO_NAME_PLACEHOLDER='Owner/Repository',
+    REPO_NAME_INPUT_ACTION='repo-name-input-action',
+    ADD_SUBSCRIPTION_EVENT_LABEL='Add Events',
+    ADD_SUBSCRIPTION_EVENT_OPTIONS='add-repo-subscription-events',
+    ADD_SUBSCRIPTION_EVENT_INPUT='add-repo-subscription-events',
+
+
+
 
 }

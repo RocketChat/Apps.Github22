@@ -14,6 +14,7 @@ import {
     IUIKitResponse,
     UIKitBlockInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
+import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -88,6 +89,18 @@ export class ExecuteBlockActionHandler {
                 return context
                     .getInteractionResponder()
                     .openModalViewResponse(codeModal);
+            }
+            case ModalsEnum.OPEN_ADD_SUBSCRIPTIONS_MODAL:{
+                const addSubscriptionModal = await AddSubscriptionModal({
+                    modify: this.modify,
+                    read: this.read,
+                    persistence: this.persistence,
+                    http: this.http,
+                    uikitcontext: context
+                })
+                return context
+                    .getInteractionResponder()
+                    .openModalViewResponse(addSubscriptionModal);
             }
         }
 
