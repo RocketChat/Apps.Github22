@@ -1,12 +1,12 @@
 import { ApiEndpoint } from "@rocket.chat/apps-engine/definition/api"
-import { IRead, IHttp, IModify,IPersistence } from "@rocket.chat/apps-engine/definition/accessors";
-import { IApiEndpointInfo,IApiEndpoint, IApiRequest,IApiResponse } from "@rocket.chat/apps-engine/definition/api";
+import { IRead, IHttp, IModify, IPersistence } from "@rocket.chat/apps-engine/definition/accessors";
+import { IApiEndpointInfo, IApiEndpoint, IApiRequest, IApiResponse } from "@rocket.chat/apps-engine/definition/api";
 import { Subscription } from "../persistance/subscriptions";
 import { ISubscription } from "../definitions/subscription";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-export class githubWebHooks extends ApiEndpoint{
+export class githubWebHooks extends ApiEndpoint {
     public path = 'githubwebhook'
-    
+
     public async post(
         request: IApiRequest,
         endpoint: IApiEndpointInfo,
@@ -17,7 +17,7 @@ export class githubWebHooks extends ApiEndpoint{
     ): Promise<IApiResponse> {
         console.log(request.content.toString());
 
-        let event: string = request.headers['x-github-event']  as string;
+        let event: string = request.headers['x-github-event'] as string;
 
         let payload: any;
 
@@ -27,33 +27,35 @@ export class githubWebHooks extends ApiEndpoint{
             payload = request.content;
         }
 
-        let subsciptionStorage = new Subscription(persis,read.getPersistenceReader())
+        let subsciptionStorage = new Subscription(persis, read.getPersistenceReader())
 
-        const subsciptions: Array<ISubscription> = await subsciptionStorage.getSubscribedRooms(payload.repository.full_name,event);
-        if(!subsciptions || subsciptions.length==0){
+        const subsciptions: Array<ISubscription> = await subsciptionStorage.getSubscribedRooms(payload.repository.full_name, event);
+        if (!subsciptions || subsciptions.length == 0) {
             return this.success();
         }
-        const eventCaps= event.toUpperCase();
+        const eventCaps = event.toUpperCase();
         let messageText = "newEvent !";
 
-        if(event=='push'){
-            messageText =  `*New Commits to* *[${payload.repository.full_name}](${payload.repository.html_url}) by ${payload.pusher.name}*`;
-        }else if (event == 'pull_request'){
-            messageText =  `*[New Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
-        }else if (event == 'issues'){
-            messageText =  `*[New Issue](${payload.issue.html_url})* *|*  *#${payload.issue.number}* *${payload.issue.title}* *|* *[${payload.repository.full_name}](${payload.repository.html_url})*  `;
+        if (event == 'push') {
+            messageText = `*New Commits to* *[${payload.repository.full_name}](${payload.repository.html_url}) by ${payload.pusher.name}*`;
+        } else if (event == 'pull_request') {
+            messageText = `*[New Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+        } else if (event == 'issues') {
+            messageText = `*[New Issue](${payload.issue.html_url})* *|*  *#${payload.issue.number}* *${payload.issue.title}* *|* *[${payload.repository.full_name}](${payload.repository.html_url})*  `;
+        } else if (event == 'deployment_status'){
+            messageText = `*Deployment Status ${payload.deployment_status.state}* *|*  *${payload.repository.full_name}*`;
         }
-      
-        for(let subsciption of subsciptions){
-            let roomId  = subsciption.room;
-            if(!roomId){
+
+        for (let subsciption of subsciptions) {
+            let roomId = subsciption.room;
+            if (!roomId) {
                 continue;
             }
-            const room :IRoom= await read.getRoomReader().getById(roomId) as IRoom;
+            const room: IRoom = await read.getRoomReader().getById(roomId) as IRoom;
             const textSender = await modify
-            .getCreator()
-            .startMessage()
-            .setText(messageText);
+                .getCreator()
+                .startMessage()
+                .setText(messageText);
             if (room) {
                 textSender.setRoom(room);
             }
