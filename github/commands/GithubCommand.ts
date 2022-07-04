@@ -26,6 +26,7 @@ import { sendDirectMessage, sendNotification } from "../lib/message";
 import { createSubscription, deleteSubscription } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { ISubscription } from "../definitions/subscription";
+import { subsciptionsModal } from "../modals/subscriptionsModal";
 
 
 
@@ -79,7 +80,13 @@ export class GithubCommand implements ISlashCommand {
                         }
                         case SubcommandEnum.SUBSCRIBE :{
                             //modal
-                            
+                            const triggerId= context.getTriggerId();
+                            if(triggerId){
+                                const modal = await subsciptionsModal({modify,read,persistence,http,slashcommandcontext:context});
+                                await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+                            }else{
+                                console.log("Inavlid Trigger ID !");
+                            }
                             break;
                         } 
                         case SubcommandEnum.UNSUBSCRIBE :{
@@ -181,7 +188,6 @@ export class GithubCommand implements ISlashCommand {
                 }
                 const triggerId= context.getTriggerId();
                 if(triggerId){
-                    console.log(triggerId);
                     const modal = await pullDetailsModal({data,modify,read,persistence,http,slashcommandcontext:context});
                     await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
                 }else{

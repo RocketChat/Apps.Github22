@@ -12,5 +12,12 @@ export enum ModalsEnum {
     COMMENT_PR_ACTION = 'comment-pull-request',
     COMMENT_PR_LABEL = 'Comment',
 
-    SUBSCRIPTION_VIEW = 'subsctiptions-view'
+    SUBSCRIPTION_VIEW = 'subscriptions-view',
+    DELETE_SUBSCRIPTION_ACTION='delete-subscription',
+    DELETE_SUBSCRIPTION_LABEL='Unsubscribe',
+    ADD_SUBSCRIPTION_ACTION='add-subscription',
+    ADD_SUBSCRIPTION_LABEL='Subscribe',
+    UPDATE_SUBSCRIPTION_ACTION='update-subscription',
+    UPDATE_SUBSCRIPTION_LABEL='Update',
+
 }
