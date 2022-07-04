@@ -11,4 +11,6 @@ export enum ModalsEnum {
     MERGE_PULL_REQUEST_LABEL = 'Merge',
     COMMENT_PR_ACTION = 'comment-pull-request',
     COMMENT_PR_LABEL = 'Comment',
+
+    SUBSCRIPTION_VIEW = 'subsctiptions-view'
 }

@@ -79,6 +79,7 @@ export class GithubCommand implements ISlashCommand {
                         }
                         case SubcommandEnum.SUBSCRIBE :{
                             //modal
+                            
                             break;
                         } 
                         case SubcommandEnum.UNSUBSCRIBE :{
@@ -104,7 +105,7 @@ export class GithubCommand implements ISlashCommand {
                         let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
                         if(accessToken){
                             try {
-                                let events: Array<string> =["pull_request","push","issues"];
+                                let events: Array<string> =["pull_request","push","issues","deployment_status"];
                                 let url = await getWebhookUrl(this.app);
                                 let response = await createSubscription(http,repository,url,accessToken.token,events);
                                 let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader())
@@ -134,7 +135,7 @@ export class GithubCommand implements ISlashCommand {
                         let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
                         if(accessToken){
                             try {
-                                let events: Array<string> =["pull_request","push","issues"];
+                                let events: Array<string> =["pull_request","push","issues","deployment_status"];
                                 let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader())
                                 let roomSubscriptions: Array<ISubscription>  = await subsciptionStorage.getSubscriptions(room.id);
                                 let hooksMap=new Map<string,boolean>;
