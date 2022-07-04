@@ -90,6 +90,8 @@ export class ExecuteViewSubmitHandler {
                                 }
                            
                             }
+                            const modal = await subsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http:this.http, uikitcontext: context });
+                            await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                             return context.getInteractionResponder().successResponse();
                         }
                     }
