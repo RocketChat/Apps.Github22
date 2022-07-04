@@ -32,12 +32,6 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
         let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader());
         let roomSubsciptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
 
-
-            
-        block.addSectionBlock({
-            text: { text: `Room Subscriptions`, type: TextObjectType.PLAINTEXT },
-        })
-    
         block.addDividerBlock();
         
     
@@ -75,28 +69,22 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
             let repoUser = repository.user;
             let events = repository.events;
 
-
-                if(user.id === repoUser.id ){
-
-                    block.addSectionBlock({
-                        text: { text: `${index} [${repoName}](https://github.com/${repoName})`, type: TextObjectType.PLAINTEXT},
-                    });
-
-                }else{
+               
+                
 
                     block.addSectionBlock({
-                        text: { text: `${index} [${repoName}](https://github.com/${repoName})`, type: TextObjectType.PLAINTEXT},
+                        text: { text: `${index}) ${repoName}`, type: TextObjectType.PLAINTEXT},
                         accessory: block.newButtonElement({
-                            actionId: ModalsEnum.DELETE_SUBSCRIPTION_ACTION,
+                            actionId: ModalsEnum.OPEN_REPO_ACTION,
                             text: {
-                                text: ModalsEnum.DELETE_SUBSCRIPTION_LABEL,
+                                text: ModalsEnum.OPEN_REPO_LABEL,
                                 type: TextObjectType.PLAINTEXT
                             },
-                            value: repository.webhookId
+                            value: repository.webhookId,
+                            url:`https://github.com/${repoName}`
                         })
                     });
 
-                }
                
 
                 let eventList : Array<ITextObject>=[];
@@ -109,17 +97,23 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
         }
     }
 
+    block.addDividerBlock();
 
     block.addActionsBlock({
         elements: [
             block.newButtonElement({
-                actionId: ModalsEnum.ADD_SUBSCRIPTION_ACTION,
-                text: { text: ModalsEnum.ADD_SUBSCRIPTION_LABEL, type: TextObjectType.PLAINTEXT },
+                actionId: ModalsEnum.OPEN_ADD_SUBSCRIPTIONS_MODAL,
+                text: { text: ModalsEnum.OPEN_ADD_SUBSCRIPTIONS_LABEL, type: TextObjectType.PLAINTEXT },
                 value: room?.id
             }),
             block.newButtonElement({
-                actionId: ModalsEnum.DELETE_SUBSCRIPTION_ACTION,
-                text: { text: ModalsEnum.DELETE_SUBSCRIPTION_LABEL, type: TextObjectType.PLAINTEXT },
+                actionId: ModalsEnum.OPEN_UPDATE_SUBSCRIPTIONS_MODAL,
+                text: { text: ModalsEnum.OPEN_UPDATE_SUBSCRIPTIONS_LABEL, type: TextObjectType.PLAINTEXT },
+                value: room?.id
+            }),
+            block.newButtonElement({
+                actionId: ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_MODAL,
+                text: { text: ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_LABEL, type: TextObjectType.PLAINTEXT },
                 value: room?.id
             }),
         ]
@@ -129,7 +123,7 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: AppEnum.DEFAULT_TITLE,
+            text: ModalsEnum.SUBSCRIPTION_TITLE,
         },
         close: block.newButtonElement({
             text: {
