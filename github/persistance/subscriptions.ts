@@ -79,6 +79,21 @@ export class Subscription {
         }
         return true;
     }
+    public async deleteSubscriptionsByRepoUser(repoName: string, roomId: string, userId: string): Promise<boolean> {
+        try {
+            const associations: Array<RocketChatAssociationRecord> = [
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subscription`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `repo:${repoName}`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.USER, `${userId}`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),
+            ];
+            await this.persistence.removeByAssociations(associations);
+        } catch (error) {
+            console.warn('Delete Subsciption Error :', error)
+            return false;
+        }
+        return true;
+    }
 
     public async deleteAllRoomSubscriptions(roomId: string): Promise<boolean> {
         try {
@@ -87,6 +102,17 @@ export class Subscription {
                 new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),
             ];
             await this.persistence.removeByAssociations(associations);
+        } catch (error) {
+            console.warn('Delete All Room Subsciption Error :', error)
+            return false;
+        }
+        return true;
+    }
+
+    public async deleteAllRoomSubscriptionsByHookId(hookId: string): Promise<boolean> {
+        try {
+            let association = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, hookId)
+            await this.persistence.removeByAssociation(association);
         } catch (error) {
             console.warn('Delete All Room Subsciption Error :', error)
             return false;

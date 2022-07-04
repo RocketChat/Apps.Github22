@@ -15,10 +15,16 @@ import {
     UIKitBlockInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
-
+import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
+import { deleteSubscription } from "../helpers/githubSDK";
+import { Subscription } from "../persistance/subscriptions";
+import { getAccessTokenForUser } from "../persistance/auth";
+import { GithubApp } from "../GithubApp";
+import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
+import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 export class ExecuteBlockActionHandler {
     constructor(
-        private readonly app: IApp,
+        private readonly app: GithubApp,
         private readonly read: IRead,
         private readonly http: IHttp,
         private readonly modify: IModify,
@@ -30,7 +36,8 @@ export class ExecuteBlockActionHandler {
     ): Promise<IUIKitResponse> {
         const data = context.getInteractionData();
 
-        const { actionId } = data;
+        try {
+            const { actionId } = data;
         switch (actionId) {
             case "githubDataSelect": {
                 try {
@@ -102,8 +109,51 @@ export class ExecuteBlockActionHandler {
                     .getInteractionResponder()
                     .openModalViewResponse(addSubscriptionModal);
             }
+            case ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_MODAL:{
+                const addSubscriptionModal = await deleteSubsciptionsModal({
+                    modify: this.modify,
+                    read: this.read,
+                    persistence: this.persistence,
+                    http: this.http,
+                    uikitcontext: context
+                })
+                return context
+                    .getInteractionResponder()
+                    .openModalViewResponse(addSubscriptionModal);
+            }
+            case ModalsEnum.DELETE_SUBSCRIPTION_ACTION:{
+                
+                
+                let {user,room} = await context.getInteractionData();
+                let accessToken = await getAccessTokenForUser(this.read,user,this.app.oauth2Config) as IAuthData;
+                let value :string= context.getInteractionData().value as string;
+                let splitted = value.split(',');
+                if(splitted.length == 2 && accessToken.token){
+                    let repoName = splitted[0];
+                    let hookId = splitted[1];
+                    let roomId;
+                    if (room?.id) {
+                        roomId = room.id;
+                        await storeInteractionRoomData(this.persistence, user.id, roomId);
+                    } else {
+                        roomId = (await getInteractionRoomData(this.read.getPersistenceReader(), user.id)).roomId;
+                    }
+                    // await deleteSubscription(this.http,repoName,accessToken.token,hookId);
+                    let subsciptionStorage = new Subscription(this.persistence,this.read.getPersistenceReader());
+                    await subsciptionStorage.deleteSubscriptionsByRepoUser(repoName,roomId,user.id);
+                }
+                
+        
+                const modal = await deleteSubsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence,http : this.http, uikitcontext: context });
+                await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                break;
+            }
         }
 
+        } catch (error) {
+             console.log(error);
+        }
+        
         return context.getInteractionResponder().successResponse();
     }
 }

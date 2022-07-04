@@ -15,6 +15,7 @@ export enum ModalsEnum {
     SUBSCRIPTION_TITLE='GitHub Subscriptions',
     SUBSCRIPTION_VIEW = 'subscriptions-view',
     ADD_SUBSCRIPTION_VIEW = 'add-subscription-view',
+    DELETE_SUBSCRIPTION_VIEW ='delete-subscription-view',
     OPEN_ADD_SUBSCRIPTIONS_MODAL='open-add-subscriptions',
     OPEN_UPDATE_SUBSCRIPTIONS_MODAL='open-update-subscriptions',
     OPEN_DELETE_SUBSCRIPTIONS_MODAL='open-update-subscriptions',
@@ -27,7 +28,7 @@ export enum ModalsEnum {
     ADD_SUBSCRIPTION_LABEL='Subscribe',
     UPDATE_SUBSCRIPTION_ACTION='update-subscription',
     UPDATE_SUBSCRIPTION_LABEL='Update',
-    
+    DELETE_SUBSCIPTIONS_TITLE='Unsubscribe to Repositories',
 
     OPEN_REPO_ACTION='open-repo',
     OPEN_REPO_LABEL='Open',
