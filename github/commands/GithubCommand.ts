@@ -22,7 +22,7 @@ import { removeToken } from "../persistance/auth";
 import { getWebhookUrl } from "../helpers/getWebhookURL";
 import { githubWebHooks } from "../endpoints/githubEndpoints";
 import { sendDirectMessage, sendNotification } from "../lib/message";
-import { createSubscription, deleteSubscription } from "../helpers/githubSDK";
+import { createSubscription, deleteSubscription, updateSubscription } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { ISubscription } from "../definitions/subscription";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
@@ -103,14 +103,41 @@ export class GithubCommand implements ISlashCommand {
                         let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
                         if(accessToken){
                             try {
-                                let events: Array<string> =["pull_request","push","issues","deployment_status"];
-                                let url = await getWebhookUrl(this.app);
-                                let response = await createSubscription(http,repository,url,accessToken.token,events);
-                                let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader())
-                                
-                                let createdEntry = false ;
+                                let events: Array<string> =["pull_request","push","issues","deployment_status","star"];
+                                //if hook exists we set its take its hook id and add our aditional events to it
+                                let eventSusbcriptions = new Map<string,boolean>;//this helps us mark the new events to be added
                                 for(let event of events){
-                                    createdEntry= await subsciptionStorage.createSubscription(repository,event,response?.id,room,context.getSender());
+                                    eventSusbcriptions.set(event,false);
+                                }
+                                let url = await getWebhookUrl(this.app);
+                                let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader());
+                                let user = await context.getSender();                                
+                                let repositorySubscriptions = await subsciptionStorage.getSubscriptionsByRepo(repository,user.id);
+                                let hookId = "";
+                                for(let susbcription of repositorySubscriptions){
+                                    if(hookId==""){
+                                        hookId=susbcription.webhookId;
+                                    }
+                                    eventSusbcriptions.set(susbcription.event,true);
+                                }
+                                let newEvents:Array<string>=[];
+                                for(let [event,value] of eventSusbcriptions){
+                                    if(!value){
+                                        newEvents.push(event);
+                                    }
+                                }
+                                let createdEntry = false ;
+                                if(hookId==""){
+                                    let response = await createSubscription(http,repository,url,accessToken.token,events);
+                                    hookId=response.id;
+                                }else{
+                                    if(newEvents.length){
+                                        let response = await updateSubscription(http,repository,accessToken.token,hookId,events); 
+                                        hookId=response.id;
+                                    }
+                                }
+                                for(let event of events){
+                                    createdEntry = await subsciptionStorage.createSubscription(repository,event,hookId,room,context.getSender());
                                 }
                                 if(!createdEntry){
                                     throw new Error("Error creating new susbcription entry");
@@ -131,29 +158,41 @@ export class GithubCommand implements ISlashCommand {
                         let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
                         if(accessToken){
                             try {
-                                let events: Array<string> =["pull_request","push","issues","deployment_status"];
+                                let user = await context.getSender();   
+                                let events: Array<string> =["pull_request","push","issues","deployment_status","star"];
                                 let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader())
-                                let roomSubscriptions: Array<ISubscription>  = await subsciptionStorage.getSubscriptions(room.id);
-                                let hooksMap=new Map<string,boolean>;
-                                for(let event of events){
-                                    for(let subscription of roomSubscriptions){
-                                        let webhookId = subscription.webhookId;
-                                        if(subscription.repoName!==repository || subscription.event!==event){
-                                            //skip entry if event and repo name doesnt match or if hook has been deleted 
-                                            continue;
-                                        }
-                                        if(!hooksMap.has(webhookId)){
-                                            hooksMap.set(webhookId,true);
-                                            await deleteSubscription(http,repository,accessToken.token,webhookId);
-                                        }
-                                        let deleted = await subsciptionStorage.deleteSubscriptions(repository,event,room.id);
-                                        if(!deleted){
-                                            console.log("Cant delete unsubsribed hook");
-                                        }
+                                let oldSubscriptions = await subsciptionStorage.getSubscriptionsByRepo(repository,user.id);
+                                await subsciptionStorage.deleteSubscriptionsByRepoUser(repository, room.id, user.id);
+                                let hookId = "";
+                                //check if any subscription events of the repo is left in any other room
+                                let eventSubscriptions = new Map<string, boolean>;
+                                for (let subsciption of oldSubscriptions) {
+                                    eventSubscriptions.set(subsciption.event, false);
+                                    if(hookId == ""){
+                                        hookId = subsciption.webhookId;
                                     }
                                 }
-                                
-                                await sendNotification(read,modify,context.getSender(),room,`Unsubscibed ${repository} ✔️`);
+                                let updatedsubscriptions = await subsciptionStorage.getSubscriptionsByRepo(repository, user.id);
+                                if (updatedsubscriptions.length == 0) {
+                                    await deleteSubscription(http, repository, accessToken.token, hookId);
+                                } else {
+                                    for (let subsciption of updatedsubscriptions) {
+                                        eventSubscriptions.set(subsciption.event, true);
+                                    }
+                                    let updatedEvents: Array<string> = [];
+                                    let sameEvents = true;
+                                    for (let [event, present] of eventSubscriptions) {
+                                        sameEvents = sameEvents && present;
+                                        if (present) {
+                                            updatedEvents.push(event);
+                                        }
+                                    }
+                                    if (updatedEvents.length && !sameEvents) {
+                                        let response = await updateSubscription(http, repository, accessToken.token, hookId, updatedEvents);
+                                    }
+                                }
+    
+                                await sendNotification(read, modify, user, room, `Unsubscribed to ${repository} 🔕`);
 
                             } catch (error) {
                                 console.log("SubcommandError",error);

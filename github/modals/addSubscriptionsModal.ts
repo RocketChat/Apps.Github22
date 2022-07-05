@@ -119,6 +119,14 @@ export async function AddSubscriptionModal({
                         emoji: true,
                     },
                 },
+                {
+                    value: "star",
+                    text: {
+                        type: TextObjectType.PLAINTEXT,
+                        text: "New Stars",
+                        emoji: true,
+                    },
+                },
             ],
             placeholder: {
                 type: TextObjectType.PLAINTEXT,

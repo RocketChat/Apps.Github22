@@ -60,6 +60,12 @@ export class githubWebHooks extends ApiEndpoint {
             messageText = `*[New Issue](${payload.issue.html_url})* *|*  *#${payload.issue.number}* *${payload.issue.title}* *|* *[${payload.repository.full_name}](${payload.repository.html_url})*  `;
         } else if (event == "deployment_status") {
             messageText = `*Deployment Status ${payload.deployment_status.state}* *|*  *${payload.repository.full_name}*`;
+        } else if (event == "star"){
+            if(payload?.action == "created"){
+                messageText = `*New Stars on* *${payload.repository.full_name}*  *|* *${payload.repository.stargazers_count}* ⭐`;
+            }else{
+                return this.success();
+            }
         }
 
         for (let subsciption of subsciptions) {
