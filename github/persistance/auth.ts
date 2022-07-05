@@ -98,7 +98,7 @@ export async function revokeUserAccessToken(read:IRead,user: IUser, persis: IPer
         if (!tokenInfo?.token) {
             throw new Error('No access token available for this user.');
         }
-        /*****fix revoking token***** 
+        /*****fix revoking token*****  The access token api throws an error
         let client_id = await read.getEnvironmentReader().getSettings().getValueById(`${config.alias}-oauth-client-id`);
         let client_secret = await read.getEnvironmentReader().getSettings().getValueById(`github-app-oauth-clientsecret`);
         const url = new URL(`https://api.github.com/applications/${client_id}/token`);

@@ -11,7 +11,6 @@ export enum ModalsEnum {
     MERGE_PULL_REQUEST_LABEL = 'Merge',
     COMMENT_PR_ACTION = 'comment-pull-request',
     COMMENT_PR_LABEL = 'Comment',
-
     SUBSCRIPTION_TITLE='GitHub Subscriptions',
     SUBSCRIPTION_VIEW = 'subscriptions-view',
     ADD_SUBSCRIPTION_VIEW = 'add-subscription-view',
@@ -29,10 +28,8 @@ export enum ModalsEnum {
     UPDATE_SUBSCRIPTION_ACTION='update-subscription',
     UPDATE_SUBSCRIPTION_LABEL='Update',
     DELETE_SUBSCIPTIONS_TITLE='Unsubscribe to Repositories',
-
     OPEN_REPO_ACTION='open-repo',
     OPEN_REPO_LABEL='Open',
-
     REPO_NAME_INPUT='repo-name-input',
     REPO_NAME_LABEL='Enter Full Repository Name',
     REPO_NAME_PLACEHOLDER='Owner/Repository',
@@ -40,8 +37,6 @@ export enum ModalsEnum {
     ADD_SUBSCRIPTION_EVENT_LABEL='Add Events',
     ADD_SUBSCRIPTION_EVENT_OPTIONS='add-repo-subscription-events',
     ADD_SUBSCRIPTION_EVENT_INPUT='add-repo-subscription-events',
-
-
-
-
+    SUBSCRIPTION_REFRESH_LABEL="Refresh",
+    SUBSCRIPTION_REFRESH_ACTION="subscription-refresh",
 }

@@ -16,7 +16,7 @@ export class ExecuteViewClosedHandler {
         private readonly http: IHttp,
         private readonly modify: IModify,
         private readonly persistence: IPersistence
-    ) {}
+    ) { }
 
     public async run(context: UIKitViewCloseInteractionContext) {
         const { view } = context.getInteractionData();

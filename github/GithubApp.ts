@@ -31,7 +31,6 @@ import { sendDirectMessage } from "./lib/message";
 import { OAuth2Client } from "@rocket.chat/apps-engine/server/oauth2/OAuth2Client";
 import { deleteOathToken } from "./processors/deleteOAthToken";
 import { ProcessorsEnum } from "./enum/Processors";
-import getOauth2Config from "./oath2/oath2Config";
 import {
     ApiSecurity,
     ApiVisibility,

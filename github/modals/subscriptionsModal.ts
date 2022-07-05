@@ -107,13 +107,13 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
                 value: room?.id
             }),
             block.newButtonElement({
-                actionId: ModalsEnum.OPEN_UPDATE_SUBSCRIPTIONS_MODAL,
-                text: { text: ModalsEnum.OPEN_UPDATE_SUBSCRIPTIONS_LABEL, type: TextObjectType.PLAINTEXT },
+                actionId: ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_MODAL,
+                text: { text: ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_LABEL, type: TextObjectType.PLAINTEXT },
                 value: room?.id
             }),
             block.newButtonElement({
-                actionId: ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_MODAL,
-                text: { text: ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_LABEL, type: TextObjectType.PLAINTEXT },
+                actionId: ModalsEnum.SUBSCRIPTION_REFRESH_ACTION,
+                text: { text: ModalsEnum.SUBSCRIPTION_REFRESH_LABEL, type: TextObjectType.PLAINTEXT },
                 value: room?.id
             }),
         ]
