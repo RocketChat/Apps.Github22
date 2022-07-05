@@ -122,3 +122,17 @@ export async function addSubscribedEvents(
         add_events: events
     });
 }
+
+export async function removeSubscribedEvents(
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    hookId: string,
+    events: Array<String>
+) {
+    return patchReqeust(http, access_token, BaseApiHost + repoName + "/hooks/" +  hookId,{
+        active: true,
+        add_events: events
+    });
+}
+

@@ -109,15 +109,20 @@ export class Subscription {
         return true;
     }
 
-    public async deleteAllRoomSubscriptionsByHookId(hookId: string): Promise<boolean> {
+    public async getSubscriptionsByRepo(repoName: string, userId: string): Promise<Array<ISubscription>> {
+        let subsciptions: Array<ISubscription>=[];
         try {
-            let association = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, hookId)
-            await this.persistence.removeByAssociation(association);
+            const associations: Array<RocketChatAssociationRecord> = [
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `subscription`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `repo:${repoName}`),
+                new RocketChatAssociationRecord(RocketChatAssociationModel.USER, `${userId}`)
+            ];
+            subsciptions= await this.persistenceRead.readByAssociations(associations) as Array<ISubscription>;
         } catch (error) {
-            console.warn('Delete All Room Subsciption Error :', error)
-            return false;
+            console.warn('Get Subsciptions By Repo Error :', error)
+            return subsciptions;
         }
-        return true;
+        return subsciptions;
     }
 
 }

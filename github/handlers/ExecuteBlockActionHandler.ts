@@ -16,7 +16,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription } from "../helpers/githubSDK";
+import { deleteSubscription, updateSubscription } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -63,7 +63,6 @@ export class ExecuteBlockActionHandler {
 
                         const room: IRoom = context.getInteractionData()
                             .room as IRoom;
-                        console.log("PRESS", query);
                         await basicQueryMessage({
                             query,
                             repository,
@@ -139,9 +138,34 @@ export class ExecuteBlockActionHandler {
                         } else {
                             roomId = (await getInteractionRoomData(this.read.getPersistenceReader(), user.id)).roomId;
                         }
-                        await deleteSubscription(this.http, repoName, accessToken.token, hookId);
-                        let subsciptionStorage = new Subscription(this.persistence, this.read.getPersistenceReader());
-                        await subsciptionStorage.deleteSubscriptionsByRepoUser(repoName, roomId, user.id);
+                        //delete the susbscriptions for persistance 
+                        let subscriptionStorage = new Subscription(this.persistence, this.read.getPersistenceReader());
+                        let oldSubscriptions = await subscriptionStorage.getSubscriptionsByRepo(repoName,user.id);
+                        await subscriptionStorage.deleteSubscriptionsByRepoUser(repoName, roomId, user.id);
+                        //check if any subscription events of the repo is left in any other room
+                        let eventSubscriptions = new Map<string,boolean>;
+                        for(let subsciption of oldSubscriptions){
+                            eventSubscriptions.set(subsciption.event,false);
+                        }
+                        let updatedsubscriptions = await subscriptionStorage.getSubscriptionsByRepo(repoName,user.id);
+                        if(updatedsubscriptions.length==0){
+                            await deleteSubscription(this.http,repoName,accessToken.token,hookId);
+                        }else{
+                            for(let subsciption of updatedsubscriptions){
+                                eventSubscriptions.set(subsciption.event,true);
+                            }
+                            let updatedEvents :Array<string>=[];
+                            let sameEvents = true;
+                            for(let [event,present] of eventSubscriptions ){
+                                sameEvents=sameEvents&&present;
+                                if(present){
+                                    updatedEvents.push(event);
+                                }
+                            }
+                            if(updatedEvents.length && !sameEvents){
+                                let response = await updateSubscription(this.http,repoName,accessToken.token,hookId,updatedEvents);
+                            }
+                        }
                         let userRoom = await this.read.getRoomReader().getById(roomId) as IRoom;
                         await sendNotification(this.read, this.modify, user, userRoom, `Unsubscribed to ${repoName} 🔕`);
                     }

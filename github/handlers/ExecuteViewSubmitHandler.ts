@@ -51,16 +51,22 @@ export class ExecuteViewSubmitHandler {
                                     let subsciptionStorage = new Subscription(this.persistence,this.read.getPersistenceReader());
                                     let subscribedEvents=new Map<string,boolean>;
                                     let hookId= "";
-                                    for(let event of events){
-                                        subscribedEvents.set(event,false);
-                                        let subscriptions = await subsciptionStorage.getSubscribedRooms(repository,event);
-                                        if(subscriptions && subscriptions.length){
-                                            subscribedEvents.set(event,true);
-                                            for(let subscription of subscriptions ){
-                                                if(hookId==""){
-                                                    hookId=subscription.webhookId;
-                                                }
+                    
+                                   
+                                    let subscriptions = await subsciptionStorage.getSubscriptionsByRepo(repository,user.id);
+                                    if(subscriptions && subscriptions.length){
+                                        for(let subscription of subscriptions){
+                                            subscribedEvents.set(subscription.event,true);
+                                            if(hookId==""){
+                                                hookId=subscription.webhookId;
                                             }
+                                        }
+                                    }
+                                    let additionalEvents=0; 
+                                    for(let event of events){
+                                        if(!subscribedEvents.has(event)){
+                                            additionalEvents++;
+                                            subscribedEvents.set(event,true);
                                         }
                                     }
                                     let response:any;
@@ -68,14 +74,13 @@ export class ExecuteViewSubmitHandler {
                                     if(hookId == ""){
                                         response = await createSubscription(this.http,repository,url,accessToken.token,events);
                                     }else{
+                                        //if hook is already present, we just need to send a patch request to add new events to existing hook
                                         let newEvents:Array<string> = [];
                                         for(let [event,present] of subscribedEvents){
-                                            if(!present){
-                                                newEvents.push(event);
-                                            }
+                                            newEvents.push(event);
                                         }
-                                        if(newEvents.length){
-                                            response = await addSubscribedEvents(this.http,repository,accessToken.token,hookId,events);
+                                        if(additionalEvents && newEvents.length){
+                                            response = await updateSubscription(this.http,repository,accessToken.token,hookId,newEvents);
                                         }
                                     }
                                     let createdEntry = false ;
