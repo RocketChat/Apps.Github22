@@ -28,8 +28,6 @@ import { Subscription } from "../persistance/subscriptions";
 import { ISubscription } from "../definitions/subscription";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
 
-
-
 export class GithubCommand implements ISlashCommand {
     public constructor(private readonly app: GithubApp) {}
     public command = "github";
@@ -73,8 +71,6 @@ export class GithubCommand implements ISlashCommand {
                             break;
                         }
                         case SubcommandEnum.TEST : {
-                            // let a = await getWebhookUrl(this.app);
-                            // console.log(a);
                             //test command
                             break;
                         }
@@ -87,10 +83,6 @@ export class GithubCommand implements ISlashCommand {
                             }else{
                                 console.log("Inavlid Trigger ID !");
                             }
-                            break;
-                        } 
-                        case SubcommandEnum.UNSUBSCRIBE :{
-                            //modal
                             break;
                         } 
                         default:{
@@ -125,9 +117,7 @@ export class GithubCommand implements ISlashCommand {
                                     throw new Error("Error creating new susbcription entry");
                                 }
                                
-
                                 await sendNotification(read,modify,context.getSender(),room,`Subscibed to ${repository} ✔️`);
-
 
                             } catch (error) {
                                 console.log("SubcommandError",error);

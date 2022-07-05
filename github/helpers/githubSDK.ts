@@ -36,7 +36,7 @@ async function deleteReqeust(
             Authorization: `token ${accessToken}`,
             "Content-Type": "application/json",
             "User-Agent": "Rocket.Chat-Apps-Engine",
-        }
+        },
     });
 
     // If it isn't a 2xx code, something wrong happened
@@ -93,9 +93,12 @@ export async function deleteSubscription(
     access_token: string,
     hookId: string
 ) {
-    return deleteReqeust(http, access_token, BaseApiHost + repoName + "/hooks/" + hookId,);
+    return deleteReqeust(
+        http,
+        access_token,
+        BaseApiHost + repoName + "/hooks/" + hookId
+    );
 }
-
 
 export async function updateSubscription(
     http: IHttp,
@@ -104,10 +107,15 @@ export async function updateSubscription(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(http, access_token, BaseApiHost + repoName + "/hooks/" + hookId, {
-        active: true,
-        events: events
-    });
+    return patchReqeust(
+        http,
+        access_token,
+        BaseApiHost + repoName + "/hooks/" + hookId,
+        {
+            active: true,
+            events: events,
+        }
+    );
 }
 
 export async function addSubscribedEvents(
@@ -117,10 +125,15 @@ export async function addSubscribedEvents(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(http, access_token, BaseApiHost + repoName + "/hooks/" + hookId, {
-        active: true,
-        add_events: events
-    });
+    return patchReqeust(
+        http,
+        access_token,
+        BaseApiHost + repoName + "/hooks/" + hookId,
+        {
+            active: true,
+            add_events: events,
+        }
+    );
 }
 
 export async function removeSubscribedEvents(
@@ -130,9 +143,13 @@ export async function removeSubscribedEvents(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(http, access_token, BaseApiHost + repoName + "/hooks/" + hookId, {
-        active: true,
-        add_events: events
-    });
+    return patchReqeust(
+        http,
+        access_token,
+        BaseApiHost + repoName + "/hooks/" + hookId,
+        {
+            active: true,
+            add_events: events,
+        }
+    );
 }
-

@@ -33,8 +33,7 @@ export async function deleteSubsciptionsModal({ modify, read, persistence, http,
         let roomSubsciptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
 
         block.addDividerBlock();
-        
-    
+
         let repositoryData = new Map<string,IRepositorySubscriptions>;
         for (let subsciption of roomSubsciptions) {
 
@@ -64,12 +63,9 @@ export async function deleteSubsciptionsModal({ modify, read, persistence, http,
         let index=1;
         for (let repository of repositoryData.values()) {
 
-            
             let repoName = repository.repoName;
             let repoUser = repository.user;
-            let events = repository.events;
-
-               
+            let events = repository.events;   
             if(repoUser.id == user.id){
                 block.addSectionBlock({
                     text: { text: `${index}) ${repoName}`, type: TextObjectType.PLAINTEXT},
@@ -89,21 +85,18 @@ export async function deleteSubsciptionsModal({ modify, read, persistence, http,
                 });
 
             }
-            
-               
-
-                let eventList : Array<ITextObject>=[];
-                eventList.push(block.newPlainTextObject("Events : "));
-                for(let event of events){
-                    eventList.push(block.newPlainTextObject(`${event} `));
-                }
-                block.addContextBlock({ elements: eventList});
-                index++;
+        
+            let eventList : Array<ITextObject>=[];
+            eventList.push(block.newPlainTextObject("Events : "));
+            for(let event of events){
+                eventList.push(block.newPlainTextObject(`${event} `));
+            }
+            block.addContextBlock({ elements: eventList});
+            index++;
         }
     }
 
     block.addDividerBlock();
-
 
     return {
         id: viewId,

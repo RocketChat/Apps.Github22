@@ -63,37 +63,28 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
         }
         let index=1;
         for (let repository of repositoryData.values()) {
-
-            
             let repoName = repository.repoName;
             let repoUser = repository.user;
             let events = repository.events;
-
-               
-                
-
-                    block.addSectionBlock({
-                        text: { text: `${index}) ${repoName}`, type: TextObjectType.PLAINTEXT},
-                        accessory: block.newButtonElement({
-                            actionId: ModalsEnum.OPEN_REPO_ACTION,
-                            text: {
-                                text: ModalsEnum.OPEN_REPO_LABEL,
-                                type: TextObjectType.PLAINTEXT
-                            },
-                            value: repository.webhookId,
-                            url:`https://github.com/${repoName}`
-                        })
-                    });
-
-               
-
-                let eventList : Array<ITextObject>=[];
-                eventList.push(block.newPlainTextObject("Events : "));
-                for(let event of events){
-                    eventList.push(block.newPlainTextObject(`${event} `));
-                }
-                block.addContextBlock({ elements: eventList});
-                index++;
+            block.addSectionBlock({
+                text: { text: `${index}) ${repoName}`, type: TextObjectType.PLAINTEXT},
+                accessory: block.newButtonElement({
+                    actionId: ModalsEnum.OPEN_REPO_ACTION,
+                    text: {
+                        text: ModalsEnum.OPEN_REPO_LABEL,
+                        type: TextObjectType.PLAINTEXT
+                    },
+                    value: repository.webhookId,
+                    url:`https://github.com/${repoName}`
+                })
+            });
+            let eventList : Array<ITextObject>=[];
+            eventList.push(block.newPlainTextObject("Events : "));
+            for(let event of events){
+                eventList.push(block.newPlainTextObject(`${event} `));
+            }
+            block.addContextBlock({ elements: eventList});
+            index++;
         }
     }
 
