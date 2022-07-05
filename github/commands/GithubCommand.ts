@@ -9,7 +9,6 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { ProcessorsEnum } from "../enum/Processors";
-
 import { GithubApp } from "../GithubApp";
 import { initiatorMessage } from "../lib/initiatorMessage";
 import { helperMessage } from "../lib/helperMessage";
