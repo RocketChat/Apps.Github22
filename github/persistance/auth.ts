@@ -94,29 +94,9 @@ export  async function removeToken({
 export async function revokeUserAccessToken(read:IRead,user: IUser, persis: IPersistence, http:IHttp, config: IOAuth2ClientOptions): Promise<boolean> {
     try {
         const tokenInfo = await getAccessTokenForUser(read,user,config);
-
         if (!tokenInfo?.token) {
             throw new Error('No access token available for this user.');
         }
-        /*****fix revoking token*****  The access token api throws an error
-        let client_id = await read.getEnvironmentReader().getSettings().getValueById(`${config.alias}-oauth-client-id`);
-        let client_secret = await read.getEnvironmentReader().getSettings().getValueById(`github-app-oauth-clientsecret`);
-        const url = new URL(`https://api.github.com/applications/${client_id}/token`);
-        // https://docs.github.com/en/rest/apps/oauth-applications
-        const headers: any = {
-            Accept: "application/vnd.github.v3+json",
-            Authorization: `Bearer ${tokenInfo?.token}`,
-        };
-        const body : any= {
-            "access_token":`${tokenInfo?.token}`
-        }
-        const result = await http.del(url.href,{headers,data:body});
-        
-        if (result.statusCode !== 200) {
-            console.log(result.content);
-            throw new Error('Provider did not allow token to be revoked');
-        }
-        ******/
         await removeToken({ userId: user.id, persis,config });
         return true;
     } catch (error) {
