@@ -3,16 +3,19 @@ import {
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
+import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GithubApp } from "../GithubApp";
 import { IButton, createSectionBlock } from "../lib/blocks";
-import { sendDirectMessage } from "../lib/message";
+import { sendNotification } from "../lib/message";
+import { storeInteractionRoomData } from "../persistance/roomInteraction";
 
 export async function authorize(
     app: GithubApp,
     read: IRead,
     modify: IModify,
     user: IUser,
+    room: IRoom,
     persistence: IPersistence
 ): Promise<void> {
     const url = await app
@@ -25,5 +28,6 @@ export async function authorize(
     };
     const message = `Login to GitHub`;
     const block = await createSectionBlock(modify, message, button);
-    await sendDirectMessage(read, modify, user, message, persistence, block);
+    await storeInteractionRoomData(persistence,user.id,room.id);
+    await sendNotification(read, modify, user, room, message, block);
 }

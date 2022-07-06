@@ -66,7 +66,7 @@ export class GithubCommand implements ISlashCommand {
                 }else{
                     switch(command[0]){
                         case SubcommandEnum.LOGIN : {
-                            await authorize(this.app, read, modify, context.getSender(), persistence);
+                            await authorize(this.app, read, modify, context.getSender(),room, persistence);
                             break;
                         }
                         case SubcommandEnum.TEST : {
