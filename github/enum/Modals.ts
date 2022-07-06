@@ -28,6 +28,7 @@ export enum ModalsEnum {
     UPDATE_SUBSCRIPTION_ACTION='update-subscription',
     UPDATE_SUBSCRIPTION_LABEL='Update',
     DELETE_SUBSCIPTIONS_TITLE='Unsubscribe to Repositories',
+    ADD_SUBSCIPTIONS_TITLE='New Subscription',
     OPEN_REPO_ACTION='open-repo',
     OPEN_REPO_LABEL='Open',
     REPO_NAME_INPUT='repo-name-input',

@@ -150,7 +150,7 @@ export async function AddSubscriptionModal({
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: AppEnum.DEFAULT_TITLE,
+            text: ModalsEnum.ADD_SUBSCIPTIONS_TITLE,
         },
         close: block.newButtonElement({
             text: {
