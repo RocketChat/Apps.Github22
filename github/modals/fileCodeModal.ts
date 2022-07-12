@@ -15,7 +15,7 @@ import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
-import { type } from "os";
+
 
 export async function fileCodeModal({
     data,
