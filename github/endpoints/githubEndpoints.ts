@@ -55,9 +55,27 @@ export class githubWebHooks extends ApiEndpoint {
         if (event == "push") {
             messageText = `*New Commits to* *[${payload.repository.full_name}](${payload.repository.html_url}) by ${payload.pusher.name}*`;
         } else if (event == "pull_request") {
-            messageText = `*[New Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+            if(payload.action == "opened"){
+                messageText = `*[New Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+            }else if(payload.action == "closed" && payload.pull_request.merged ){
+                messageText = `*[Merged Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+            }else if(payload.action == "closed" && !payload.pull_request.merged){
+                messageText = `*[Closed Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+            }else if(payload.action =="reopened"){
+                messageText = `*[ReOpened Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+            }else{
+                return this.success();
+            }
         } else if (event == "issues") {
-            messageText = `*[New Issue](${payload.issue.html_url})* *|*  *#${payload.issue.number}* *${payload.issue.title}* *|* *[${payload.repository.full_name}](${payload.repository.html_url})*  `;
+            if(payload.action == "opened"){
+                messageText = `*[New Issue](${payload.issue.html_url})* *|*  *#${payload.issue.number}* *${payload.issue.title}* *|* *[${payload.repository.full_name}](${payload.repository.html_url})*  `;
+            }else if(payload.action == "closed"){
+                messageText = `*[Issue Closed](${payload.issue.html_url})* *|*  *#${payload.issue.number}* *${payload.issue.title}* *|* *[${payload.repository.full_name}](${payload.repository.html_url})*  `;
+            }else if(payload.action == "reopened"){
+                messageText = `*[ReOpened Issue](${payload.issue.html_url})* *|*  *#${payload.issue.number}* *${payload.issue.title}* *|* *[${payload.repository.full_name}](${payload.repository.html_url})*  `;
+            }else{
+                return this.success();
+            }
         } else if (event == "deployment_status") {
             messageText = `*Deployment Status ${payload.deployment_status.state}* *|*  *${payload.repository.full_name}*`;
         } else if (event == "star"){
@@ -67,7 +85,6 @@ export class githubWebHooks extends ApiEndpoint {
                 return this.success();
             }
         }
-
         for (let subsciption of subsciptions) {
             let roomId = subsciption.room;
             if (!roomId) {
