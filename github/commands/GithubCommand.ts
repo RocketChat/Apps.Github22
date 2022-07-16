@@ -75,12 +75,17 @@ export class GithubCommand implements ISlashCommand {
                         }
                         case SubcommandEnum.SUBSCRIBE :{
                             //modal
-                            const triggerId= context.getTriggerId();
-                            if(triggerId){
-                                const modal = await subsciptionsModal({modify,read,persistence,http,slashcommandcontext:context});
-                                await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+                            let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
+                            if(accessToken && accessToken.token){
+                                const triggerId= context.getTriggerId();
+                                if(triggerId){
+                                    const modal = await subsciptionsModal({modify,read,persistence,http,slashcommandcontext:context});
+                                    await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+                                }else{
+                                    console.log("Inavlid Trigger ID !");
+                                }
                             }else{
-                                console.log("Inavlid Trigger ID !");
+                                await sendNotification(read,modify,context.getSender(),room,"Login to subscribe to repository events ! `/github login`");
                             }
                             break;
                         } 
@@ -101,7 +106,7 @@ export class GithubCommand implements ISlashCommand {
                     case SubcommandEnum.SUBSCRIBE : {
                         //sub
                         let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
-                        if(accessToken){
+                        if(accessToken && accessToken?.token){
                             try {
                                 let events: Array<string> =["pull_request","push","issues","deployment_status","star"];
                                 //if hook exists we set its take its hook id and add our aditional events to it
@@ -149,14 +154,14 @@ export class GithubCommand implements ISlashCommand {
                                 console.log("SubcommandError",error);
                             }
                         } else{
-                            await sendDirectMessage(read,modify,context.getSender(),"Login to subscribe to repository events ! `/github login`",persistence);
+                            await sendNotification(read,modify,context.getSender(),room,"Login to subscribe to repository events ! `/github login`");
                         }
                         break;
                     }
                     case SubcommandEnum.UNSUBSCRIBE : {
                         //unsub
                         let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
-                        if(accessToken){
+                        if(accessToken && accessToken?.token){
                             try {
                                 let user = await context.getSender();   
                                 let events: Array<string> =["pull_request","push","issues","deployment_status","star"];
@@ -198,7 +203,7 @@ export class GithubCommand implements ISlashCommand {
                                 console.log("SubcommandError",error);
                             }
                         } else{
-                            await sendDirectMessage(read,modify,context.getSender(),"Login to subscribe to repository events ! `/github login`",persistence);
+                            await sendNotification(read,modify,context.getSender(),room,"Login to subscribe to repository events ! `/github login`");
                         }
                         break;
                     }
