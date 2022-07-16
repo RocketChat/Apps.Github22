@@ -9,7 +9,6 @@ import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { ModalsEnum } from "../enum/Modals";
 import { AppEnum } from "../enum/App";
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import {
     UIKitBlockInteractionContext,
@@ -19,8 +18,6 @@ import {
     storeInteractionRoomData,
     getInteractionRoomData,
 } from "../persistance/roomInteraction";
-import { Subscription } from "../persistance/subscriptions";
-import { ISubscription } from "../definitions/subscription";
 
 export async function NewIssueModal({
     modify,
@@ -57,8 +54,6 @@ export async function NewIssueModal({
             ).roomId;
         }
 
-        
-
         // shows indentations in input blocks but not inn section block
         block.addInputBlock({
             blockId: ModalsEnum.REPO_NAME_INPUT,
@@ -75,63 +70,65 @@ export async function NewIssueModal({
             }),
         });
 
-        let newMultiStaticElemnt = block.newMultiStaticElement({
-            actionId: ModalsEnum.ADD_SUBSCRIPTION_EVENT_OPTIONS,
-            options: [
-                {
-                    value: "issues",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "New Issues",
-                        emoji: true,
-                    },
-                },
-                {
-                    value: "pull_request",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "New Pull Request",
-                        emoji: true,
-                    },
-                },
-                {
-                    value: "push",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "New Commits",
-                        emoji: true,
-                    },
-                },
-                {
-                    value: "deployment_status",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "Deployment",
-                        emoji: true,
-                    },
-                },
-                {
-                    value: "star",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "New Stars",
-                        emoji: true,
-                    },
-                },
-            ],
-            placeholder: {
+        block.addInputBlock({
+            blockId: ModalsEnum.ISSUE_TITLE_INPUT,
+            label: {
+                text: ModalsEnum.ISSUE_TITLE_LABEL,
                 type: TextObjectType.PLAINTEXT,
-                text: "Select Events",
             },
+            element: block.newPlainTextInputElement({
+                actionId: ModalsEnum.ISSUE_TITLE_ACTION,
+                placeholder: {
+                    text: ModalsEnum.ISSUE_TITLE_PLACEHOLDER,
+                    type: TextObjectType.PLAINTEXT,
+                },
+            }),
         });
 
         block.addInputBlock({
+            blockId: ModalsEnum.ISSUE_BODY_INPUT,
             label: {
-                text: ModalsEnum.ADD_SUBSCRIPTION_EVENT_LABEL,
+                text: ModalsEnum.ISSUE_BODY_INPUT_LABEL,
                 type: TextObjectType.PLAINTEXT,
             },
-            element: newMultiStaticElemnt,
-            blockId: ModalsEnum.ADD_SUBSCRIPTION_EVENT_INPUT,
+            element: block.newPlainTextInputElement({
+                actionId: ModalsEnum.ISSUE_BODY_INPUT_ACTION,
+                placeholder: {
+                    text: ModalsEnum.ISSUE_BODY_INPUT_PLACEHOLDER,
+                    type: TextObjectType.PLAINTEXT,
+                },
+                multiline: true
+            }),
+        });
+
+        block.addInputBlock({
+            blockId: ModalsEnum.ISSUE_LABELS_INPUT,
+            label: {
+                text: ModalsEnum.ISSUE_LABELS_INPUT_LABEL,
+                type: TextObjectType.PLAINTEXT,
+            },
+            element: block.newPlainTextInputElement({
+                actionId: ModalsEnum.ISSUE_LABELS_INPUT_ACTION,
+                placeholder: {
+                    text: ModalsEnum.ISSUE_LABELS_INPUT_PLACEHOLDER,
+                    type: TextObjectType.PLAINTEXT,
+                },
+            }),
+        });
+
+        block.addInputBlock({
+            blockId: ModalsEnum.ISSUE_ASSIGNEES_INPUT,
+            label: {
+                text: ModalsEnum.ISSUE_ASSIGNEES_INPUT_LABEL,
+                type: TextObjectType.PLAINTEXT,
+            },
+            element: block.newPlainTextInputElement({
+                actionId: ModalsEnum.ISSUE_ASSIGNEES_INPUT_ACTION,
+                placeholder: {
+                    text: ModalsEnum.ISSUE_ASSIGNEES_INPUT_PLACEHOLDER,
+                    type: TextObjectType.PLAINTEXT,
+                },
+            }),
         });
     }
 
@@ -141,7 +138,7 @@ export async function NewIssueModal({
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.ADD_SUBSCIPTIONS_TITLE,
+            text: ModalsEnum.NEW_ISSUE_TITLE,
         },
         close: block.newButtonElement({
             text: {
@@ -150,10 +147,10 @@ export async function NewIssueModal({
             },
         }),
         submit: block.newButtonElement({
-            actionId: ModalsEnum.ADD_SUBSCRIPTION_ACTION,
+            actionId: ModalsEnum.NEW_ISSUE_ACTION,
             text: {
                 type: TextObjectType.PLAINTEXT,
-                text: "Subscribe",
+                text: "Create Issue",
             },
         }),
         blocks: block.getBlocks(),

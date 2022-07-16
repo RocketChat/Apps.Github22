@@ -24,6 +24,7 @@ export class ExecuteViewClosedHandler {
             case ModalsEnum.PULL_VIEW ||
                 ModalsEnum.CODE_VIEW ||
                 ModalsEnum.ADD_SUBSCRIPTION_VIEW ||
+                ModalsEnum.NEW_ISSUE_VIEW ||
                 ModalsEnum.SUBSCRIPTION_VIEW:
                 const modal = await pullDetailsModal({
                     modify: this.modify,
