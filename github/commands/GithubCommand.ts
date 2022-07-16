@@ -100,6 +100,9 @@ export class GithubCommand implements ISlashCommand {
                             }
                             break;
                         } 
+                        case SubcommandEnum.NEW_ISSUE :{
+
+                        }
                         default:{
                             await helperMessage({room,read, persistence, modify, http});
                             break;

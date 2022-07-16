@@ -40,4 +40,7 @@ export enum ModalsEnum {
     ADD_SUBSCRIPTION_EVENT_INPUT='add-repo-subscription-events',
     SUBSCRIPTION_REFRESH_LABEL="Refresh",
     SUBSCRIPTION_REFRESH_ACTION="subscription-refresh",
+    NEW_ISSUE_VIEW="new-issue-view",
+    NEW_ISSUE_TITLE = 'New  GitHub Issue',
+
 }
