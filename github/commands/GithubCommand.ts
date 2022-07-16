@@ -16,7 +16,7 @@ import { basicQueryMessage } from "../helpers/basicQueryMessage";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
 import { authorize } from "../oath2/authentication";
 import { SubcommandEnum } from "../enum/Subcommands";
-import { getAccessTokenForUser } from "../persistance/auth";
+import { getAccessTokenForUser,revokeUserAccessToken } from "../persistance/auth";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { removeToken } from "../persistance/auth";
 import { getWebhookUrl } from "../helpers/getWebhookURL";
@@ -26,6 +26,7 @@ import { createSubscription, deleteSubscription, updateSubscription } from "../h
 import { Subscription } from "../persistance/subscriptions";
 import { ISubscription } from "../definitions/subscription";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
+
 
 export class GithubCommand implements ISlashCommand {
     public constructor(private readonly app: GithubApp) {}
@@ -67,6 +68,16 @@ export class GithubCommand implements ISlashCommand {
                     switch(command[0]){
                         case SubcommandEnum.LOGIN : {
                             await authorize(this.app, read, modify, context.getSender(),room, persistence);
+                            break;
+                        }
+                        case SubcommandEnum.LOGOUT : {
+                            let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
+                            if(accessToken && accessToken?.token){
+                                await revokeUserAccessToken(read, sender, persistence, http, this.app.oauth2Config);
+                                await sendNotification(read,modify,context.getSender(),room,"Logged out successfully !");
+                            }else{
+                                await sendNotification(read,modify,context.getSender(),room,"You are not logged in !");
+                            }
                             break;
                         }
                         case SubcommandEnum.TEST : {
@@ -236,4 +247,4 @@ export class GithubCommand implements ISlashCommand {
             
         }
     
-    }}//rc-apps deploy --url https://community.liaison.edge.rocketchat.digital --username samad.yar.khan --password samad --update
+    }}
