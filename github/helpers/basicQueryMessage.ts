@@ -21,7 +21,7 @@ export async function basicQueryMessage({
     http,
 }: {
     query: String,
-    repository:String,
+    repository: String,
     room: IRoom;
     read: IRead;
     persistence: IPersistence;
@@ -31,22 +31,22 @@ export async function basicQueryMessage({
 
     switch (query) {
         case "issues": {
-            await issueListMessage({repository,room,read,persistence,modify,http});
+            await issueListMessage({ repository, room, read, persistence, modify, http });
             break;
         }
         case "contributors": {
-           await contributorListMessage({repository,room,read,persistence,modify,http});
+            await contributorListMessage({ repository, room, read, persistence, modify, http });
             break;
         }
         case "pulls": {
-            await pullRequestListMessage({repository,room,read,persistence,modify,http});
+            await pullRequestListMessage({ repository, room, read, persistence, modify, http });
             break;
         }
         case "repo": {
-            await repoDataMessage({repository,room,read,persistence,modify,http})
+            await repoDataMessage({ repository, room, read, persistence, modify, http })
             break;
         }
-        default: 
-            await helperMessage({room,read,persistence,modify,http});
+        default:
+            await helperMessage({ room, read, persistence, modify, http });
     }
 }

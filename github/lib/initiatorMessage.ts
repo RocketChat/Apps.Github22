@@ -25,8 +25,8 @@ export async function initiatorMessage({
         .getCreator()
         .startMessage()
         .setRoom(data.room)
-        .setText(`Hey _${data.sender.username}_ !`);
-
+        .setText(`Hey ${data.sender.username} !`);
+        
     if (data.room.type !== "l") {
         await modify
             .getNotifier()
