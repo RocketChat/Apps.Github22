@@ -153,3 +153,20 @@ export async function removeSubscribedEvents(
         }
     );
 }
+
+export async function createNewIssue(
+    http: IHttp,
+    repoName: string,
+    issueTitle: string,
+    issueBody: string,
+    issueLabels: Array<string>,
+    issueAssignees : Array<string>,
+    access_token: string,
+) {
+    return postReqeust(http, access_token, BaseApiHost + repoName + "/issues", {
+        title: issueTitle,
+        body: issueBody,
+        assignees: issueAssignees,
+        labels: issueLabels
+    });
+}

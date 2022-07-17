@@ -7,7 +7,7 @@ import { getInteractionRoomData } from '../persistance/roomInteraction';
 import { Subscription } from '../persistance/subscriptions';
 import { GithubApp } from '../GithubApp';
 import { getWebhookUrl } from '../helpers/getWebhookURL';
-import { addSubscribedEvents, createSubscription, updateSubscription } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue } from '../helpers/githubSDK';
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
 
@@ -101,6 +101,39 @@ export class ExecuteViewSubmitHandler {
                         }
                     }
                     break;
+                case ModalsEnum.NEW_ISSUE_VIEW: {
+                    const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                    if (roomId) {
+                        let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
+                        let title = view.state?.[ModalsEnum.ISSUE_TITLE_INPUT]?.[ModalsEnum.ISSUE_TITLE_ACTION] as string;
+                        let issueBody =  view.state?.[ModalsEnum.ISSUE_BODY_INPUT]?.[ModalsEnum.ISSUE_BODY_INPUT_ACTION];
+                        let issueLabels = view.state?.[ModalsEnum.ISSUE_LABELS_INPUT]?.[ModalsEnum.ISSUE_LABELS_INPUT_ACTION] as string;
+                        issueLabels = issueLabels.trim();
+                        let issueAssignees = view.state?.[ModalsEnum.ISSUE_ASSIGNEES_INPUT]?.[ModalsEnum.ISSUE_ASSIGNEES_INPUT_ACTION] as string;
+                        repository = repository.trim();
+                        title = title.trim();
+                        issueAssignees = issueAssignees.trim();
+                        let issueLabelsArray:Array<string> = issueLabels.split(" ");
+                        let issueAssigneesArray:Array<string> = issueAssignees.split(" ");
+                        if(title && title?.length){
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if (!accessToken) {
+                                await sendNotification(this.read, this.modify, user, room, "Login To Github !");
+                            } else {
+                                let reponse = await createNewIssue(this.http,repository,title,issueBody,issueLabelsArray,issueAssigneesArray,accessToken?.token)
+                                if(reponse && reponse?.id){
+                                    await sendNotification(this.read,this.modify,user,room,`Created New Issue | [#${reponse.number} ](${reponse.html_url})  *[${reponse.title}](${reponse.html_url})*`)
+                                }else{
+                                    await sendNotification(this.read,this.modify,user,room,`Invalid Issue !`);
+                                }
+                            }
+                        }else{
+                            await sendNotification(this.read,this.modify,user,room,`Invalid Issue !`);
+                        }
+                    } 
+                    break;
+                }
                 default:
                     break;
             }
