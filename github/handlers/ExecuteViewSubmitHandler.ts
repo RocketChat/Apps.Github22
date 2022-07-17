@@ -116,7 +116,7 @@ export class ExecuteViewSubmitHandler {
                         issueAssignees = issueAssignees.trim();
                         let issueLabelsArray:Array<string> = issueLabels.split(" ");
                         let issueAssigneesArray:Array<string> = issueAssignees.split(" ");
-                        if(title && title?.length){
+                        if(repository && repository?.length && title && title?.length){
                             let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
                             if (!accessToken) {
                                 await sendNotification(this.read, this.modify, user, room, "Login To Github !");
