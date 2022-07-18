@@ -33,6 +33,7 @@ export async function helperMessage({
     9) View/Add/Delete/Update Repository Subscriptions -> /github subscribe 
     10) Subscribe to all repository events -> /github Username/RepositoryName subscribe
     11) Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe
+    12) Add New Issues to GitHub Repository -> /github new-issue
     
     `;
 
