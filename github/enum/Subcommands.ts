@@ -4,5 +4,6 @@ export enum SubcommandEnum {
     HELP = 'help',
     SUBSCRIBE = 'subscribe',
     UNSUBSCRIBE = 'unsubscribe',
-    TEST = 'test'
+    TEST = 'test',
+    SEARCH = 'search',
 }
