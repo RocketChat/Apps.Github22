@@ -22,7 +22,7 @@ As a GitHub App developer
 - [ ] TODO 2
 - [ ] TODO 3
 
-## Further Comments / Referances 
+## Further Comments / References  
 
 <!-- Any additional comments for this . -->
 <!-- Add Referances to similiar features provided by any other platform or any other Rocket.Chat App(if possible)  -->
