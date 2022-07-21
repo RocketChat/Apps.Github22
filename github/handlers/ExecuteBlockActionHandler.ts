@@ -22,8 +22,9 @@ import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
 import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
-import { sendNotification } from "../lib/message";
+import { sendMessage, sendNotification } from "../lib/message";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
+import { pullDetailsModal } from "../modals/pullDetailsModal";
 export class ExecuteBlockActionHandler {
     constructor(
         private readonly app: GithubApp,
@@ -124,7 +125,6 @@ export class ExecuteBlockActionHandler {
                 }
                 case ModalsEnum.DELETE_SUBSCRIPTION_ACTION: {
 
-
                     let { user, room } = await context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                     let value: string = context.getInteractionData().value as string;
@@ -178,6 +178,68 @@ export class ExecuteBlockActionHandler {
                 case ModalsEnum.SUBSCRIPTION_REFRESH_ACTION:{
                     const modal = await subsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                     await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                    break;
+                }
+                case ModalsEnum.SHARE_SEARCH_RESULT_ACTION:{
+                    let { user, room } = await context.getInteractionData();
+                    let value: string = context.getInteractionData().value as string;
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify,room,user,`${value}`);
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify,room,user,`${value}`);
+                        }
+                    }
+                    break;
+                }
+                case ModalsEnum.VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES:{
+                    let { user, room } = await context.getInteractionData();
+                    let value: string = context.getInteractionData().value as string;
+                    let PullRequestDetails = value.split(" ");
+                    if(PullRequestDetails.length==2){
+                        const triggerId= context.getInteractionData().triggerId;
+                        const data = {
+                            repository:PullRequestDetails[0],
+                            query:"pulls",
+                            number:PullRequestDetails[1]
+                        }
+                        if(triggerId && data){
+                            const resultsModal = await pullDetailsModal({
+                                data,
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context
+                            });
+                            return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(resultsModal);
+                        }else{
+                            console.log("Inavlid Trigger ID !");
+                        }
+                    }
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify,room,user,`${value}`);
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify,room,user,`${value}`);
+                        }
+                    }
                     break;
                 }
             }

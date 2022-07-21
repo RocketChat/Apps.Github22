@@ -19,8 +19,7 @@ import {
     storeInteractionRoomData,
     getInteractionRoomData,
 } from "../persistance/roomInteraction";
-import { Subscription } from "../persistance/subscriptions";
-import { ISubscription } from "../definitions/subscription";
+
 
 export async function githubSearchModal({
     modify,
@@ -112,6 +111,49 @@ export async function githubSearchModal({
             },
             element: newResourceStaticElement,
             blockId: ModalsEnum.ADD_MAIN_SEARCH_PARAMATER_INPUT,
+        });
+        
+        let newResourceStateStaticElement = block.newStaticSelectElement({
+            actionId: ModalsEnum.ADD_SEARCH_STATE_PARAMATER_INPUT_OPTION,
+            options: [
+                {
+                    value: "open",
+                    text: {
+                        type: TextObjectType.PLAINTEXT,
+                        text: "Open",
+                        emoji: true,
+                    },
+                },
+                {
+                    value: "closed",
+                    text: {
+                        type: TextObjectType.PLAINTEXT,
+                        text: "Closed",
+                        emoji: true,
+                    },
+                },
+                {
+                    value: "any",
+                    text: {
+                        type: TextObjectType.PLAINTEXT,
+                        text: "Any",
+                        emoji: true,
+                    },
+                },
+            ],
+            placeholder: {
+                type: TextObjectType.PLAINTEXT,
+                text: "Open/Closed",
+            },
+        });
+
+        block.addInputBlock({
+            label: {
+                text: ModalsEnum.ADD_SEARCH_STATE_PARAMATER_INPUT_LABEL,
+                type: TextObjectType.PLAINTEXT,
+            },
+            element: newResourceStateStaticElement,
+            blockId: ModalsEnum.ADD_SEARCH_STATE_PARAMATER_INPUT,
         });
 
         block.addInputBlock({
