@@ -58,4 +58,14 @@ export enum ModalsEnum {
     RESOURCE_MILESTONES_INPUT_LABEL="Milestone/'s",
     RESOURCE_MILESTONES_INPUT_ACTION="resource-milestone-input",
     RESOURCE_MILESTONES_PLACEHOLDER="Quarter1Milstone Quarter2Milestone",
+    ADD_SEARCH_STATE_PARAMATER_INPUT_OPTION="add-search-state-paramater-option",
+    ADD_SEARCH_STATE_PARAMATER_INPUT_LABEL="State",
+    ADD_SEARCH_STATE_PARAMATER_INPUT="add-search-state-paramater-input",
+    SEARCH_RESULT_VIEW ="search-result-view",
+    SHARE_SEARCH_RESULT_ACTION="share-search-result-action",
+    SHARE_SEARCH_RESULT_LABEL="Share",
+    OPEN_GITHUB_RESULT_ACTION="open-github-result-action",
+    OPEN_GITHUB_RESULT_LABEL="GitHub",
+    VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES='view-github-search-result-pr-changes',
+    VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES_LABEL="View Changes"
 }

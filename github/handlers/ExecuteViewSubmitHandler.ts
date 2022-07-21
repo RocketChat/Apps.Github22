@@ -7,9 +7,10 @@ import { getInteractionRoomData } from '../persistance/roomInteraction';
 import { Subscription } from '../persistance/subscriptions';
 import { GithubApp } from '../GithubApp';
 import { getWebhookUrl } from '../helpers/getWebhookURL';
-import { addSubscribedEvents, createSubscription, updateSubscription } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, githubSearchIssuesPulls } from '../helpers/githubSDK';
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
+import { githubSearchResultModal } from '../modals/githubSearchResultModal';
 
 
 export class ExecuteViewSubmitHandler {
@@ -101,6 +102,73 @@ export class ExecuteViewSubmitHandler {
                         }
                     }
                     break;
+                case ModalsEnum.SEARCH_VIEW: {
+                    if (user.id) {
+                        const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            let repository: string|undefined = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION];
+                            let resource: string|undefined = view.state?.[ModalsEnum.ADD_MAIN_SEARCH_PARAMATER_INPUT]?.[ModalsEnum.ADD_MAIN_SEARCH_PARAMATER_OPTION];
+                            let authors: string|undefined = view.state?.[ModalsEnum.AUTHOR_NAMES_INPUT]?.[ModalsEnum.AUTHOR_NAMES_INPUT_ACTION];
+                            let labels: string|undefined = view.state?.[ModalsEnum.RESOURCE_LABELS_INPUT]?.[ModalsEnum.RESOURCE_LABELS_INPUT_ACTION];
+                            let milestones: string|undefined = view.state?.[ModalsEnum.RESOURCE_MILESTONES_INPUT]?.[ModalsEnum.RESOURCE_LABELS_INPUT_ACTION];
+                            let resourceState: string|undefined = view.state?.[ModalsEnum.ADD_SEARCH_STATE_PARAMATER_INPUT]?.[ModalsEnum.ADD_SEARCH_STATE_PARAMATER_INPUT_OPTION];
+                            let labelsArray:Array<string>=[];
+                            let milestonesArray:Array<string>=[];
+                            let authorsArray:Array<string>=[];
+
+                            if(typeof authors == 'string' && authors.length){
+                                authorsArray = authors.trim().split(" ");
+                            }
+                            if(typeof labels == 'string' && labels.length){
+                                labelsArray = labels.trim().split(" ");
+                            }
+                            if(typeof milestones == 'string' && milestones.length){
+                                milestonesArray = milestones.trim().split(" ");
+                            }
+                            if(repository == undefined){
+                                repository = "";
+                            }else{
+                                repository=repository?.trim();
+                            }
+                            if(resource == undefined){
+                                resource = "";
+                            }else{
+                                resource = resource?.trim();
+                            }
+                            if(resourceState == undefined){
+                                resourceState = "";
+                            }else{
+                                resourceState = resourceState?.trim();
+                            }
+ 
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if(repository?.length == 0 && labelsArray?.length == 0 && authorsArray?.length == 0){
+                                await sendNotification(this.read, this.modify, user, room, "*Invalid Search Query !*");
+                            }else if (!accessToken) {
+                                await sendNotification(this.read, this.modify, user, room, "Login To Github !");
+                            } else {
+                                let data = await githubSearchIssuesPulls(this.http,repository,accessToken.token,resource,resourceState,labelsArray,authorsArray,milestonesArray);
+                                const triggerId= context.getInteractionData().triggerId;
+                                if(triggerId && data){
+                                    const resultsModal = await githubSearchResultModal({
+                                        data,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context});
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(resultsModal);
+                                }else{
+                                    console.log("Inavlid Trigger ID !");
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
