@@ -32,6 +32,7 @@ export async function helperMessage({
     8) View/Add/Delete/Update Repository Subscriptions -> /github subscribe 
     9) Subscribe to all repository events -> /github Username/RepositoryName subscribe
     10) Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe
+    11) Search Issues and Pull Requests -> /github search
     
     `;
 
