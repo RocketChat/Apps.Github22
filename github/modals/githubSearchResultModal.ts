@@ -86,7 +86,7 @@ export async function githubSearchResultModal({
                 //context block should only have labels section if labels exist on a resource
                 let contextBlockElementsArray = [
                     block.newPlainTextObject(`User : ${item.user?.login} | `),
-                    block.newPlainTextObject(`Status: ${item.state}  `),
+                    block.newPlainTextObject(`Status: ${item.state} | `),
                 ]
                 if(item?.labels && Array.isArray(item.labels)){
                     let labelString = "";
