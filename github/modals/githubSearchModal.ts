@@ -82,7 +82,7 @@ export async function githubSearchModal({
             actionId: ModalsEnum.ADD_MAIN_SEARCH_PARAMATER_OPTION,
             options: [
                 {
-                    value: "issues",
+                    value: "issue",
                     text: {
                         type: TextObjectType.PLAINTEXT,
                         text: "Issues",
@@ -94,6 +94,14 @@ export async function githubSearchModal({
                     text: {
                         type: TextObjectType.PLAINTEXT,
                         text: "Pull Request",
+                        emoji: true,
+                    },
+                },
+                {
+                    value: "issue/pull_request",
+                    text: {
+                        type: TextObjectType.PLAINTEXT,
+                        text: "Issues/Pull Request",
                         emoji: true,
                     },
                 },
