@@ -1,4 +1,5 @@
-# Github
+<h1 align='center'>GitHub App For Rocket.Chat</h1>
+
 The ultimate app extending Rocket.Chat for all developers collaborating on Github
 
 ## Getting Started
