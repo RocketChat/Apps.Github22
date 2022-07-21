@@ -26,6 +26,7 @@ import { createSubscription, deleteSubscription, updateSubscription } from "../h
 import { Subscription } from "../persistance/subscriptions";
 import { ISubscription } from "../definitions/subscription";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
+import { githubSearchModal } from "../modals/githubSearchModal"
 
 
 export class GithubCommand implements ISlashCommand {
@@ -91,6 +92,22 @@ export class GithubCommand implements ISlashCommand {
                                 const triggerId= context.getTriggerId();
                                 if(triggerId){
                                     const modal = await subsciptionsModal({modify,read,persistence,http,slashcommandcontext:context});
+                                    await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+                                }else{
+                                    console.log("Inavlid Trigger ID !");
+                                }
+                            }else{
+                                await sendNotification(read,modify,context.getSender(),room,"Login to subscribe to repository events ! `/github login`");
+                            }
+                            break;
+                        } 
+                        case SubcommandEnum.SEARCH :{
+                            //modal
+                            let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
+                            if(accessToken && accessToken.token){
+                                const triggerId= context.getTriggerId();
+                                if(triggerId){
+                                    const modal = await githubSearchModal({modify,read,persistence,http,slashcommandcontext:context});
                                     await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
                                 }else{
                                     console.log("Inavlid Trigger ID !");
