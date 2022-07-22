@@ -58,5 +58,11 @@ export enum ModalsEnum {
     ISSUE_ASSIGNEES_INPUT = "issue-assignees-input",
     ISSUE_ASSIGNEES_INPUT_LABEL = "Add Assignees",
     ISSUE_ASSIGNEES_INPUT_ACTION = "issue-assignee-input-action",
-    ISSUE_ASSIGNEES_INPUT_PLACEHOLDER = "samad-yar-khan RonLek Sing-Li"
+    ISSUE_ASSIGNEES_INPUT_PLACEHOLDER = "samad-yar-khan RonLek Sing-Li",
+    NEW_ISSUE_STARTER_VIEW = "new-issue-starter-view",
+    NEW_ISSUE_STARTER__ACTION= "new-issue-starter-action",
+    ISSUE_TEMPLATE_SELECTION_VIEW= "issue-template-selection-view",
+    ISSUE_TEMPLATE_SELECTION_ACTION = "issue-template-selection-action",
+    ISSUE_TEMPLATE_SELECTION_LABEL = "Select",
+    BLANK_GITHUB_TEMPLATE = "blank-github-app-template"
 }
