@@ -7,10 +7,11 @@ import { getInteractionRoomData } from '../persistance/roomInteraction';
 import { Subscription } from '../persistance/subscriptions';
 import { GithubApp } from '../GithubApp';
 import { getWebhookUrl } from '../helpers/getWebhookURL';
-import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates } from '../helpers/githubSDK';
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
-
+import { NewIssueModal } from '../modals/newIssueModal';
+import { issueTemplateSelectionModal } from '../modals/issueTemplateSelectionModal';
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -130,6 +131,37 @@ export class ExecuteViewSubmitHandler {
                             }
                         }else{
                             await sendNotification(this.read,this.modify,user,room,`Invalid Issue !`);
+                        }
+                    } 
+                    break;
+                }
+                case ModalsEnum.NEW_ISSUE_STARTER_VIEW:{
+                    const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+    
+                    if (roomId) {
+                        let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
+                        let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                        if (!accessToken) {
+                            await sendNotification(this.read, this.modify, user, room, `Login To Github ! -> /github login`);
+                        }else{
+                            
+                            repository=repository?.trim();
+                            let response = await getIssueTemplates(this.http,repository,accessToken.token);
+                            if((!response.template_not_found) && response?.templates?.length){
+                                const issueTemplateSelection = await issueTemplateSelectionModal({ data: response, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                                return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(issueTemplateSelection);
+                            }else{
+                                let data = {
+                                    repository: repository
+                                }
+                                const createNewIssue = await NewIssueModal({ data: data, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                                return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(createNewIssue);
+                            }
                         }
                     } 
                     break;

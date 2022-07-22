@@ -20,6 +20,7 @@ import {
 } from "../persistance/roomInteraction";
 
 export async function NewIssueModal({
+    data,
     modify,
     read,
     persistence,
@@ -27,6 +28,7 @@ export async function NewIssueModal({
     slashcommandcontext,
     uikitcontext,
 }: {
+    data: any,
     modify: IModify;
     read: IRead;
     persistence: IPersistence;
@@ -54,21 +56,39 @@ export async function NewIssueModal({
             ).roomId;
         }
 
-        // shows indentations in input blocks but not inn section block
-        block.addInputBlock({
-            blockId: ModalsEnum.REPO_NAME_INPUT,
-            label: {
-                text: ModalsEnum.REPO_NAME_LABEL,
-                type: TextObjectType.PLAINTEXT,
-            },
-            element: block.newPlainTextInputElement({
-                actionId: ModalsEnum.REPO_NAME_INPUT_ACTION,
-                placeholder: {
-                    text: ModalsEnum.REPO_NAME_PLACEHOLDER,
+        if(data?.repository != undefined){
+            block.addInputBlock({
+                blockId: ModalsEnum.REPO_NAME_INPUT,
+                label: {
+                    text: ModalsEnum.REPO_NAME_LABEL,
                     type: TextObjectType.PLAINTEXT,
                 },
-            }),
-        });
+                element: block.newPlainTextInputElement({
+                    actionId: ModalsEnum.REPO_NAME_INPUT_ACTION,
+                    placeholder: {
+                        text: ModalsEnum.REPO_NAME_PLACEHOLDER,
+                        type: TextObjectType.PLAINTEXT,
+                    },
+                    initialValue: data?.repository
+                }),
+            });
+        }else{
+            block.addInputBlock({
+                blockId: ModalsEnum.REPO_NAME_INPUT,
+                label: {
+                    text: ModalsEnum.REPO_NAME_LABEL,
+                    type: TextObjectType.PLAINTEXT,
+                },
+                element: block.newPlainTextInputElement({
+                    actionId: ModalsEnum.REPO_NAME_INPUT_ACTION,
+                    placeholder: {
+                        text: ModalsEnum.REPO_NAME_PLACEHOLDER,
+                        type: TextObjectType.PLAINTEXT,
+                    },
+                }),
+            });
+        }
+        
 
         block.addInputBlock({
             blockId: ModalsEnum.ISSUE_TITLE_INPUT,
@@ -85,21 +105,40 @@ export async function NewIssueModal({
             }),
         });
 
-        block.addInputBlock({
-            blockId: ModalsEnum.ISSUE_BODY_INPUT,
-            label: {
-                text: ModalsEnum.ISSUE_BODY_INPUT_LABEL,
-                type: TextObjectType.PLAINTEXT,
-            },
-            element: block.newPlainTextInputElement({
-                actionId: ModalsEnum.ISSUE_BODY_INPUT_ACTION,
-                placeholder: {
-                    text: ModalsEnum.ISSUE_BODY_INPUT_PLACEHOLDER,
+        if(data?.template != undefined){
+            block.addInputBlock({
+                blockId: ModalsEnum.ISSUE_BODY_INPUT,
+                label: {
+                    text: ModalsEnum.ISSUE_BODY_INPUT_LABEL,
                     type: TextObjectType.PLAINTEXT,
                 },
-                multiline: true
-            }),
-        });
+                element: block.newPlainTextInputElement({
+                    actionId: ModalsEnum.ISSUE_BODY_INPUT_ACTION,
+                    placeholder: {
+                        text: ModalsEnum.ISSUE_BODY_INPUT_PLACEHOLDER,
+                        type: TextObjectType.PLAINTEXT,
+                    },
+                    multiline: true,
+                    initialValue:data?.template
+                }),
+            });
+        }else{
+            block.addInputBlock({
+                blockId: ModalsEnum.ISSUE_BODY_INPUT,
+                label: {
+                    text: ModalsEnum.ISSUE_BODY_INPUT_LABEL,
+                    type: TextObjectType.PLAINTEXT,
+                },
+                element: block.newPlainTextInputElement({
+                    actionId: ModalsEnum.ISSUE_BODY_INPUT_ACTION,
+                    placeholder: {
+                        text: ModalsEnum.ISSUE_BODY_INPUT_PLACEHOLDER,
+                        type: TextObjectType.PLAINTEXT,
+                    },
+                    multiline: true
+                }),
+            });
+        }
 
         block.addInputBlock({
             blockId: ModalsEnum.ISSUE_LABELS_INPUT,
