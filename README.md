@@ -95,7 +95,7 @@ Enter `/github` or  `/github help` in the message input box of any channel on th
 
 <p>The GitHub App uses the GitHub OAth2 and you must setup a GitHub OAuth App to unlock the full potential of the GitHub App.</p>
 
-<ul>
+<ol>
 <li>The First Step is to setup a GitHub Oauth2 App. To setup the GitHub Oauth App Follow <a href="https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app">These Steps</a>
 </li> 
 <li>
@@ -112,7 +112,7 @@ Once the GitHub OAuth app is setup, open the GitHub Application Settings and ent
 <img src="https://user-images.githubusercontent.com/70485812/180335480-4b7ceba2-1c0a-4d81-be9b-843121cbbc6b.png" alt="OAuth Setting Example" width="70%"/>
 <div>
 </li>
-</ul>
+</ol>
 
 The users can login to GitHub by entering the slash command `/github login` and then clicking on the `Login` button.
 
