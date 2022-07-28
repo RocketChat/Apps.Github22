@@ -24,6 +24,10 @@ import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 import { sendNotification } from "../lib/message";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
+import { mergePullRequestModal } from "../modals/mergePullReqeustModal";
+import { messageModal } from "../modals/messageModal";
+import { getRepoData } from "../helpers/githubSDK";
+
 export class ExecuteBlockActionHandler {
     constructor(
         private readonly app: GithubApp,
@@ -181,6 +185,44 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.MERGE_PULL_REQUEST_ACTION:{
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    if(splittedValues.length==2 && accessToken?.token){
+                        let data={
+                            "repo" : splittedValues[0],
+                            "pullNumber": splittedValues[1]
+                        }
+                        let repoDetails = await getRepoData(this.http,splittedValues[0],accessToken.token);
+
+                        if(repoDetails?.permissions?.admin || repoDetails?.permissions?.push || repoDetails?.permissions?.maintain ){
+                            const mergePRModal = await mergePullRequestModal({
+                                data:data,
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context
+                            })
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(mergePRModal);
+                        }else{
+                            const unauthrizedMessageModal = await messageModal({
+                                message:"Unauthorized Action 🤖 You dont have push rights ⚠️",
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context
+                            })
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(unauthrizedMessageModal);
+                        }
+                       
+                    }
                     break;
                 }
                 case ModalsEnum.COMMENT_PR_ACTION:{

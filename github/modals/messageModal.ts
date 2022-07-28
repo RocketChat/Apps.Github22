@@ -39,8 +39,9 @@ export async function messageModal({
 
     block.addSectionBlock({
         text: {
-            text: `${message}`,
-            type: TextObjectType.PLAINTEXT,
+            text: `*${message}*`,
+            type: TextObjectType.MARKDOWN,
+            emoji:true,
         },
     });
     
