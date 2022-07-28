@@ -40,7 +40,6 @@ export enum ModalsEnum {
     ADD_SUBSCRIPTION_EVENT_INPUT='add-repo-subscription-events',
     SUBSCRIPTION_REFRESH_LABEL="Refresh",
     SUBSCRIPTION_REFRESH_ACTION="subscription-refresh",
-    //merge pull request
     MERGE_PULL_REQUEST_VIEW="merge-pull-request-view",
     MERGE_PULL_REQUEST_VIEW_TITLE="Merge Pull Request",
     PULL_REQUEST_NUMBER_INPUT="pull-request-number-input",
@@ -58,4 +57,5 @@ export enum ModalsEnum {
     PULL_REQUEST_MERGE_METHOD_OPTION="pull-request-merge-method-option",
     PULL_REQUEST_MERGE_METHOD_INPUT_LABEL="Merge Method",
     PULL_REQUEST_MERGE_METHOD_INPUT="pull-request-merge-method-input",
+    MESSAGE_MODAL_VIEW="message-modal-view"
 }
