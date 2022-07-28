@@ -209,7 +209,7 @@ export class ExecuteBlockActionHandler {
                                 .getInteractionResponder()
                                 .openModalViewResponse(mergePRModal);
                         }else{
-                            const unauthrizedMessageModal = await messageModal({
+                            const unauthorizedMessageModal = await messageModal({
                                 message:"Unauthorized Action 🤖 You dont have push rights ⚠️",
                                 modify: this.modify,
                                 read: this.read,
@@ -219,7 +219,7 @@ export class ExecuteBlockActionHandler {
                             })
                             return context
                                 .getInteractionResponder()
-                                .openModalViewResponse(unauthrizedMessageModal);
+                                .openModalViewResponse(unauthorizedMessageModal);
                         }
                        
                     }

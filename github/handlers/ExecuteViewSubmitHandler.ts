@@ -10,7 +10,8 @@ import { getWebhookUrl } from '../helpers/getWebhookURL';
 import { addSubscribedEvents, createSubscription, updateSubscription } from '../helpers/githubSDK';
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
-
+import { mergePullRequest } from '../helpers/githubSDK';
+import { messageModal } from '../modals/messageModal';
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -101,6 +102,51 @@ export class ExecuteViewSubmitHandler {
                         }
                     }
                     break;
+                case ModalsEnum.MERGE_PULL_REQUEST_VIEW:{
+                    if (user.id) {
+                        const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            const repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION];
+                            const pullNumber = view.state?.[ModalsEnum.PULL_REQUEST_NUMBER_INPUT]?.[ModalsEnum.PULL_REQUEST_NUMBER_INPUT_ACTION];
+                            const commitTitle = view.state?.[ModalsEnum.PULL_REQUEST_COMMIT_TITLE_INPUT]?.[ModalsEnum.PULL_REQUEST_COMMIT_TITLE_ACTION];
+                            const commitMessage = view.state?.[ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_INPUT]?.[ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_ACTION];
+                            const mergeMethod = view.state?.[ModalsEnum.PULL_REQUEST_MERGE_METHOD_INPUT]?.[ModalsEnum.PULL_REQUEST_MERGE_METHOD_OPTION];
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if(accessToken?.token){
+                                let mergeResponse = await mergePullRequest(this.http,repository,accessToken.token,pullNumber,commitTitle,commitMessage,mergeMethod);
+                                if(mergeResponse?.serverError){
+                                    let errorMessage = mergeResponse?.message;
+                                    const unauthorizedMessageModal = await messageModal({
+                                        message:`🤖 Unable to merge pull request : ⚠️ ${errorMessage}`,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(unauthorizedMessageModal);
+                                }else{
+                                    let succesMessage = mergeResponse?.message;
+                                    const succesMessageModal = await messageModal({
+                                        message:`🤖 Merged Pull Request  : ✔️ ${succesMessage}`,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(succesMessageModal);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
