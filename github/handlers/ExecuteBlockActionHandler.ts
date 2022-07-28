@@ -180,6 +180,12 @@ export class ExecuteBlockActionHandler {
                     await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     break;
                 }
+                case ModalsEnum.MERGE_PULL_REQUEST_ACTION:{
+                    break;
+                }
+                case ModalsEnum.COMMENT_PR_ACTION:{
+                    break;
+                }
             }
 
         } catch (error) {

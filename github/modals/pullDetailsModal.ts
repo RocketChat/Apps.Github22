@@ -9,12 +9,12 @@ import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { ModalsEnum } from "../enum/Modals";
 import { AppEnum } from "../enum/App";
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
+import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 
 export async function pullDetailsModal({
     data,
@@ -46,6 +46,12 @@ export async function pullDetailsModal({
 
     if (user?.id) {
         let roomId;
+        if (room?.id) {
+            roomId = room.id;
+            await storeInteractionRoomData(persistence, user.id, roomId);
+        } else {
+            roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
+        }
 
         const pullRawData = await http.get(
             `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}`
@@ -124,7 +130,7 @@ export async function pullDetailsModal({
                     text: ModalsEnum.MERGE_PULL_REQUEST_LABEL,
                     type: TextObjectType.PLAINTEXT,
                 },
-                value: room?.id,
+                value: `${data?.repository} ${data?.number}`,
             }),
             block.newButtonElement({
                 actionId: ModalsEnum.COMMENT_PR_ACTION,
@@ -132,7 +138,7 @@ export async function pullDetailsModal({
                     text: ModalsEnum.COMMENT_PR_LABEL,
                     type: TextObjectType.PLAINTEXT,
                 },
-                value: room?.id,
+                value: `${data?.repository} ${data?.number}`,
             }),
         ],
     });

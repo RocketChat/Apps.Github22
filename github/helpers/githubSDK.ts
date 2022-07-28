@@ -153,3 +153,65 @@ export async function removeSubscribedEvents(
         }
     );
 }
+
+export async function getRepoData( 
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+) {
+    const response = await http.get(`https://api.github.com/repos/${repoName}`,{
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        }
+    });
+
+    // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    }else{
+        JSONResponse["serverError"] = false;
+    }
+
+    return JSONResponse;
+}
+
+export async function mergePullRequest( 
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    pullRequestNumber: string|number,
+    commitTitle: string,
+    commitMessage: string,
+    method:string,
+) {
+    let data = {};
+    if(commitTitle?.length){
+        data["commit_title"] = commitTitle;
+    }
+    if(commitMessage?.length){
+        data["commit_message"] = commitMessage;
+    }
+    if(method?.length){
+        data["merge_method"] = method;
+    }
+    const response = await http.put(`https://api.github.com/repos/${repoName}/pulls/${pullRequestNumber}/merge`,{
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+        data
+    });
+     // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    }else{
+        JSONResponse["serverError"] = false;
+    }
+
+    return JSONResponse;
+}
+
+
