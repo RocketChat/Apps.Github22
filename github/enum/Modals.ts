@@ -57,5 +57,11 @@ export enum ModalsEnum {
     PULL_REQUEST_MERGE_METHOD_OPTION="pull-request-merge-method-option",
     PULL_REQUEST_MERGE_METHOD_INPUT_LABEL="Merge Method",
     PULL_REQUEST_MERGE_METHOD_INPUT="pull-request-merge-method-input",
-    MESSAGE_MODAL_VIEW="message-modal-view"
+    MESSAGE_MODAL_VIEW="message-modal-view",
+    ADD_PULL_RRQUEST_COMMENT_VIEW_TITLE="GitHub Comments",
+    ADD_PULL_RRQUEST_COMMENT_VIEW="add-pull-request-comment-view",
+    PULL_REQUEST_COMMENT_INPUT="pull-request-comment-input",
+    PULL_REQUEST_COMMENT_INPUT_LABEL="Enter Comment",
+    PULL_REQUEST_COMMENT_INPUT_PLACEHOLDER="@RonLek can you please reveiw the PR ?",
+    PULL_REQUEST_COMMENT_INPUT_ACTION="add-pull-request-comment-input-actions",
 }
