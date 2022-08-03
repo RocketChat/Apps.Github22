@@ -39,7 +39,7 @@ export async function addPullRequestCommentsModal({
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
 }): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.ADD_PULL_RRQUEST_COMMENT_VIEW;
+    const viewId = ModalsEnum.ADD_PULL_REQUEST_COMMENT_VIEW;
     const block = modify.getCreator().getBlockBuilder();
     const room =
         slashcommandcontext?.getRoom() ||
@@ -63,7 +63,14 @@ export async function addPullRequestCommentsModal({
             ).roomId;
         }
 
-    
+        let repoName = "";
+        let pullRequestNumber = "";
+        if(data?.repo?.length){
+            repoName = data?.repo;
+        }
+        if(data?.pullNumber?.length){
+            pullRequestNumber = data?.pullNumber;
+        }
         // shows indentations in input blocks but not inn section block
         block.addInputBlock({
             blockId: ModalsEnum.REPO_NAME_INPUT,
@@ -77,6 +84,7 @@ export async function addPullRequestCommentsModal({
                     text: ModalsEnum.REPO_NAME_PLACEHOLDER,
                     type: TextObjectType.PLAINTEXT,
                 },
+                initialValue:repoName
             }),
         });
 
@@ -92,6 +100,7 @@ export async function addPullRequestCommentsModal({
                     text: ModalsEnum.PULL_REQUEST_NUMBER_INPUT_PLACEHOLDER,
                     type: TextObjectType.PLAINTEXT,
                 },
+                initialValue:pullRequestNumber
             }),
         });
 
@@ -107,11 +116,9 @@ export async function addPullRequestCommentsModal({
                     text: ModalsEnum.PULL_REQUEST_COMMENT_INPUT_PLACEHOLDER,
                     type: TextObjectType.PLAINTEXT,
                 },
+                multiline: true
             }),
-        });
-
-
-        
+        });        
     }
 
     block.addDividerBlock();
@@ -120,7 +127,7 @@ export async function addPullRequestCommentsModal({
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.ADD_PULL_RRQUEST_COMMENT_VIEW_TITLE,
+            text: ModalsEnum.ADD_PULL_REQUEST_COMMENT_VIEW_TITLE,
         },
         close: block.newButtonElement({
             text: {

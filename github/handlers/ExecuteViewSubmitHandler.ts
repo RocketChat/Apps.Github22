@@ -10,7 +10,7 @@ import { getWebhookUrl } from '../helpers/getWebhookURL';
 import { addSubscribedEvents, createSubscription, updateSubscription } from '../helpers/githubSDK';
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
-import { mergePullRequest } from '../helpers/githubSDK';
+import { mergePullRequest, addNewPullRequestComment } from '../helpers/githubSDK';
 import { messageModal } from '../modals/messageModal';
 
 export class ExecuteViewSubmitHandler {
@@ -144,6 +144,39 @@ export class ExecuteViewSubmitHandler {
                                 }
                             }
                         }
+                    }
+                    break;
+                }
+                case ModalsEnum.ADD_PULL_REQUEST_COMMENT_VIEW:{
+                    if (user.id) {
+                        const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            const repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION];
+                            const pullNumber = view.state?.[ModalsEnum.PULL_REQUEST_NUMBER_INPUT]?.[ModalsEnum.PULL_REQUEST_NUMBER_INPUT_ACTION];
+                            const newComment = view.state?.[ModalsEnum.PULL_REQUEST_COMMENT_INPUT]?.[ModalsEnum.PULL_REQUEST_COMMENT_INPUT_ACTION];
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if(accessToken?.token && repository?.length && newComment?.length && pullNumber?.length){
+                                let addCommentResponse = await addNewPullRequestComment(this.http,repository,accessToken.token,pullNumber,newComment);
+                                if(addCommentResponse?.serverError){
+                                    let errorMessage = addCommentResponse?.message;
+                                    const unauthorizedMessageModal = await messageModal({
+                                        message:`🤖 Unable to add comment : ⚠️ ${errorMessage}`,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(unauthorizedMessageModal);
+                                }else{
+                                    await sendNotification(this.read,this.modify,user,room,`New Comment posted to ${repository} pull request #${pullNumber} by ${addCommentResponse?.user?.login} : ${addCommentResponse?.html_url}`)
+                                }
+                            }
+                        }
+                        return context.getInteractionResponder().successResponse();
                     }
                     break;
                 }

@@ -214,4 +214,32 @@ export async function mergePullRequest(
     return JSONResponse;
 }
 
+export async function addNewPullRequestComment( 
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    pullRequestNumber: string|number,
+    newComment: string,
+) {
+    let data = {
+        body : newComment,
+    }
+    const response = await http.post(`https://api.github.com/repos/${repoName}/issues/${pullRequestNumber}/comments`,{
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+        data
+    });
+     // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    }else{
+        JSONResponse["serverError"] = false;
+    }
+
+    return JSONResponse;
+}
+
 

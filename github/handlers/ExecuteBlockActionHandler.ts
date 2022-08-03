@@ -27,6 +27,7 @@ import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { mergePullRequestModal } from "../modals/mergePullReqeustModal";
 import { messageModal } from "../modals/messageModal";
 import { getRepoData } from "../helpers/githubSDK";
+import { addPullRequestCommentsModal } from "../modals/addPullRequestCommentsModal";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -226,6 +227,27 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.COMMENT_PR_ACTION:{
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    if(splittedValues.length==2 && accessToken?.token){
+                        let data={
+                            "repo" : splittedValues[0],
+                            "pullNumber": splittedValues[1]
+                        }
+                        const addPRCommentModal = await addPullRequestCommentsModal({
+                            data:data,
+                            modify:this.modify,
+                            read:this.read,
+                            persistence: this.persistence,
+                            http: this.http,
+                            uikitcontext: context
+                        })
+                        return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(addPRCommentModal);
+                    }
                     break;
                 }
             }
