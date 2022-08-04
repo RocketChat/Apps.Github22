@@ -58,8 +58,8 @@ export async function pullRequestCommentsModal({
 
         block.addSectionBlock({
             text: {
-                text: `#${pullData?.title}`,
-                type: TextObjectType.PLAINTEXT,
+                text: `*${pullData?.title}*`,
+                type: TextObjectType.MARKDOWN,
             },
             accessory: block.newButtonElement({
                 actionId: ModalsEnum.VIEW_FILE_ACTION,
