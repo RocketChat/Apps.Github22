@@ -16,7 +16,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription, updateSubscription } from "../helpers/githubSDK";
+import { deleteSubscription, getPullRequestComments, getPullRequestData, updateSubscription } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -28,6 +28,7 @@ import { mergePullRequestModal } from "../modals/mergePullReqeustModal";
 import { messageModal } from "../modals/messageModal";
 import { getRepoData } from "../helpers/githubSDK";
 import { addPullRequestCommentsModal } from "../modals/addPullRequestCommentsModal";
+import { pullRequestCommentsModal } from "../modals/pullRequestCommentsModal";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -237,6 +238,64 @@ export class ExecuteBlockActionHandler {
                             "pullNumber": splittedValues[1]
                         }
                         const addPRCommentModal = await addPullRequestCommentsModal({
+                            data:data,
+                            modify:this.modify,
+                            read:this.read,
+                            persistence: this.persistence,
+                            http: this.http,
+                            uikitcontext: context
+                        })
+                        return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(addPRCommentModal);
+                    }
+                    break;
+                }
+                case ModalsEnum.PR_COMMENT_LIST_ACTION:{
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    if(splittedValues.length==2 && accessToken?.token){
+                        let repoName = splittedValues[0];
+                        let pullNumber = splittedValues[1];
+                        let pullRequestComments = await getPullRequestComments(this.http,repoName,accessToken.token,pullNumber);
+                        let pullRequestData = await getPullRequestData(this.http,repoName,accessToken.token,pullNumber);
+                        if(pullRequestData?.serverError || pullRequestComments?.pullRequestData){
+                            if(pullRequestData?.serverError){
+                                const unauthorizedMessageModal = await messageModal({
+                                    message:`🤖 Error Fetching Repository Data: ⚠️ ${pullRequestData?.message}`,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                    uikitcontext: context
+                                })
+                                return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(unauthorizedMessageModal);
+                            }
+                            if(pullRequestComments?.serverError){
+                                const unauthorizedMessageModal = await messageModal({
+                                    message:`🤖 Error Fetching Comments: ⚠️ ${pullRequestData?.message}`,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                    uikitcontext: context
+                                })
+                                return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(unauthorizedMessageModal);
+                            }
+                        }
+                        let data={
+                            repo: repoName,
+                            pullNumber: pullNumber,
+                            pullData: pullRequestData,
+                            pullRequestComments: pullRequestComments?.data
+                        }
+                        const addPRCommentModal = await pullRequestCommentsModal({
                             data:data,
                             modify:this.modify,
                             read:this.read,

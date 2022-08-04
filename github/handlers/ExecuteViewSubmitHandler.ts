@@ -10,8 +10,9 @@ import { getWebhookUrl } from '../helpers/getWebhookURL';
 import { addSubscribedEvents, createSubscription, updateSubscription } from '../helpers/githubSDK';
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
-import { mergePullRequest, addNewPullRequestComment } from '../helpers/githubSDK';
+import { mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments } from '../helpers/githubSDK';
 import { messageModal } from '../modals/messageModal';
+import { pullRequestCommentsModal } from '../modals/pullRequestCommentsModal';
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -171,8 +172,53 @@ export class ExecuteViewSubmitHandler {
                                     return context
                                         .getInteractionResponder()
                                         .openModalViewResponse(unauthorizedMessageModal);
-                                }else{
-                                    await sendNotification(this.read,this.modify,user,room,`New Comment posted to ${repository} pull request #${pullNumber} by ${addCommentResponse?.user?.login} : ${addCommentResponse?.html_url}`)
+                                }else{                               
+                                    let pullRequestComments = await getPullRequestComments(this.http,repository,accessToken.token,pullNumber);
+                                    let pullRequestData = await getPullRequestData(this.http,repository,accessToken.token,pullNumber);
+                                    if(pullRequestData?.serverError || pullRequestComments?.pullRequestData){
+                                        if(pullRequestData?.serverError){
+                                            const unauthorizedMessageModal = await messageModal({
+                                                message:`🤖 Error Fetching Repository Data: ⚠️ ${pullRequestData?.message}`,
+                                                modify: this.modify,
+                                                read: this.read,
+                                                persistence: this.persistence,
+                                                http: this.http,
+                                                uikitcontext: context
+                                            })
+                                            return context
+                                                .getInteractionResponder()
+                                                .openModalViewResponse(unauthorizedMessageModal);
+                                        }
+                                        if(pullRequestComments?.serverError){
+                                            const unauthorizedMessageModal = await messageModal({
+                                                message:`🤖 Error Fetching Comments: ⚠️ ${pullRequestData?.message}`,
+                                                modify: this.modify,
+                                                read: this.read,
+                                                persistence: this.persistence,
+                                                http: this.http,
+                                                uikitcontext: context
+                                            })
+                                            return context
+                                                .getInteractionResponder()
+                                                .openModalViewResponse(unauthorizedMessageModal);
+                                        }
+                                    }
+                                    let data={
+                                        repo: repository,
+                                        pullNumber: pullNumber,
+                                        pullData: pullRequestData,
+                                        pullRequestComments: pullRequestComments?.data
+                                    }
+                                    const addPRCommentModal = await pullRequestCommentsModal({
+                                        data:data,
+                                        modify:this.modify,
+                                        read:this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    await sendNotification(this.read,this.modify,user,room,`New Comment posted to ${repository} pull request #${pullNumber} by ${addCommentResponse?.user?.login} : ${addCommentResponse?.html_url}`);
+                                    await this.modify.getUiController().updateModalView(addPRCommentModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                                 }
                             }
                         }

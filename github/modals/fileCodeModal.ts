@@ -67,28 +67,6 @@ export async function fileCodeModal({
 
     block.addDividerBlock();
 
-    // Adding these will complex the user expereince
-    // block.addActionsBlock({
-    //     elements: [
-    //         block.newButtonElement({
-    //             actionId: ModalsEnum.MERGE_PULL_REQUEST_ACTION,
-    //             text: {
-    //                 text: ModalsEnum.MERGE_PULL_REQUEST_LABEL,
-    //                 type: TextObjectType.PLAINTEXT,
-    //             },
-    //             value: room?.id,
-    //         }),
-    //         block.newButtonElement({
-    //             actionId: ModalsEnum.COMMENT_PR_ACTION,
-    //             text: {
-    //                 text: ModalsEnum.COMMENT_PR_LABEL,
-    //                 type: TextObjectType.PLAINTEXT,
-    //             },
-    //             value: room?.id,
-    //         }),
-    //     ],
-    // });
-
     return {
         id: viewId,
         title: {

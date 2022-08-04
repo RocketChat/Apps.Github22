@@ -64,4 +64,10 @@ export enum ModalsEnum {
     PULL_REQUEST_COMMENT_INPUT_LABEL="Enter Comment",
     PULL_REQUEST_COMMENT_INPUT_PLACEHOLDER="@RonLek can you please reveiw the PR ?",
     PULL_REQUEST_COMMENT_INPUT_ACTION="add-pull-request-comment-input-actions",
+    PULL_REQUEST_COMMENT_VIEW_TITLE="GitHub Comments",
+    PULL_REQUEST_COMMENTS_MODAL_VIEW="pull-request-commments-list-view",
+    PR_COMMENT_LIST_ACTION="pull-request-comment-list-action",
+    PR_COMMENT_LIST_LABEL="Comments",
+    VIEW_USER_ACTION="view-user-action",
+    VIEW_USER_LABEL="User Profile"
 }
