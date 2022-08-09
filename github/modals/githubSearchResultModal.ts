@@ -18,6 +18,8 @@ import {
     storeInteractionRoomData,
     getInteractionRoomData,
 } from "../persistance/roomInteraction";
+import { IGitHubSearchResult } from "../definitions/searchResult";
+import { IGitHubSearchResultData } from "../definitions/searchResultData";
 
 export async function githubSearchResultModal({
     data,
@@ -28,7 +30,7 @@ export async function githubSearchResultModal({
     slashcommandcontext,
     uikitcontext,
 }: {
-    data:any;
+    data:IGitHubSearchResultData;
     modify: IModify;
     read: IRead;
     persistence: IPersistence;
@@ -45,9 +47,10 @@ export async function githubSearchResultModal({
         uikitcontext?.getInteractionData().room;
     const user =
         slashcommandcontext?.getSender() ||
-        uikitcontext?.getInteractionData().user;
+        uikitcontext?.getInteractionData().user ||
+        await read.getUserReader().getById(data?.user_id as string);
 
-    if (user?.id && data?.total_count) {
+    if (user?.id) {
         let roomId;
         if (room?.id) {
             roomId = room.id;
@@ -69,7 +72,7 @@ export async function githubSearchResultModal({
         });
 
         block.addDividerBlock();
-        let searchItems = data?.items;
+        let searchItems = data?.search_results;
         let index = 1;
 
         if(searchItems && Array.isArray(searchItems)){
@@ -85,7 +88,7 @@ export async function githubSearchResultModal({
                 
                 //context block should only have labels section if labels exist on a resource
                 let contextBlockElementsArray = [
-                    block.newPlainTextObject(`User : ${item.user?.login} | `),
+                    block.newPlainTextObject(`User : ${item.user_login} | `),
                     block.newPlainTextObject(`Status: ${item.state} | `),
                 ]
                 if(item?.labels && Array.isArray(item.labels)){
@@ -100,16 +103,8 @@ export async function githubSearchResultModal({
                 block.addContextBlock({
                     elements: contextBlockElementsArray
                 });
-
+                //button click actions can only detected `value:string` hence search results object must be parsed to string and stored in `value` and then reparsed to javascript object in `blockActionHandler` 
                 let actionBlockElementsArray = [
-                    block.newButtonElement({
-                        actionId: ModalsEnum.SHARE_SEARCH_RESULT_ACTION,
-                        text: {
-                            text: ModalsEnum.SHARE_SEARCH_RESULT_LABEL,
-                            type: TextObjectType.PLAINTEXT,
-                        },
-                        value:`[ #${item.number} ](${item?.html_url?.toString()}) *${item.title?.toString()?.trim()}* : ${item?.html_url}`,
-                    }),
                     block.newButtonElement({
                         actionId: ModalsEnum.OPEN_GITHUB_RESULT_ACTION,
                         text: {
@@ -118,10 +113,42 @@ export async function githubSearchResultModal({
                         },
                         url: item?.html_url?.toString()
                     }),
+                    block.newButtonElement({
+                        actionId: ModalsEnum.SHARE_SEARCH_RESULT_ACTION,
+                        text: {
+                            text: ModalsEnum.SHARE_SEARCH_RESULT_LABEL,
+                            type: TextObjectType.PLAINTEXT,
+                        },
+                        value:`[ #${item.number} ](${item?.html_url?.toString()}) *${item.title?.toString()?.trim()}* : ${item?.html_url}`,
+                    }),
                 ]
+                //if item is already is selected to to be shared, we rendered `remove` button, else we render `add` button
+                if(item.share){
+                    actionBlockElementsArray.push(
+                        block.newButtonElement({
+                            actionId: ModalsEnum.MULTI_SHARE_REMOVE_SEARCH_RESULT_ACTION,
+                            text: {
+                                text: ModalsEnum.MULTI_SHARE_REMOVE_SEARCH_RESULT_LABEL,
+                                type: TextObjectType.PLAINTEXT,
+                            },
+                            value: item.result_id as string,
+                        }),
+                    );
+                }else{
+                    actionBlockElementsArray.push(
+                        block.newButtonElement({
+                            actionId: ModalsEnum.MULTI_SHARE_ADD_SEARCH_RESULT_ACTION,
+                            text: {
+                                text: ModalsEnum.MULTI_SHARE_ADD_SEARCH_RESULT_LABEL,
+                                type: TextObjectType.PLAINTEXT,
+                            },
+                            value: item.result_id as string,
+                        }),
+                    );
+                }
                 //if resource is PR we need to show a code changes option and for that we need to destructure the url to find the repository and PR details
                 if(item.pull_request){
-                    let url = item.pull_request?.url as string;
+                    let url = item.pull_request_url as string;
                     if(url){
                         let urlParams = url.split("/");
                         if(urlParams.length>=4){
@@ -156,6 +183,12 @@ export async function githubSearchResultModal({
             type: TextObjectType.PLAINTEXT,
             text: ModalsEnum.SEARCH_VIEW_TITLE,
         },
+        submit: block.newButtonElement({
+            text: {
+                type: TextObjectType.PLAINTEXT,
+                text: "Share",
+            },
+        }),
         close: block.newButtonElement({
             text: {
                 type: TextObjectType.PLAINTEXT,

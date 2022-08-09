@@ -60,8 +60,6 @@ export async function githubSearchModal({
             ).roomId;
         }
 
-        
-
         // shows indentations in input blocks but not inn section block
         block.addInputBlock({
             blockId: ModalsEnum.REPO_NAME_INPUT,

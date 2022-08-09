@@ -66,6 +66,16 @@ export enum ModalsEnum {
     SHARE_SEARCH_RESULT_LABEL="Share",
     OPEN_GITHUB_RESULT_ACTION="open-github-result-action",
     OPEN_GITHUB_RESULT_LABEL="GitHub",
+    MULTI_SHARE_ADD_SEARCH_RESULT_ACTION="github-multishare-search-add-result-action",
+    MULTI_SHARE_ADD_SEARCH_RESULT_LABEL="Add",
+    MULTI_SHARE_REMOVE_SEARCH_RESULT_ACTION="github-multishare-search-remove-result-action",
+    MULTI_SHARE_REMOVE_SEARCH_RESULT_LABEL="Remove",
     VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES='view-github-search-result-pr-changes',
-    VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES_LABEL="View Changes"
+    VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES_LABEL="View Changes",
+    GITHUB_SEARCH_ERROR_VIEW="github-search-error-view",
+    SEARCH_RESULT_SHARE_VIEW_TITLE="GitHub Search",
+    SEARCH_RESULT_SHARE_VIEW="github-search-result-share",
+    MULTI_SHARE_SEARCH_INPUT="multishare-github-search-input",
+    MULTI_SHARE_SEARCH_INPUT_LABEL="Search Results",
+    MULTI_SHARE_SEARCH_INPUT_ACTION="multishare-github-search-input-action",
 }

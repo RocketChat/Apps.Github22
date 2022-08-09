@@ -249,11 +249,22 @@ export async function githubSearchIssuesPulls(
     }
     
     queryString = queryString  + resourceFilter + repositoryFilter + stateFilter + authorsFilter +  labelsFiler + milestonesFilter;
-    queryString = encodeURI(queryString);
+    let ecodedQueryString = encodeURI(queryString);
     
-    return getRequest(
-        http,
-        access_token,
-        BaseApiHost + "search/issues?" + queryString
-    );
+    const response = await http.get(BaseApiHost + "search/issues?" + ecodedQueryString, {
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+    });
+
+    // If it isn't a 2xx code, something wrong happened
+    let resultResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        resultResponse["server_error"] = true;
+    }else{
+        resultResponse["search_query"] = queryString;
+        resultResponse["server_error"] = false;
+    }
+    return resultResponse;
 }

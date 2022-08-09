@@ -11,6 +11,11 @@ import { addSubscribedEvents, createSubscription, updateSubscription, githubSear
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
 import { githubSearchResultModal } from '../modals/githubSearchResultModal';
+import { IGitHubSearchResult } from '../definitions/searchResult';
+import { IGitHubSearchResultData } from '../definitions/searchResultData';
+import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
+import { GithubSearchResultStorage } from '../persistance/searchResults';
+import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
 
 
 export class ExecuteViewSubmitHandler {
@@ -148,26 +153,113 @@ export class ExecuteViewSubmitHandler {
                             }else if (!accessToken) {
                                 await sendNotification(this.read, this.modify, user, room, "Login To Github !");
                             } else {
-                                let data = await githubSearchIssuesPulls(this.http,repository,accessToken.token,resource,resourceState,labelsArray,authorsArray,milestonesArray);
+                                let resultResponse = await githubSearchIssuesPulls(this.http,repository,accessToken.token,resource,resourceState,labelsArray,authorsArray,milestonesArray);
                                 const triggerId= context.getInteractionData().triggerId;
-                                if(triggerId && data){
-                                    const resultsModal = await githubSearchResultModal({
-                                        data,
-                                        modify: this.modify,
-                                        read: this.read,
-                                        persistence: this.persistence,
-                                        http: this.http,
-                                        uikitcontext: context});
-                                    return context
-                                        .getInteractionResponder()
-                                        .openModalViewResponse(resultsModal);
+                                if(triggerId && resultResponse?.server_error === false){
+
+                                    let total_count = resultResponse?.total_count;
+                                    let searchItems = resultResponse?.items;
+                                    let searchResultsList : Array<IGitHubSearchResult> = [];
+                                    if(searchItems && Array.isArray(searchItems)){
+                                        for (let item of searchItems) {
+                                            let resultId = item?.id
+                                            let title = item?.title;
+                                            let number = item?.number;
+                                            let html_url = item?.html_url;
+                                            let user_login = item?.user?.login;
+                                            let state = item?.state;
+                                            let labelString = "";
+                                            if(item?.labels && Array.isArray(item.labels)){
+                                                for(let label of item.labels){
+                                                    labelString += `${label.name} `
+                                                }
+                                            }
+                                            let resultString = `[ #${item.number} ](${item?.html_url?.toString()}) *${item.title?.toString()?.trim()}* : ${item?.html_url}`;
+                                            let pull_request = (item?.pull_request) ? true : false;
+                                            let pull_request_url = item.pull_request?.url as string;
+                                            let searchResultItem: IGitHubSearchResult = {
+                                                result_id:resultId,
+                                                title:title,
+                                                html_url:html_url,
+                                                number:number,
+                                                result:resultString,
+                                                state:state,
+                                                share:false,
+                                                user_login:user_login,
+                                                labels:labelString,
+                                                pull_request:pull_request,
+                                                pull_request_url:pull_request_url
+                                            }
+                                            searchResultsList.push(searchResultItem);
+                                        }
+                                        let githubSearchResult: IGitHubSearchResultData={
+                                            room_id:room.id,
+                                            user_id:user.id,
+                                            search_query:resultResponse.search_query,
+                                            total_count:total_count,
+                                            search_results:searchResultsList
+                                        }
+                                        let githubSearchStorage = new GithubSearchResultStorage(this.persistence,this.read.getPersistenceReader());
+                                        await githubSearchStorage.updateSearchResult(room,user,githubSearchResult);
+                                        const resultsModal = await githubSearchResultModal({
+                                            data: githubSearchResult,
+                                            modify: this.modify,
+                                            read: this.read,
+                                            persistence: this.persistence,
+                                            http: this.http,
+                                            uikitcontext: context});
+                                        return context
+                                            .getInteractionResponder()
+                                            .openModalViewResponse(resultsModal);
+                                    }
                                 }else{
-                                    console.log("Inavlid Trigger ID !");
+                                    const searchErrorModal =await githubSearchErrorModal({
+                                        errorMessage:resultResponse.message,
+                                        modify:this.modify,
+                                        read:this.read,
+                                        uikitcontext:context
+                                    })
+                                    return context
+                                            .getInteractionResponder()
+                                            .openModalViewResponse(searchErrorModal);
                                 }
                             }
                         }
                     }
                     break;
+                }
+                case ModalsEnum.SEARCH_RESULT_VIEW:{
+                    if (user.id) {
+                        const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            let githubSearchStorage = new GithubSearchResultStorage(this.persistence,this.read.getPersistenceReader());
+                            let searchResults = await githubSearchStorage.getSearchResults(roomId,user);
+                            if(searchResults){
+                                const searchResultShareModal = await githubSearchResultShareModal({
+                                    data: searchResults,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                    uikitcontext: context
+                                });
+                                return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(searchResultShareModal);
+                            }
+                        }
+                    }
+                }
+                case ModalsEnum.SEARCH_RESULT_SHARE_VIEW:{
+                    if (user.id) {
+                        const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            let searchResult: string|undefined = view.state?.[ ModalsEnum.MULTI_SHARE_SEARCH_INPUT]?.[ModalsEnum.MULTI_SHARE_SEARCH_INPUT_ACTION];
+                            await sendMessage(this.modify,room,user,searchResult as string);
+                        }
+                    }
                 }
                 default:
                     break;

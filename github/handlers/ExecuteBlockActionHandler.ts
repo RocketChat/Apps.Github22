@@ -25,6 +25,10 @@ import { storeInteractionRoomData, getInteractionRoomData } from "../persistance
 import { sendMessage, sendNotification } from "../lib/message";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
+import { IGitHubSearchResult } from "../definitions/searchResult";
+import { GithubSearchResultStorage } from "../persistance/searchResults";
+import { IGitHubSearchResultData } from "../definitions/searchResultData";
+import { githubSearchResultModal } from "../modals/githubSearchResultModal";
 export class ExecuteBlockActionHandler {
     constructor(
         private readonly app: GithubApp,
@@ -239,6 +243,94 @@ export class ExecuteBlockActionHandler {
                             room = await this.read.getRoomReader().getById(roomId) as IRoom;
                             await sendMessage(this.modify,room,user,`${value}`);
                         }
+                    }
+                    break;
+                }
+                case ModalsEnum.MULTI_SHARE_ADD_SEARCH_RESULT_ACTION:{
+                    let { user, room } = await context.getInteractionData();
+                    let searchResultId: string = context.getInteractionData().value as string;
+                    let roomId:string="";
+                    if(user?.id){
+                        if(room?.id){
+                            roomId = room.id;
+                        }else{
+                            roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        }
+                        let githubSearchStorage = new GithubSearchResultStorage(this.persistence,this.read.getPersistenceReader());
+                            let searchResultData: IGitHubSearchResultData = await githubSearchStorage.getSearchResults(room?.id as string,user);
+                            if(searchResultData?.search_results?.length){
+                                let index = -1;
+                                let currentIndex = 0;
+                                for(let searchResult of searchResultData.search_results){
+                                    if(searchResult.result_id == searchResultId ){
+                                        index=currentIndex;
+                                        break;
+                                    }
+                                    currentIndex++;
+                                }
+                                if(index !== -1){
+                                    searchResultData.search_results[index].share=true;
+                                    await githubSearchStorage.updateSearchResult(room as IRoom,user,searchResultData);
+                                }
+                                const resultsModal = await githubSearchResultModal({
+                                    data: searchResultData,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                })
+                                await this.modify.getUiController().updateModalView(resultsModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                            }
+                    }
+                    break;
+                }
+                case ModalsEnum.MULTI_SHARE_REMOVE_SEARCH_RESULT_ACTION:{
+                    let { user, room } = await context.getInteractionData();
+                    let searchResultId: string = context.getInteractionData().value as string;
+                    let roomId="";
+                    if(user?.id && searchResultId){
+                        if(room?.id){
+                            roomId = room.id;
+                        }else{
+                            roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        }
+                        let githubSearchStorage = new GithubSearchResultStorage(this.persistence,this.read.getPersistenceReader());
+                            let searchResultData: IGitHubSearchResultData = await githubSearchStorage.getSearchResults(room?.id as string,user);
+                            if(searchResultData?.search_results?.length){
+                                let index = -1;
+                                let currentIndex = 0;
+                                for(let searchResult of searchResultData.search_results){
+                                    if(searchResult.result_id == searchResultId){
+                                        index=currentIndex;
+                                        break;
+                                    }
+                                    currentIndex++;
+                                }
+                                if(index !== -1){
+                                    searchResultData.search_results[index].share=false;
+                                    await githubSearchStorage.updateSearchResult(room as IRoom,user,searchResultData);
+                                }
+                                const resultsModal = await githubSearchResultModal({
+                                    data: searchResultData,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                })
+                                await this.modify.getUiController().updateModalView(resultsModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                            }
                     }
                     break;
                 }
