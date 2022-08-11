@@ -48,7 +48,7 @@ export async function issueListMessage({
                 .getCreator()
                 .startMessage()
                 .setText(
-                    `[ #${issue.number} ](${issue.html_url})  *${issue.title}*`
+                    `[ #${issue.number} ](${issue.html_url})  *[${issue.title}](${issue.html_url})*`
                 );
             if (room) {
                 textSender.setRoom(room);

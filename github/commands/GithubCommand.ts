@@ -8,7 +8,6 @@ import {
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
-import { ProcessorsEnum } from "../enum/Processors";
 import { GithubApp } from "../GithubApp";
 import { initiatorMessage } from "../lib/initiatorMessage";
 import { helperMessage } from "../lib/helperMessage";
@@ -17,16 +16,14 @@ import { pullDetailsModal } from "../modals/pullDetailsModal";
 import { authorize } from "../oath2/authentication";
 import { SubcommandEnum } from "../enum/Subcommands";
 import { getAccessTokenForUser,revokeUserAccessToken } from "../persistance/auth";
-import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { removeToken } from "../persistance/auth";
 import { getWebhookUrl } from "../helpers/getWebhookURL";
 import { githubWebHooks } from "../endpoints/githubEndpoints";
 import { sendDirectMessage, sendNotification } from "../lib/message";
 import { createSubscription, deleteSubscription, updateSubscription } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
-import { ISubscription } from "../definitions/subscription";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { githubSearchModal } from "../modals/githubSearchModal"
+import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -101,13 +98,12 @@ export class GithubCommand implements ISlashCommand {
                             }
                             break;
                         } 
-                        case SubcommandEnum.SEARCH :{
-                            //modal
+                        case SubcommandEnum.NEW_ISSUE :{
                             let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
                             if(accessToken && accessToken.token){
                                 const triggerId= context.getTriggerId();
                                 if(triggerId){
-                                    const modal = await githubSearchModal({modify,read,persistence,http,slashcommandcontext:context});
+                                    const modal = await NewIssueStarterModal({modify,read,persistence,http,slashcommandcontext:context});
                                     await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
                                 }else{
                                     console.log("Inavlid Trigger ID !");
@@ -116,7 +112,7 @@ export class GithubCommand implements ISlashCommand {
                                 await sendNotification(read,modify,context.getSender(),room,"Login to subscribe to repository events ! `/github login`");
                             }
                             break;
-                        } 
+                        }
                         default:{
                             await helperMessage({room,read, persistence, modify, http});
                             break;

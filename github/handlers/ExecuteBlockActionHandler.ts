@@ -16,7 +16,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription, updateSubscription } from "../helpers/githubSDK";
+import { deleteSubscription, updateSubscription, getIssueTemplateCode } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -29,6 +29,7 @@ import { IGitHubSearchResult } from "../definitions/searchResult";
 import { GithubSearchResultStorage } from "../persistance/searchResults";
 import { IGitHubSearchResultData } from "../definitions/searchResultData";
 import { githubSearchResultModal } from "../modals/githubSearchResultModal";
+import { NewIssueModal } from "../modals/newIssueModal";
 export class ExecuteBlockActionHandler {
     constructor(
         private readonly app: GithubApp,
@@ -184,7 +185,61 @@ export class ExecuteBlockActionHandler {
                     await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     break;
                 }
-                case ModalsEnum.SHARE_SEARCH_RESULT_ACTION:{
+                case ModalsEnum.ISSUE_TEMPLATE_SELECTION_ACTION:{
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    let value: string = context.getInteractionData().value as string;
+                    let actionDetailsArray = value?.trim()?.split(" ");
+                    if(accessToken && actionDetailsArray?.length == 2){
+
+                        if(actionDetailsArray[1] !== ModalsEnum.BLANK_GITHUB_TEMPLATE){
+
+                            let templateResponse = await getIssueTemplateCode(this.http,actionDetailsArray[1],accessToken.token);
+                            // console.log(templateResponse);
+                            let data = {};
+                            if(templateResponse?.template){
+                                data = {
+                                    template : templateResponse.template,
+                                    repository:actionDetailsArray[0]
+                                };
+                            }else{
+                                data = {
+                                    template : "",
+                                    repository:actionDetailsArray[0]
+                                };
+                            }
+                            const newIssueModal = await NewIssueModal({
+                                data,
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context,
+                            });
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(newIssueModal);
+
+                        }else{
+                            let data = {
+                                repository:actionDetailsArray[0]
+                            };
+                            const newIssueModal = await NewIssueModal({
+                                data,
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context,
+                            });
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(newIssueModal);
+                        }
+                    }
+                    break;
+                }
+                                case ModalsEnum.SHARE_SEARCH_RESULT_ACTION:{
                     let { user, room } = await context.getInteractionData();
                     let value: string = context.getInteractionData().value as string;
                     if(user?.id){

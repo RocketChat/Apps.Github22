@@ -175,6 +175,77 @@ export async function removeSubscribedEvents(
         }
     );
 }
+export async function createNewIssue(
+    http: IHttp,
+    repoName: string,
+    issueTitle: string,
+    issueBody: string,
+    issueLabels: Array<string>,
+    issueAssignees : Array<string>,
+    access_token: string,
+) {
+    return postReqeust(http, access_token, BaseApiHost + repoName + "/issues", {
+        title: issueTitle,
+        body: issueBody,
+        assignees: issueAssignees,
+        labels: issueLabels
+    });
+}
+
+export async function getIssueTemplates(
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+) {
+    //this does not use the get , post , patch method defined because we dont want to throw an error for an eror response
+    const response = await http.get(`https://api.github.com/repos/${repoName}/contents/.github/ISSUE_TEMPLATE/`, {
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        }
+    });
+
+    // If it isn't a 2xx code, something wrong happened
+    let repsonseJSON :any =  {};
+    if (!response.statusCode.toString().startsWith("2")) {
+        repsonseJSON["template_not_found"] = true;
+    }else{
+        repsonseJSON = {
+            templates : JSON.parse(response.content || "{}"),
+            repository: repoName,
+            template_not_found : false
+        }
+    }
+    return repsonseJSON;
+}
+
+export async function getIssueTemplateCode(
+    http: IHttp,
+    templateDownloadUrl: string,
+    access_token: string,
+) {
+    //this does not use the get , post , patch method defined because we dont want to throw an error for an eror response
+    const response = await http.get(templateDownloadUrl, {
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        }
+    });
+
+    // If it isn't a 2xx code, something wrong happened
+    let repsonseJSON :any =  {};
+
+    if (!response.statusCode.toString().startsWith("2")) {
+        repsonseJSON = {
+            template : ""
+        }
+    }else{
+        repsonseJSON = {
+            template : response.content || "",
+        }
+    }
+    return repsonseJSON;
+}
 
 export async function githubSearchIssuesPulls(
     http: IHttp,
