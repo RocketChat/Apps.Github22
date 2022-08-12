@@ -239,7 +239,7 @@ export class ExecuteBlockActionHandler {
                     }
                     break;
                 }
-                                case ModalsEnum.SHARE_SEARCH_RESULT_ACTION:{
+                case ModalsEnum.SHARE_SEARCH_RESULT_ACTION:{
                     let { user, room } = await context.getInteractionData();
                     let value: string = context.getInteractionData().value as string;
                     if(user?.id){

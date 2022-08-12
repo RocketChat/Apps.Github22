@@ -6,5 +6,5 @@ export enum SubcommandEnum {
     UNSUBSCRIBE = 'unsubscribe',
     TEST = 'test',
     SEARCH = 'search',
-    NEW_ISSUE = 'issue
+    NEW_ISSUE = 'issue',
 }

@@ -113,6 +113,22 @@ export class GithubCommand implements ISlashCommand {
                             }
                             break;
                         }
+                        case SubcommandEnum.SEARCH :{
+                            //modal
+                            let accessToken = await getAccessTokenForUser(read,context.getSender(),this.app.oauth2Config);
+                            if(accessToken && accessToken.token){
+                                const triggerId= context.getTriggerId();
+                                if(triggerId){
+                                    const modal = await githubSearchModal({modify,read,persistence,http,slashcommandcontext:context});
+                                    await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+                                }else{
+                                    console.log("Inavlid Trigger ID !");
+                                }
+                            }else{
+                                await sendNotification(read,modify,context.getSender(),room,"Login to subscribe to repository events ! `/github login`");
+                            }
+                            break;
+                        } 
                         default:{
                             await helperMessage({room,read, persistence, modify, http});
                             break;
