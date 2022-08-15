@@ -5,9 +5,12 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IApp } from "@rocket.chat/apps-engine/definition/IApp";
+import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { UIKitViewCloseInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { ModalsEnum } from "../enum/Modals";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
+import { storeInteractionRoomData, clearInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
+import { GithubSearchResultStorage } from "../persistance/searchResults";
 
 export class ExecuteViewClosedHandler {
     constructor(
@@ -22,10 +25,7 @@ export class ExecuteViewClosedHandler {
         const { view } = context.getInteractionData();
         switch (view.id) {
             case ModalsEnum.PULL_VIEW ||
-                ModalsEnum.CODE_VIEW ||
-                ModalsEnum.ADD_SUBSCRIPTION_VIEW ||
-                ModalsEnum.NEW_ISSUE_VIEW ||
-                ModalsEnum.SUBSCRIPTION_VIEW:
+                 ModalsEnum.CODE_VIEW:
                 const modal = await pullDetailsModal({
                     modify: this.modify,
                     read: this.read,
@@ -42,6 +42,29 @@ export class ExecuteViewClosedHandler {
                     context.getInteractionData().user
                 );
                 break;
+            case ModalsEnum.SEARCH_RESULT_VIEW:{
+                const room = context.getInteractionData().room;
+                const user = context.getInteractionData().user;
+        
+                if (user?.id) {
+                    let roomId;
+            
+                    if (room?.id) {
+                        roomId = room.id;
+                        await storeInteractionRoomData(this.persistence, user.id, roomId);
+                    } else {
+                        roomId = (
+                            await getInteractionRoomData(
+                                this.read.getPersistenceReader(),
+                                user.id
+                            )
+                        ).roomId;
+                    }
+                    let githubSearchStorage = new GithubSearchResultStorage(this.persistence,this.read.getPersistenceReader());
+                    await githubSearchStorage.deleteSearchResults(roomId,user);
+                }
+                break;
+            }
         }
         return { success: true } as any;
     }
