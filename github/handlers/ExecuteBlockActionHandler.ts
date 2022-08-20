@@ -16,19 +16,25 @@ import {
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription, getPullRequestComments, getPullRequestData, updateSubscription } from "../helpers/githubSDK";
+import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
 import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
-import { sendNotification } from "../lib/message";
+import { sendMessage, sendNotification } from "../lib/message";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { mergePullRequestModal } from "../modals/mergePullReqeustModal";
 import { messageModal } from "../modals/messageModal";
 import { getRepoData } from "../helpers/githubSDK";
 import { addPullRequestCommentsModal } from "../modals/addPullRequestCommentsModal";
 import { pullRequestCommentsModal } from "../modals/pullRequestCommentsModal";
+import { pullDetailsModal } from "../modals/pullDetailsModal";
+import { IGitHubSearchResult } from "../definitions/searchResult";
+import { GithubSearchResultStorage } from "../persistance/searchResults";
+import { IGitHubSearchResultData } from "../definitions/searchResultData";
+import { githubSearchResultModal } from "../modals/githubSearchResultModal";
+import { NewIssueModal } from "../modals/newIssueModal";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -130,7 +136,6 @@ export class ExecuteBlockActionHandler {
                 }
                 case ModalsEnum.DELETE_SUBSCRIPTION_ACTION: {
 
-
                     let { user, room } = await context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                     let value: string = context.getInteractionData().value as string;
@@ -184,6 +189,210 @@ export class ExecuteBlockActionHandler {
                 case ModalsEnum.SUBSCRIPTION_REFRESH_ACTION:{
                     const modal = await subsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                     await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                    break;
+                }
+                case ModalsEnum.ISSUE_TEMPLATE_SELECTION_ACTION:{
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    let value: string = context.getInteractionData().value as string;
+                    let actionDetailsArray = value?.trim()?.split(" ");
+                    if(accessToken && actionDetailsArray?.length == 2){
+
+                        if(actionDetailsArray[1] !== ModalsEnum.BLANK_GITHUB_TEMPLATE){
+
+                            let templateResponse = await getIssueTemplateCode(this.http,actionDetailsArray[1],accessToken.token);
+                            // console.log(templateResponse);
+                            let data = {};
+                            if(templateResponse?.template){
+                                data = {
+                                    template : templateResponse.template,
+                                    repository:actionDetailsArray[0]
+                                };
+                            }else{
+                                data = {
+                                    template : "",
+                                    repository:actionDetailsArray[0]
+                                };
+                            }
+                            const newIssueModal = await NewIssueModal({
+                                data,
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context,
+                            });
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(newIssueModal);
+
+                        }else{
+                            let data = {
+                                repository:actionDetailsArray[0]
+                            };
+                            const newIssueModal = await NewIssueModal({
+                                data,
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context,
+                            });
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(newIssueModal);
+                        }
+                    }
+                    break;
+                }
+                case ModalsEnum.SHARE_SEARCH_RESULT_ACTION:{
+                    let { user, room } = await context.getInteractionData();
+                    let value: string = context.getInteractionData().value as string;
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify,room,user,`${value}`);
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify,room,user,`${value}`);
+                        }
+                    }
+                    break;
+                }
+                case ModalsEnum.VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES:{
+                    let { user, room } = await context.getInteractionData();
+                    let value: string = context.getInteractionData().value as string;
+                    let PullRequestDetails = value.split(" ");
+                    if(PullRequestDetails.length==2){
+                        const triggerId= context.getInteractionData().triggerId;
+                        const data = {
+                            repository:PullRequestDetails[0],
+                            query:"pulls",
+                            number:PullRequestDetails[1]
+                        }
+                        if(triggerId && data){
+                            const resultsModal = await pullDetailsModal({
+                                data,
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context
+                            });
+                            return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(resultsModal);
+                        }else{
+                            console.log("Inavlid Trigger ID !");
+                        }
+                    }
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify,room,user,`${value}`);
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify,room,user,`${value}`);
+                        }
+                    }
+                    break;
+                }
+                case ModalsEnum.MULTI_SHARE_ADD_SEARCH_RESULT_ACTION:{
+                    let { user, room } = await context.getInteractionData();
+                    let searchResultId: string = context.getInteractionData().value as string;
+                    let roomId:string="";
+                    if(user?.id){
+                        if(room?.id){
+                            roomId = room.id;
+                        }else{
+                            roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        }
+                        let githubSearchStorage = new GithubSearchResultStorage(this.persistence,this.read.getPersistenceReader());
+                            let searchResultData: IGitHubSearchResultData = await githubSearchStorage.getSearchResults(room?.id as string,user);
+                            if(searchResultData?.search_results?.length){
+                                let index = -1;
+                                let currentIndex = 0;
+                                for(let searchResult of searchResultData.search_results){
+                                    if(searchResult.result_id == searchResultId ){
+                                        index=currentIndex;
+                                        break;
+                                    }
+                                    currentIndex++;
+                                }
+                                if(index !== -1){
+                                    searchResultData.search_results[index].share=true;
+                                    await githubSearchStorage.updateSearchResult(room as IRoom,user,searchResultData);
+                                }
+                                const resultsModal = await githubSearchResultModal({
+                                    data: searchResultData,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                })
+                                await this.modify.getUiController().updateModalView(resultsModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                            }
+                    }
+                    break;
+                }
+                case ModalsEnum.MULTI_SHARE_REMOVE_SEARCH_RESULT_ACTION:{
+                    let { user, room } = await context.getInteractionData();
+                    let searchResultId: string = context.getInteractionData().value as string;
+                    let roomId="";
+                    if(user?.id && searchResultId){
+                        if(room?.id){
+                            roomId = room.id;
+                        }else{
+                            roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        }
+                        let githubSearchStorage = new GithubSearchResultStorage(this.persistence,this.read.getPersistenceReader());
+                            let searchResultData: IGitHubSearchResultData = await githubSearchStorage.getSearchResults(room?.id as string,user);
+                            if(searchResultData?.search_results?.length){
+                                let index = -1;
+                                let currentIndex = 0;
+                                for(let searchResult of searchResultData.search_results){
+                                    if(searchResult.result_id == searchResultId){
+                                        index=currentIndex;
+                                        break;
+                                    }
+                                    currentIndex++;
+                                }
+                                if(index !== -1){
+                                    searchResultData.search_results[index].share=false;
+                                    await githubSearchStorage.updateSearchResult(room as IRoom,user,searchResultData);
+                                }
+                                const resultsModal = await githubSearchResultModal({
+                                    data: searchResultData,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                })
+                                await this.modify.getUiController().updateModalView(resultsModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                            }
+                    }
                     break;
                 }
                 case ModalsEnum.MERGE_PULL_REQUEST_ACTION:{
@@ -310,7 +519,6 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
             }
-
         } catch (error) {
             console.log(error);
         }

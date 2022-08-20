@@ -29,9 +29,12 @@ export async function helperMessage({
     5) Get Recent Pull Request of a Repository -> /github  Username/RepositoryName pulls
     6) Review a Pull Request -> /github  Username/RepositoryName pulls pullNumber
     7) Login to GitHub -> /github login
-    8) View/Add/Delete/Update Repository Subscriptions -> /github subscribe 
-    9) Subscribe to all repository events -> /github Username/RepositoryName subscribe
-    10) Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe
+    8) Logout from GitHub -> /github logout
+    9) View/Add/Delete/Update Repository Subscriptions -> /github subscribe 
+    10) Subscribe to all repository events -> /github Username/RepositoryName subscribe
+    11) Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe
+    12) Add New Issues to GitHub Repository -> /github issue
+    13) Search Issues and Pull Requests -> /github search
     
     `;
 
