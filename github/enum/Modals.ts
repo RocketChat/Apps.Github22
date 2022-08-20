@@ -69,7 +69,7 @@ export enum ModalsEnum {
     PR_COMMENT_LIST_ACTION="pull-request-comment-list-action",
     PR_COMMENT_LIST_LABEL="Comments",
     VIEW_USER_ACTION="view-user-action",
-    VIEW_USER_LABEL="User Profile"
+    VIEW_USER_LABEL="User Profile",
     SEARCH_VIEW="search-view",
     SEARCH_VIEW_TITLE="GitHub Search",
     GITHUB_SEARCH_ACTION = "github-search-action",
