@@ -102,5 +102,7 @@ export enum ModalsEnum {
     ISSUE_TEMPLATE_SELECTION_VIEW= "issue-template-selection-view",
     ISSUE_TEMPLATE_SELECTION_ACTION = "issue-template-selection-action",
     ISSUE_TEMPLATE_SELECTION_LABEL = "Select",
-    BLANK_GITHUB_TEMPLATE = "blank-github-app-template"
+    BLANK_GITHUB_TEMPLATE = "blank-github-app-template",
+    GITHUB_ISSUES_STARTER_VIEW = "github-issues-starter-view",
+    GITHUB_ISSUES_TITLE = "GitHub Issues", 
 }
