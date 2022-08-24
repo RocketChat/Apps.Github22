@@ -328,7 +328,6 @@ export async function githubSearchIssuesPulls(
             "Content-Type": "application/json",
         },
     });
-
     // If it isn't a 2xx code, something wrong happened
     let resultResponse = JSON.parse(response.content || "{}");
     if (!response.statusCode.toString().startsWith("2")) {
@@ -338,6 +337,140 @@ export async function githubSearchIssuesPulls(
         resultResponse["server_error"] = false;
     }
     return resultResponse;
+}
+
+export async function getRepoData( 
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+) {
+    const response = await http.get(`https://api.github.com/repos/${repoName}`,{
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        }
+    });
+
+    // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    }else{
+        JSONResponse["serverError"] = false;
+    }
+
+    return JSONResponse;
+}
+
+export async function mergePullRequest( 
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    pullRequestNumber: string|number,
+    commitTitle: string,
+    commitMessage: string,
+    method:string,
+) {
+    let data = {};
+    if(commitTitle?.length){
+        data["commit_title"] = commitTitle;
+    }
+    if(commitMessage?.length){
+        data["commit_message"] = commitMessage;
+    }
+    if(method?.length){
+        data["merge_method"] = method;
+    }
+    const response = await http.put(`https://api.github.com/repos/${repoName}/pulls/${pullRequestNumber}/merge`,{
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+        data
+    });
+     // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    }else{
+        JSONResponse["serverError"] = false;
+    }
+
+    return JSONResponse;
+}
+
+export async function addNewPullRequestComment( 
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    pullRequestNumber: string|number,
+    newComment: string,
+) {
+    let data = {
+        body : newComment,
+    }
+    const response = await http.post(`https://api.github.com/repos/${repoName}/issues/${pullRequestNumber}/comments`,{
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+        data
+    });
+     // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    }else{
+        JSONResponse["serverError"] = false;
+    }
+
+    return JSONResponse;
+}
+
+export async function getPullRequestComments( 
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    pullRequestNumber: string|number,
+) {
+    const response = await http.get(`https://api.github.com/repos/${repoName}/issues/${pullRequestNumber}/comments`,{
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+    });
+     // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse("{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse = JSON.parse(response.content || "{}");
+        JSONResponse["serverError"] = true;
+    }else{
+        JSONResponse["data"] = JSON.parse(response.content || "[]");
+        JSONResponse["serverError"] = false;
+    }
+    return JSONResponse;
+}
+
+export async function getPullRequestData( 
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    pullRequestNumber: string|number,
+) {
+    const response = await http.get(`https://api.github.com/repos/${repoName}/pulls/${pullRequestNumber}`,{
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+    });
+     // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    }else{
+        JSONResponse["serverError"] = false;
+    }
+    return JSONResponse;
 }
 
 export async function getRepositoryIssues(

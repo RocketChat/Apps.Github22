@@ -9,16 +9,15 @@ import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { ModalsEnum } from "../enum/Modals";
 import { AppEnum } from "../enum/App";
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
+import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 
-
-export async function fileCodeModal({
-    data,
+export async function messageModal({
+    message,
     modify,
     read,
     persistence,
@@ -26,7 +25,7 @@ export async function fileCodeModal({
     slashcommandcontext,
     uikitcontext,
 }: {
-    data;
+    message:string;
     modify: IModify;
     read: IRead;
     persistence: IPersistence;
@@ -34,39 +33,18 @@ export async function fileCodeModal({
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
 }): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.CODE_VIEW;
+    const viewId = ModalsEnum.MESSAGE_MODAL_VIEW;
 
     const block = modify.getCreator().getBlockBuilder();
 
-    const room =
-        slashcommandcontext?.getRoom() ||
-        uikitcontext?.getInteractionData().room;
-    const user =
-        slashcommandcontext?.getSender() ||
-        uikitcontext?.getInteractionData().user;
-
-    if (user?.id) {
-        let roomId;
-        const pullRawData = await http.get(data.value);
-        const pullData = pullRawData.content;
-        block.addSectionBlock({
-            text: { text: `${pullData}`, type: TextObjectType.MARKDOWN },
-        });
-
-        // shows indentations in input blocks but not inn section block
-        // block.addInputBlock({
-        //     blockId: ModalsEnum.CODE_VIEW,
-        //     label: { text: ModalsEnum.CODE_VIEW_LABEL, type: TextObjectType.PLAINTEXT },
-        //     element: block.newPlainTextInputElement({
-        //         initialValue : `${pullData}`,
-        //         multiline:true,
-        //         actionId: ModalsEnum.CODE_INPUT,
-        //     })
-        // });
-    }
-
-    block.addDividerBlock();
-
+    block.addSectionBlock({
+        text: {
+            text: `*${message}*`,
+            type: TextObjectType.MARKDOWN,
+            emoji:true,
+        },
+    });
+    
     return {
         id: viewId,
         title: {
