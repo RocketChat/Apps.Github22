@@ -332,6 +332,37 @@ export class ExecuteViewSubmitHandler {
                         }
                     }
                 }
+                case ModalsEnum.GITHUB_ISSUES_STARTER_VIEW:{
+                    const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if (!accessToken) {
+                                
+                                
+
+                            }else{
+                                
+                                repository=repository?.trim();
+                                let response = await getIssueTemplates(this.http,repository,accessToken.token);
+                                if((!response.template_not_found) && response?.templates?.length){
+                                    const issueTemplateSelection = await issueTemplateSelectionModal({ data: response, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                                    return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(issueTemplateSelection);
+                                }else{
+                                    let data = {
+                                        repository: repository
+                                    }
+                                    const createNewIssue = await NewIssueModal({ data: data, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                                    return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(createNewIssue);
+                                }
+                            }
+                        } 
+                    break;
+                }
                 default:
                     break;
             }

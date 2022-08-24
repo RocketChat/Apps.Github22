@@ -339,3 +339,75 @@ export async function githubSearchIssuesPulls(
     }
     return resultResponse;
 }
+
+export async function getRepositoryIssues(
+    http: IHttp,
+    repoName: string,
+    access_token?: string,
+) {
+    //this does not use the get , post , patch method defined because we dont want to throw an error for an eror response
+    let response:any;
+
+    if(access_token){
+        response = await http.get(BaseRepoApiHost + repoName +"/issues", {
+            headers: {
+                Authorization: `token ${access_token}`,
+                "Content-Type": "application/json",
+            }
+        });
+    }else{
+        response = await http.get(BaseRepoApiHost + repoName +"/issues", {
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+    }
+    let repsonseJSON :any =  {};
+    // If it isn't a 2xx code, something wrong happened
+    if (!response.statusCode.toString().startsWith("2")) {
+        repsonseJSON = JSON.parse(response.content || "{}");
+        repsonseJSON['template_not_found'] = true;
+    }else{
+        repsonseJSON = {
+            issues : JSON.parse(response.content || "{}"),
+            repository: repoName,
+            template_not_found : false
+        }
+    }
+    return repsonseJSON;
+}
+
+export async function updateIssueAssignees(
+    http: IHttp,
+    repoName: string,
+    assignees: Array<string>,
+    issueNumber: string|number,
+    access_token: string,
+) {
+    //this does not use the get , post , patch method defined because we dont want to throw an error for an eror response
+    let response:any;
+    let data = {
+        assignees:assignees
+    }
+    
+    response = await http.patch(BaseRepoApiHost + repoName +`/issues/${issueNumber}`, {
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+        data
+    });
+    let repsonseJSON :any =  {};
+    // If it isn't a 2xx code, something wrong happened
+    if (!response.statusCode.toString().startsWith("2")) {
+        repsonseJSON = JSON.parse(response.content || "{}");
+        repsonseJSON['serverError'] = true;
+    }else{
+        repsonseJSON = {
+            issue: JSON.parse(response.content || "{}"),
+            repository: repoName,
+            serverError: false
+        }
+    }
+    return repsonseJSON;
+}
