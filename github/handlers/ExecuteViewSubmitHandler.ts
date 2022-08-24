@@ -9,13 +9,15 @@ import { GithubApp } from '../GithubApp';
 import { getWebhookUrl } from '../helpers/getWebhookURL';
 import { getAccessTokenForUser } from '../persistance/auth';
 import { subsciptionsModal } from '../modals/subscriptionsModal';
+import { messageModal } from '../modals/messageModal';
+import { pullRequestCommentsModal } from '../modals/pullRequestCommentsModal';
 import { githubSearchResultModal } from '../modals/githubSearchResultModal';
 import { IGitHubSearchResult } from '../definitions/searchResult';
 import { IGitHubSearchResultData } from '../definitions/searchResultData';
 import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
-import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments} from '../helpers/githubSDK';
 import { NewIssueModal } from '../modals/newIssueModal';
 import { issueTemplateSelectionModal } from '../modals/issueTemplateSelectionModal';
 
@@ -332,10 +334,132 @@ export class ExecuteViewSubmitHandler {
                         }
                     }
                 }
+                case ModalsEnum.MERGE_PULL_REQUEST_VIEW:{
+                    if (user.id) {
+                        const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            const repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION];
+                            const pullNumber = view.state?.[ModalsEnum.PULL_REQUEST_NUMBER_INPUT]?.[ModalsEnum.PULL_REQUEST_NUMBER_INPUT_ACTION];
+                            const commitTitle = view.state?.[ModalsEnum.PULL_REQUEST_COMMIT_TITLE_INPUT]?.[ModalsEnum.PULL_REQUEST_COMMIT_TITLE_ACTION];
+                            const commitMessage = view.state?.[ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_INPUT]?.[ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_ACTION];
+                            const mergeMethod = view.state?.[ModalsEnum.PULL_REQUEST_MERGE_METHOD_INPUT]?.[ModalsEnum.PULL_REQUEST_MERGE_METHOD_OPTION];
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if(accessToken?.token){
+                                let mergeResponse = await mergePullRequest(this.http,repository,accessToken.token,pullNumber,commitTitle,commitMessage,mergeMethod);
+                                if(mergeResponse?.serverError){
+                                    let errorMessage = mergeResponse?.message;
+                                    const unauthorizedMessageModal = await messageModal({
+                                        message:`🤖 Unable to merge pull request : ⚠️ ${errorMessage}`,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(unauthorizedMessageModal);
+                                }else{
+                                    let succesMessage = mergeResponse?.message;
+                                    const succesMessageModal = await messageModal({
+                                        message:`🤖 Merged Pull Request  : ✔️ ${succesMessage}`,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(succesMessageModal);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+                case ModalsEnum.ADD_PULL_REQUEST_COMMENT_VIEW:{
+                    if (user.id) {
+                        const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            const repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION];
+                            const pullNumber = view.state?.[ModalsEnum.PULL_REQUEST_NUMBER_INPUT]?.[ModalsEnum.PULL_REQUEST_NUMBER_INPUT_ACTION];
+                            const newComment = view.state?.[ModalsEnum.PULL_REQUEST_COMMENT_INPUT]?.[ModalsEnum.PULL_REQUEST_COMMENT_INPUT_ACTION];
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if(accessToken?.token && repository?.length && newComment?.length && pullNumber?.length){
+                                let addCommentResponse = await addNewPullRequestComment(this.http,repository,accessToken.token,pullNumber,newComment);
+                                if(addCommentResponse?.serverError){
+                                    let errorMessage = addCommentResponse?.message;
+                                    const unauthorizedMessageModal = await messageModal({
+                                        message:`🤖 Unable to add comment : ⚠️ ${errorMessage}`,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(unauthorizedMessageModal);
+                                }else{                               
+                                    let pullRequestComments = await getPullRequestComments(this.http,repository,accessToken.token,pullNumber);
+                                    let pullRequestData = await getPullRequestData(this.http,repository,accessToken.token,pullNumber);
+                                    if(pullRequestData?.serverError || pullRequestComments?.pullRequestData){
+                                        if(pullRequestData?.serverError){
+                                            const unauthorizedMessageModal = await messageModal({
+                                                message:`🤖 Error Fetching Repository Data: ⚠️ ${pullRequestData?.message}`,
+                                                modify: this.modify,
+                                                read: this.read,
+                                                persistence: this.persistence,
+                                                http: this.http,
+                                                uikitcontext: context
+                                            })
+                                            return context
+                                                .getInteractionResponder()
+                                                .openModalViewResponse(unauthorizedMessageModal);
+                                        }
+                                        if(pullRequestComments?.serverError){
+                                            const unauthorizedMessageModal = await messageModal({
+                                                message:`🤖 Error Fetching Comments: ⚠️ ${pullRequestData?.message}`,
+                                                modify: this.modify,
+                                                read: this.read,
+                                                persistence: this.persistence,
+                                                http: this.http,
+                                                uikitcontext: context
+                                            })
+                                            return context
+                                                .getInteractionResponder()
+                                                .openModalViewResponse(unauthorizedMessageModal);
+                                        }
+                                    }
+                                    let data={
+                                        repo: repository,
+                                        pullNumber: pullNumber,
+                                        pullData: pullRequestData,
+                                        pullRequestComments: pullRequestComments?.data
+                                    }
+                                    const addPRCommentModal = await pullRequestCommentsModal({
+                                        data:data,
+                                        modify:this.modify,
+                                        read:this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    await sendNotification(this.read,this.modify,user,room,`New Comment posted to ${repository} pull request #${pullNumber} by ${addCommentResponse?.user?.login} : ${addCommentResponse?.html_url}`);
+                                    await this.modify.getUiController().updateModalView(addPRCommentModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                                }
+                            }
+                        }
+                        return context.getInteractionResponder().successResponse();
+                    }
+                    break;
+                }
                 default:
                     break;
             }
-
         } catch (error) {
             console.log('error : ', error);
         }

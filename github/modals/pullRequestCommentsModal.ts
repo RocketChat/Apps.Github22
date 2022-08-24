@@ -15,8 +15,9 @@ import {
     UIKitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
+import { parseDate, parseTime } from "../helpers/dateTime";
 
-export async function pullDetailsModal({
+export async function pullRequestCommentsModal({
     data,
     modify,
     read,
@@ -33,7 +34,7 @@ export async function pullDetailsModal({
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
 }): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.PULL_VIEW;
+    const viewId = ModalsEnum.PULL_REQUEST_COMMENTS_MODAL_VIEW;
 
     const block = modify.getCreator().getBlockBuilder();
 
@@ -52,17 +53,8 @@ export async function pullDetailsModal({
         } else {
             roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
         }
-
-        const pullRawData = await http.get(
-            `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}`
-        );
-        const pullData = pullRawData.data;
-
-        const pullRequestFilesRaw = await http.get(
-            `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}/files`
-        );
-
-        const pullRequestFiles = pullRequestFilesRaw.data;
+        let pullData = data?.pullData;
+        let pullRequestComments = data?.pullRequestComments;
 
         block.addSectionBlock({
             text: {
@@ -75,79 +67,94 @@ export async function pullDetailsModal({
                     text: ModalsEnum.VIEW_DIFFS_ACTION_LABEL,
                     type: TextObjectType.PLAINTEXT,
                 },
-                value: pullData["diff_url"],
+                value: pullData?.diff_url,
             }),
         });
         block.addContextBlock({
             elements: [
                 block.newPlainTextObject(`Author: ${pullData?.user?.login} | `),
                 block.newPlainTextObject(`State : ${pullData?.state} | `),
-                block.newPlainTextObject(`Mergeable : ${pullData?.mergeable}`),
+                block.newPlainTextObject(`Mergeable : ${pullData?.mergeable} |` ),
+                block.newPlainTextObject(`Total Comments : ${pullRequestComments?.length} |` ),
+            ],
+        });
+        
+        block.addActionsBlock({
+            elements: [
+                block.newButtonElement({
+                    actionId: ModalsEnum.COMMENT_PR_ACTION,
+                    text: {
+                        text: ModalsEnum.COMMENT_PR_LABEL,
+                        type: TextObjectType.PLAINTEXT,
+                    },
+                    value: `${data?.repo} ${data?.pullNumber}`,
+                }),
+                block.newButtonElement({
+                    text: {
+                        text: AppEnum.DEFAULT_TITLE,
+                        type: TextObjectType.PLAINTEXT,
+                    },
+                    url: pullData ?.html_url
+                }),
             ],
         });
 
         block.addDividerBlock();
 
-        let index = 1;
-
-        for (let file of pullRequestFiles) {
-            let fileName = file["filename"];
-            let rawUrl = file["raw_url"];
-            let status = file["status"];
-            let addition = file["additions"];
-            let deletions = file["deletions"];
+        if(pullRequestComments?.length === 0){
             block.addSectionBlock({
                 text: {
-                    text: `${index} ${fileName}`,
-                    type: TextObjectType.PLAINTEXT,
+                    text: `📝 No comments so far !`,
+                    type: TextObjectType.MARKDOWN,
+                },
+            });
+        }
+
+        let index = 1;
+
+        for (let comment of pullRequestComments) {
+            let username = comment?.user?.login;
+            let avatarUrl = comment?.user?.avatar_url;
+            let commentBody = comment?.body;
+            let userProfileUrl = comment?.user?.html_url
+
+            block.addSectionBlock({
+                text: {
+                    text: `*@${username}*`,
+                    type: TextObjectType.MARKDOWN,
                 },
                 accessory: block.newButtonElement({
-                    actionId: ModalsEnum.VIEW_FILE_ACTION,
+                    actionId: ModalsEnum.VIEW_USER_ACTION,
                     text: {
-                        text: ModalsEnum.VIEW_FILE_ACTION_LABEL,
+                        text: ModalsEnum.VIEW_USER_LABEL,
                         type: TextObjectType.PLAINTEXT,
                     },
-                    value: rawUrl,
+                    url:userProfileUrl
                 }),
             });
+            block.addSectionBlock({
+                text: {
+                    text: `${commentBody}`,
+                    type: TextObjectType.MARKDOWN,
+                },
+            });
+            let date = parseDate(comment?.created_at);
+            let time = parseTime(comment?.created_at);
             block.addContextBlock({
                 elements: [
-                    block.newPlainTextObject(`Status: ${status} | `),
-                    block.newPlainTextObject(`Additions : ${addition} | `),
-                    block.newPlainTextObject(`Deletions : ${deletions}`),
+                    block.newPlainTextObject(`Created at : ${date} ${time} UTC`),
                 ],
             });
-
+            block.addDividerBlock();
             index++;
         }
     }
-
-    block.addActionsBlock({
-        elements: [
-            block.newButtonElement({
-                actionId: ModalsEnum.MERGE_PULL_REQUEST_ACTION,
-                text: {
-                    text: ModalsEnum.MERGE_PULL_REQUEST_LABEL,
-                    type: TextObjectType.PLAINTEXT,
-                },
-                value: `${data?.repository} ${data?.number}`,
-            }),
-            block.newButtonElement({
-                actionId: ModalsEnum.PR_COMMENT_LIST_ACTION,
-                text: {
-                    text: ModalsEnum.PR_COMMENT_LIST_LABEL,
-                    type: TextObjectType.PLAINTEXT,
-                },
-                value: `${data?.repository} ${data?.number}`,
-            }),
-        ],
-    });
 
     return {
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: AppEnum.DEFAULT_TITLE,
+            text: ModalsEnum.PULL_REQUEST_COMMENT_VIEW_TITLE,
         },
         close: block.newButtonElement({
             text: {

@@ -16,7 +16,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription, updateSubscription, getIssueTemplateCode } from "../helpers/githubSDK";
+import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -24,12 +24,18 @@ import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 import { sendMessage, sendNotification } from "../lib/message";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
+import { mergePullRequestModal } from "../modals/mergePullReqeustModal";
+import { messageModal } from "../modals/messageModal";
+import { getRepoData } from "../helpers/githubSDK";
+import { addPullRequestCommentsModal } from "../modals/addPullRequestCommentsModal";
+import { pullRequestCommentsModal } from "../modals/pullRequestCommentsModal";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
 import { IGitHubSearchResult } from "../definitions/searchResult";
 import { GithubSearchResultStorage } from "../persistance/searchResults";
 import { IGitHubSearchResultData } from "../definitions/searchResultData";
 import { githubSearchResultModal } from "../modals/githubSearchResultModal";
 import { NewIssueModal } from "../modals/newIssueModal";
+
 export class ExecuteBlockActionHandler {
     constructor(
         private readonly app: GithubApp,
@@ -389,8 +395,130 @@ export class ExecuteBlockActionHandler {
                     }
                     break;
                 }
-            }
+                case ModalsEnum.MERGE_PULL_REQUEST_ACTION:{
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    if(splittedValues.length==2 && accessToken?.token){
+                        let data={
+                            "repo" : splittedValues[0],
+                            "pullNumber": splittedValues[1]
+                        }
+                        let repoDetails = await getRepoData(this.http,splittedValues[0],accessToken.token);
 
+                        if(repoDetails?.permissions?.admin || repoDetails?.permissions?.push || repoDetails?.permissions?.maintain ){
+                            const mergePRModal = await mergePullRequestModal({
+                                data:data,
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context
+                            })
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(mergePRModal);
+                        }else{
+                            const unauthorizedMessageModal = await messageModal({
+                                message:"Unauthorized Action 🤖 You dont have push rights ⚠️",
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context
+                            })
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(unauthorizedMessageModal);
+                        }
+                       
+                    }
+                    break;
+                }
+                case ModalsEnum.COMMENT_PR_ACTION:{
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    if(splittedValues.length==2 && accessToken?.token){
+                        let data={
+                            "repo" : splittedValues[0],
+                            "pullNumber": splittedValues[1]
+                        }
+                        const addPRCommentModal = await addPullRequestCommentsModal({
+                            data:data,
+                            modify:this.modify,
+                            read:this.read,
+                            persistence: this.persistence,
+                            http: this.http,
+                            uikitcontext: context
+                        })
+                        return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(addPRCommentModal);
+                    }
+                    break;
+                }
+                case ModalsEnum.PR_COMMENT_LIST_ACTION:{
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    if(splittedValues.length==2 && accessToken?.token){
+                        let repoName = splittedValues[0];
+                        let pullNumber = splittedValues[1];
+                        let pullRequestComments = await getPullRequestComments(this.http,repoName,accessToken.token,pullNumber);
+                        let pullRequestData = await getPullRequestData(this.http,repoName,accessToken.token,pullNumber);
+                        if(pullRequestData?.serverError || pullRequestComments?.pullRequestData){
+                            if(pullRequestData?.serverError){
+                                const unauthorizedMessageModal = await messageModal({
+                                    message:`🤖 Error Fetching Repository Data: ⚠️ ${pullRequestData?.message}`,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                    uikitcontext: context
+                                })
+                                return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(unauthorizedMessageModal);
+                            }
+                            if(pullRequestComments?.serverError){
+                                const unauthorizedMessageModal = await messageModal({
+                                    message:`🤖 Error Fetching Comments: ⚠️ ${pullRequestData?.message}`,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                    uikitcontext: context
+                                })
+                                return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(unauthorizedMessageModal);
+                            }
+                        }
+                        let data={
+                            repo: repoName,
+                            pullNumber: pullNumber,
+                            pullData: pullRequestData,
+                            pullRequestComments: pullRequestComments?.data
+                        }
+                        const addPRCommentModal = await pullRequestCommentsModal({
+                            data:data,
+                            modify:this.modify,
+                            read:this.read,
+                            persistence: this.persistence,
+                            http: this.http,
+                            uikitcontext: context
+                        })
+                        return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(addPRCommentModal);
+                    }
+                    break;
+                }
+            }
         } catch (error) {
             console.log(error);
         }
