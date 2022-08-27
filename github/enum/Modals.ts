@@ -148,5 +148,13 @@ export enum ModalsEnum {
     ISSUE_NUMBER_INPUT_ACTION = "issue-number-input-action",
     ISSUE_NUMBER_INPUT_PLACEHOLDER = "23",
     REFRESH_GITHUB_ISSUES_ACTION = "refresh-github-issues-action",
-    REFRESH_GITHUB_ISSUES_LABEL = "Refresh"
+    REFRESH_GITHUB_ISSUES_LABEL = "Refresh",
+    MULTI_SHARE_REMOVE_GITHUB_ISSUE_ACTION = "github-multishare-issue-remove-action",
+    MULTI_SHARE_REMOVE_GITHUB_ISSUE_LABEL = "Remove",
+    MULTI_SHARE_ADD_GITHUB_ISSUE_ACTION = "github-multishare-issue-add-action",
+    MULTI_SHARE_ADD_GITHUB_ISSUE_LABEL = "Add",
+    GITHUB_ISSUES_SHARE_VIEW = "github-issues-share-view",
+    MULTI_SHARE_GITHUB_ISSUES_INPUT = "multishare-github-issues-input",
+    MULTI_SHARE_GITHUB_ISSUES_INPUT_LABEL = "Issues",
+    MULTI_SHARE_GITHUB_ISSUES_INPUT_ACTION = "multishare-github-issues-input-action",
 }

@@ -37,6 +37,8 @@ import { githubSearchResultModal } from "../modals/githubSearchResultModal";
 import { NewIssueModal } from "../modals/newIssueModal";
 import { addIssueAssigneeModal } from "../modals/addIssueAssigneeModal";
 import { githubIssuesListModal } from "../modals/githubIssuesListModal";
+import { GithubRepoIssuesStorage } from "../persistance/githubIssues";
+import { IGitHubIssueData } from "../definitions/githubIssueData";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -549,6 +551,7 @@ export class ExecuteBlockActionHandler {
                             .getInteractionResponder()
                             .openModalViewResponse(addIssueAssignee);
                     }
+                    break;
                 }
                 case ModalsEnum.REFRESH_GITHUB_ISSUES_ACTION: {
                     let repository: string = context.getInteractionData().value as string;
@@ -575,6 +578,107 @@ export class ExecuteBlockActionHandler {
                         const issuesListModal = await githubIssuesListModal( {data: data, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context} );
                         await this.modify.getUiController().updateModalView(issuesListModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     }
+                    break;
+                }
+                case ModalsEnum.MULTI_SHARE_ADD_GITHUB_ISSUE_ACTION:{
+                    let { user, room } = await context.getInteractionData();
+                    let issueId: string = context.getInteractionData().value as string;
+                    let roomId:string="";
+                    if(user?.id){
+                        if(room?.id){
+                            roomId = room.id;
+                        }else{
+                            roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        }
+                        let githubissueStorage = new GithubRepoIssuesStorage(this.persistence,this.read.getPersistenceReader());
+                        let repoIssuesData: IGitHubIssueData = await githubissueStorage.getIssueData(room?.id as string,user);
+                            if(repoIssuesData?.issue_list?.length){
+                                let index = -1;
+                                let currentIndex = 0;
+                                for(let issue of repoIssuesData.issue_list){
+                                    if(issue.issue_id == issueId ){
+                                        index=currentIndex;
+                                        break;
+                                    }
+                                    currentIndex++;
+                                }
+                                if(index !== -1){
+                                    repoIssuesData.issue_list[index].share=true;
+                                    await githubissueStorage.updateIssueData(room as IRoom,user,repoIssuesData);
+                                }
+                                let data = {
+                                    issues: repoIssuesData.issue_list,
+                                    pushRights : repoIssuesData.push_rights, //no access token, so user has no pushRights to the repo,
+                                    repo: repoIssuesData.repository,
+                                    user_id: user.id
+                                }
+                                const githubIssuesModal = await githubIssuesListModal({
+                                    data: data,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                })
+                                await this.modify.getUiController().updateModalView(githubIssuesModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                            }
+                    }
+                    break;
+                }
+                case ModalsEnum.MULTI_SHARE_REMOVE_GITHUB_ISSUE_ACTION:{
+                    let { user, room } = await context.getInteractionData();
+                    let issueId: string = context.getInteractionData().value as string;
+                    let roomId:string="";
+                    if(user?.id){
+                        if(room?.id){
+                            roomId = room.id;
+                        }else{
+                            roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        }
+                        let githubissueStorage = new GithubRepoIssuesStorage(this.persistence,this.read.getPersistenceReader());
+                        let repoIssuesData: IGitHubIssueData = await githubissueStorage.getIssueData(room?.id as string,user);
+                            if(repoIssuesData?.issue_list?.length){
+                                let index = -1;
+                                let currentIndex = 0;
+                                for(let issue of repoIssuesData.issue_list){
+                                    if(issue.issue_id == issueId ){
+                                        index=currentIndex;
+                                        break;
+                                    }
+                                    currentIndex++;
+                                }
+                                if(index !== -1){
+                                    repoIssuesData.issue_list[index].share=false;
+                                    await githubissueStorage.updateIssueData(room as IRoom,user,repoIssuesData);
+                                }
+                                 let data = {
+                                    issues: repoIssuesData.issue_list,
+                                    pushRights : repoIssuesData.push_rights, //no access token, so user has no pushRights to the repo,
+                                    repo: repoIssuesData.repository,
+                                    user_id: user.id
+                                }
+                                const githubIssuesModal = await githubIssuesListModal({
+                                    data: data,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                })
+                                await this.modify.getUiController().updateModalView(githubIssuesModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                            }
+                    }
+                    break;
                 }
             }
         } catch (error) {

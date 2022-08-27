@@ -65,24 +65,13 @@ export async function githubIssuesListModal({
                 text: `*${data.repo}*`,
                 type: TextObjectType.MARKDOWN,
             },
-            accessory: block.newButtonElement({
-                actionId: ModalsEnum.REFRESH_GITHUB_ISSUES_ACTION,
-                text: {
-                    text: ModalsEnum.REFRESH_GITHUB_ISSUES_LABEL,
-                    type: TextObjectType.PLAINTEXT,
-                },
-                value: data.repo,
-            }),
         });
 
         block.addDividerBlock();
         let issueList = data?.issues;
         let index = 1;
         if(issueList && Array.isArray(issueList)){
-            for (let issue of issueList) {     
-                if(issue.pull_request){
-                    continue;
-                }       
+            for (let issue of issueList) {        
                 block.addSectionBlock({
                     text: {
                         text: `#${issue.number} ${issue.title}`,
@@ -90,13 +79,13 @@ export async function githubIssuesListModal({
                     },
                 });
                 let contextBlockElementsArray = [
-                    block.newPlainTextObject(`User : ${issue.user.login} | `),
+                    block.newPlainTextObject(`User : ${issue.user_login} | `),
                     block.newPlainTextObject(`Status: ${issue.state} | `),
                 ]
                 if(issue?.labels && Array.isArray(issue.labels)){
                     let labelString = "";
                     for(let label of issue.labels){
-                        labelString += `${label.name} `
+                        labelString += `${label} `
                     }
                     if(labelString.length){
                         contextBlockElementsArray.push(block.newPlainTextObject(`labels: ${labelString} `),)
@@ -109,7 +98,7 @@ export async function githubIssuesListModal({
                 let assigneesString = "";
                 if(issue?.assignees && Array.isArray(issue.assignees)){
                     for(let assignee of issue.assignees){
-                        assigneesString += `${assignee.login} `
+                        assigneesString += `${assignee} `
                     }
                     if(assigneesString.length){
                         contextBlockElementAssigneesArray.push(block.newPlainTextObject(`assignees: ${assigneesString} `),)
@@ -141,6 +130,29 @@ export async function githubIssuesListModal({
                         }),
                     )
                 }
+                if(issue.share){
+                    actionBlockElementsArray.push(
+                        block.newButtonElement({
+                            actionId: ModalsEnum.MULTI_SHARE_REMOVE_GITHUB_ISSUE_ACTION,
+                            text: {
+                                text: ModalsEnum.MULTI_SHARE_REMOVE_GITHUB_ISSUE_LABEL,
+                                type: TextObjectType.PLAINTEXT,
+                            },
+                            value: issue.issue_id as string,
+                        }),
+                    );
+                }else{
+                    actionBlockElementsArray.push(
+                        block.newButtonElement({
+                            actionId: ModalsEnum.MULTI_SHARE_ADD_GITHUB_ISSUE_ACTION,
+                            text: {
+                                text: ModalsEnum.MULTI_SHARE_ADD_GITHUB_ISSUE_LABEL,
+                                type: TextObjectType.PLAINTEXT,
+                            },
+                            value: issue.issue_id as string,
+                        }),
+                    );
+                }
                 block.addActionsBlock({
                     elements: actionBlockElementsArray,
                 });
@@ -155,6 +167,12 @@ export async function githubIssuesListModal({
             type: TextObjectType.PLAINTEXT,
             text: ModalsEnum.GITHUB_ISSUES_TITLE,
         },
+        submit: block.newButtonElement({
+            text: {
+                type: TextObjectType.PLAINTEXT,
+                text: "Share",
+            },
+        }),
         close: block.newButtonElement({
             text: {
                 type: TextObjectType.PLAINTEXT,
