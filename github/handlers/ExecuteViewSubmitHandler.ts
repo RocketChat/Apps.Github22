@@ -324,6 +324,7 @@ export class ExecuteViewSubmitHandler {
                             }
                         }
                     }
+                    break;
                 }
                 case ModalsEnum.SEARCH_RESULT_SHARE_VIEW:{
                     if (user.id) {
@@ -334,6 +335,7 @@ export class ExecuteViewSubmitHandler {
                             await sendMessage(this.modify,room,user,searchResult as string);
                         }
                     }
+                    break;
                 }
                 case ModalsEnum.MERGE_PULL_REQUEST_VIEW:{
                     if (user.id) {
