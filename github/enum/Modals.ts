@@ -135,4 +135,18 @@ export enum ModalsEnum {
     BLANK_GITHUB_TEMPLATE = "blank-github-app-template",
     GITHUB_ISSUES_STARTER_VIEW = "github-issues-starter-view",
     GITHUB_ISSUES_TITLE = "GitHub Issues", 
+    ISSUE_LIST_VIEW = "github-issue-list-view",
+    ADD_GITHUB_ISSUE_ASSIGNEE = "update-github-issue",
+    ADD_GITHUB_ISSUE_ASSIGNEE_LABEL = "Assign",
+    ADD_ISSUE_ASSIGNEE_VIEW = "add-issue-assignee-view",
+    ISSUE_ASSIGNEE_INPUT = "issue-assignee-input",
+    ISSUE_ASSIGNEE_LABEL = "Assignees",
+    ISSUE_ASSIGNEE_INPUT_ACTION = "issue-assignee-input-action",
+    ISSUE_ASSIGNEE_PLACEHOLDER = "samad-yar-khan RonLek",
+    ISSUE_NUMBER_INPUT = "issue-number-input",
+    ISSUE_NUMBER_INPUT_LABEL = "Issue Number",
+    ISSUE_NUMBER_INPUT_ACTION = "issue-number-input-action",
+    ISSUE_NUMBER_INPUT_PLACEHOLDER = "23",
+    REFRESH_GITHUB_ISSUES_ACTION = "refresh-github-issues-action",
+    REFRESH_GITHUB_ISSUES_LABEL = "Refresh"
 }

@@ -17,9 +17,10 @@ import { IGitHubSearchResultData } from '../definitions/searchResultData';
 import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
-import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments} from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues } from '../helpers/githubSDK';
 import { NewIssueModal } from '../modals/newIssueModal';
 import { issueTemplateSelectionModal } from '../modals/issueTemplateSelectionModal';
+import { githubIssuesListModal } from '../modals/githubIssuesListModal';
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -461,28 +462,67 @@ export class ExecuteViewSubmitHandler {
                     const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
                         if (roomId) {
                             let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
+                            repository=repository?.trim();
                             let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
                             if (!accessToken) {
-                                
-                                
-
+                                let response =  await getRepositoryIssues(this.http,repository);
+                                let data = {
+                                    issues: response.issues,
+                                    pushRights : false, //no access token, so user has no pushRights to the repo,
+                                    repo: repository
+                                }
+                                const issuesListModal = await githubIssuesListModal( {data: data, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context} );
+                                return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(issuesListModal);
                             }else{
-                                
-                                repository=repository?.trim();
-                                let response = await getIssueTemplates(this.http,repository,accessToken.token);
-                                if((!response.template_not_found) && response?.templates?.length){
-                                    const issueTemplateSelection = await issueTemplateSelectionModal({ data: response, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
-                                    return context
+                                let repoDetails = await getRepoData(this.http,repository,accessToken.token);
+                                let response =  await getRepositoryIssues(this.http,repository);
+                                let data = {
+                                    issues: response.issues,
+                                    pushRights : repoDetails?.permissions?.push || repoDetails?.permissions?.admin,
+                                    repo: repository
+                                }
+                                const issuesListModal = await githubIssuesListModal( {data: data, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context} );
+                                return context
                                     .getInteractionResponder()
-                                    .openModalViewResponse(issueTemplateSelection);
+                                    .openModalViewResponse(issuesListModal);
+                            }
+                        } 
+                    break;
+                }
+                case ModalsEnum.ADD_ISSUE_ASSIGNEE_VIEW: {
+                    const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
+                            let issueNumber = view.state?.[ModalsEnum.ISSUE_NUMBER_INPUT]?.[ModalsEnum.ISSUE_NUMBER_INPUT_ACTION] as string;
+                            let issueAssignees = view.state?.[ModalsEnum.ISSUE_ASSIGNEE_INPUT]?.[ModalsEnum.ISSUE_ASSIGNEE_INPUT_ACTION] as string;
+                            repository=repository?.trim();
+                            issueNumber = issueNumber?.trim();
+                            issueAssignees = issueAssignees?.trim();
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if (accessToken?.token && issueNumber && repository) {
+                                let assigneesArray: Array<string> = [];
+                                if(issueAssignees){
+                                    assigneesArray = issueAssignees.split(" ");
+                                }
+                                let response =  await updateGithubIssues(this.http,repository,assigneesArray,issueNumber,accessToken.token);
+                                if(response.serverError){
+                                    let errorMessage = response?.message;
+                                    const unauthorizedMessageModal = await messageModal({
+                                        message:`🤖 Unable to assign issues : ⚠️ ${errorMessage}`,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(unauthorizedMessageModal);
                                 }else{
-                                    let data = {
-                                        repository: repository
-                                    }
-                                    const createNewIssue = await NewIssueModal({ data: data, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
-                                    return context
-                                    .getInteractionResponder()
-                                    .openModalViewResponse(createNewIssue);
+                                    let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                                    await sendNotification(this.read,this.modify,user,room,"🤖 Assigned Issue Succesfull ✔️");
                                 }
                             }
                         } 

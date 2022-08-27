@@ -499,18 +499,18 @@ export async function getRepositoryIssues(
     // If it isn't a 2xx code, something wrong happened
     if (!response.statusCode.toString().startsWith("2")) {
         repsonseJSON = JSON.parse(response.content || "{}");
-        repsonseJSON['template_not_found'] = true;
+        repsonseJSON['serverError'] = true;
     }else{
         repsonseJSON = {
             issues : JSON.parse(response.content || "{}"),
             repository: repoName,
-            template_not_found : false
+            serverError : false
         }
     }
     return repsonseJSON;
 }
 
-export async function updateIssueAssignees(
+export async function updateGithubIssues(
     http: IHttp,
     repoName: string,
     assignees: Array<string>,
@@ -520,9 +520,8 @@ export async function updateIssueAssignees(
     //this does not use the get , post , patch method defined because we dont want to throw an error for an eror response
     let response:any;
     let data = {
-        assignees:assignees
+        assignees:assignees,
     }
-    
     response = await http.patch(BaseRepoApiHost + repoName +`/issues/${issueNumber}`, {
         headers: {
             Authorization: `token ${access_token}`,
