@@ -90,7 +90,7 @@ export async function githubIssuesListModal({
                     },
                 });
                 let contextBlockElementsArray = [
-                    block.newPlainTextObject(`User : ${issue.user_login} | `),
+                    block.newPlainTextObject(`User : ${issue.user.login} | `),
                     block.newPlainTextObject(`Status: ${issue.state} | `),
                 ]
                 if(issue?.labels && Array.isArray(issue.labels)){
