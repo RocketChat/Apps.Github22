@@ -368,18 +368,9 @@ export class ExecuteViewSubmitHandler {
                                         .getInteractionResponder()
                                         .openModalViewResponse(unauthorizedMessageModal);
                                 }else{
-                                    let succesMessage = mergeResponse?.message;
-                                    const succesMessageModal = await messageModal({
-                                        message:`🤖 Merged Pull Request  : ✔️ ${succesMessage}`,
-                                        modify: this.modify,
-                                        read: this.read,
-                                        persistence: this.persistence,
-                                        http: this.http,
-                                        uikitcontext: context
-                                    })
-                                    return context
-                                        .getInteractionResponder()
-                                        .openModalViewResponse(succesMessageModal);
+                                    let url = `https://github.com/${repository}/pull/${pullNumber}`;
+                                    let succesMessage =`🤖 ${mergeResponse?.message} ✔️ : ${url}`;
+                                    await sendMessage(this.modify,room,user,succesMessage);
                                 }
                             }
                         }
