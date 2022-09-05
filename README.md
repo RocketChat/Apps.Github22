@@ -30,6 +30,7 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
     <li> Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe </li>
     <li> Add New Issues to GitHub Repository -> /github issue </li>
     <li> Search Issues and Pull Request -> /github search </li>
+    <li> Assign and Share GitHub issues -> /github issues </li>
     <li> Review a Pull Request -> /github  Username/RepositoryName pulls pullNumber </li>
     <li> See Interactive Button interface to fetch repository data -> /github Username/RepositoryName </li>
     <li> Get details of a Repository -> /github  Username/RepositoryName repo </li>
