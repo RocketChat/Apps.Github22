@@ -609,7 +609,7 @@ export class ExecuteViewSubmitHandler {
                                                 http: this.http,
                                             })
                                             let room = await this.read.getRoomReader().getById(roomId) as IRoom;
-                                            await sendNotification(this.read,this.modify,user,room,"🤖 Assigned Issue Succesfull ✔️");
+                                            await sendNotification(this.read,this.modify,user,room,"🤖 Assigned Issue Successfully ✔️");
                                             await this.modify.getUiController().updateModalView(githubIssuesModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                                             return context.getInteractionResponder().successResponse();
                                         }
