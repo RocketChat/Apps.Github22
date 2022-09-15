@@ -6,6 +6,7 @@ import {
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
+import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import {
     ISlashCommand,
@@ -19,6 +20,7 @@ export async function issueListMessage({
     persistence,
     modify,
     http,
+    accessToken,
 }: {
     repository : String,
     room: IRoom;
@@ -26,11 +28,21 @@ export async function issueListMessage({
     persistence: IPersistence;
     modify: IModify;
     http: IHttp;
+    accessToken?: IAuthData;
 }) {
-    
-    const gitResponse = await http.get(
-        `https://api.github.com/repos/${repository}/issues`
-    );
+    let gitResponse:any;
+    if(accessToken?.token){
+        gitResponse = await http.get(`https://api.github.com/repos/${repository}/issues`, {
+            headers: {
+                Authorization: `token ${accessToken?.token}`,
+                "Content-Type": "application/json",
+            },
+        });
+    } else {
+        gitResponse = await http.get(
+            `https://api.github.com/repos/${repository}/issues`
+        );
+    }
     const resData = gitResponse.data;
     const textSender = await modify
         .getCreator()

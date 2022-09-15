@@ -6,6 +6,7 @@ import {
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
+import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 
 export async function pullRequestListMessage({
@@ -15,6 +16,7 @@ export async function pullRequestListMessage({
     persistence,
     modify,
     http,
+    accessToken,
 }: {
     repository : String,
     room: IRoom;
@@ -22,11 +24,22 @@ export async function pullRequestListMessage({
     persistence: IPersistence;
     modify: IModify;
     http: IHttp;
+    accessToken?: IAuthData;
 }) {
   
-    const gitResponse = await http.get(
-        `https://api.github.com/repos/${repository}/pulls`
-    );
+    let gitResponse:any;
+    if(accessToken?.token){
+        gitResponse = await http.get(`https://api.github.com/repos/${repository}/pulls`, {
+            headers: {
+                Authorization: `token ${accessToken?.token}`,
+                "Content-Type": "application/json",
+            },
+        });
+    } else {
+        gitResponse = await http.get(
+            `https://api.github.com/repos/${repository}/pulls`
+        );
+    }
     const resData = gitResponse.data;
     const textSender = await modify
         .getCreator()
