@@ -13,7 +13,7 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
 <h2 align='center'>🚀 Features 🚀</h2>
 <ul>
   <li>Quick and Easy Setup</li> 
-  <li>Login to GitHub with one click using built-in OAth2 mechanism</li>
+  <li>Login to GitHub with one click using built-in OAuth2 mechanism</li>
   <li>Subscribe to Repository Events and get notified about new issues, pull requests, code pushes etc</li>
   <li>Review and Merge Pull Requests right from Rocket.Chat Channels</li>
   <li>Create new Issues from Rocket.Chat</li>
@@ -45,31 +45,30 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
   <li>To start with development on Rocket.Chat Apps, you need to install the Rocket.Chat Apps Engline CLI. Enter the following commands : </li>
   
   ``` 
-    npm install -g @rocket.chat/apps-cli
+  npm install -g @rocket.chat/apps-cli
   ```
   
   Check of the CLI has been installed 
   
   ```
   rc-apps -v
-# @rocket.chat/apps-cli/1.4.0 darwin-x64 node-v10.15.3
+  # @rocket.chat/apps-cli/1.4.0 darwin-x64 node-v10.15.3
   ```
   
   <li>Clone the GitHub Repository</li>
     
- ```
-    git clone https://github.com/RocketChat/Apps.Github22
- ```
+  ```
+  git clone https://github.com/RocketChat/Apps.Github22
+  ```
   
   <li>Enter the App.Github22 directory and install dependecies</li>
   
   ```
-    cd Apps.Github22
-    cd github
-    npm install
+  cd Apps.Github22/github
+  npm install
   ```
   
-  <li>In order to install Rocket.Chat Apps on your development server, the server must be in development mode. Enable Apps development mode by navigating to <i>Administration > General > Apps</i> and click on the True radio button over the Enable development mode..</li>
+  <li>In order to install Rocket.Chat Apps on your development server, the server must be in development mode. Enable Apps development mode by navigating to <i>Administration > General > Apps</i> and click on the True radio button over the Enable development mode.</li>
   
   <li>Build and Upload your application by running the following inside the apps directory (/App.Github22/github) </li>
   
@@ -93,13 +92,13 @@ Enter `/github` or  `/github help` in the message input box of any channel on th
 
 <h2 align='center'>🖥️ Application Setup 🖥️</h2>
 
-<p>The GitHub App uses the GitHub OAth2 and you must setup a GitHub OAuth App to unlock the full potential of the GitHub App.</p>
+<p>The GitHub App uses the GitHub OAuth2 and you must setup a GitHub OAuth App to unlock the full potential of the GitHub App.</p>
 
 <ol>
-<li>The First Step is to setup a GitHub Oauth2 App. To setup the GitHub Oauth App Follow <a href="https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app">These Steps</a>
+<li>The First Step is to setup a GitHub Oauth2 App. To setup the GitHub OAuth App Follow <a href="https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app">These Steps</a>
 </li> 
 <li>
-The callback URL must be set to the url of your server as shown below. (Note : There is an issue of trailing slashes with RocketChat OathClient, so incase the authentication does not work, go to Administration Panel and try removing the trailing '/' at the end of the hosted url. This issue might not occur as it will be fixed in the future.)
+The callback URL must be set to the url of your server as shown below. (Note : There is an issue of trailing slashes with RocketChat OAuthClient, so incase the authentication does not work, go to Administration Panel and try removing the trailing '/' at the end of the hosted url. This issue might not occur as it will be fixed in the future.)
 <div align="center">
  <img src="https://user-images.githubusercontent.com/70485812/180335941-f77ff2f9-272c-4716-a0fd-b50a2648e2de.png" alt="OAuth Example" width="50%"/>
  </div>
@@ -118,11 +117,11 @@ The users can login to GitHub by entering the slash command `/github login` and 
 
 Users are logged out after a week but the users can also logout at any time by entering `/github logout`.
 
-<h2 align='center'>🚀 Contrubuting 🚀</h2>
+<h2 align='center'>🚀 Contributing 🚀</h2>
 
 <ul>
   <li>After Setting up the Application on your server, look for open issues.</li>
-  <li>If you are new to Rocket.Chat App Development, follow the <a href="https://developer.rocket.chat/apps-engine/rocket.chat-app">developement documentation</a> and <a href="https://rocketchat.github.io/Rocket.Chat.Apps-engine/">RocketChat Apps Engine TypeScript Defenitions</a></li>
+  <li>If you are new to Rocket.Chat App Development, follow the <a href="https://developer.rocket.chat/apps-engine/rocketchat-app">development documentation</a> and <a href="https://rocketchat.github.io/Rocket.Chat.Apps-engine/">RocketChat Apps Engine TypeScript Definitions</a></li>
   <li>You can also follow other Rocket.Chat Apps for inspiration : <a href="https://github.com/Poll-Plus/rocket.chat.app-poll">Polls Plus App</a>, <a href="https://github.com/RocketChat/Apps.ClickUp">ClickUp Rocket.Chat App</a> , <a href="https://github.com/RocketChat/Apps.Figma">Figma Rocket.Chat App</a>
 </ul>
 
