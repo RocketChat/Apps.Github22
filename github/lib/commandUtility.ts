@@ -11,9 +11,8 @@ import {
 import { initiatorMessage } from "./initiatorMessage";
 import { SubcommandEnum } from "../enum/Subcommands";
 import { GithubApp } from "../GithubApp";
-import { authorize } from "../oath2/authentication";
-import { getAccessTokenForUser, revokeUserAccessToken } from "../persistance/auth";
-import { sendDirectMessage, sendNotification } from "../lib/message";
+import { getAccessTokenForUser } from "../persistance/auth";
+import { sendNotification } from "../lib/message";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
 import { githubSearchModal } from "../modals/githubSearchModal";
@@ -23,6 +22,7 @@ import { Subscription } from "../persistance/subscriptions";
 import { basicQueryMessage } from "../helpers/basicQueryMessage";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
 import { ExecutorProps } from "../definitions/ExecutorProps";
+import { handleLogin, handleLogout } from "../processors/AuthenticationHandler";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -46,22 +46,6 @@ export class CommandUtility implements ExecutorProps {
         this.http = props.http;
         this.persistence = props.persistence;
         this.app = props.app
-    }
-
-    // Authentication
-    private async handleLogin(){
-        await authorize(this.app, this.read, this.modify, this.context.getSender(), this.room, this.persistence);
-    }
-
-    private async handleLogout(){
-        let accessToken = await getAccessTokenForUser(this.read, this.context.getSender(), this.app.oauth2Config);
-        if (accessToken && accessToken?.token){
-            await revokeUserAccessToken(this.read, this.sender, this.persistence, this.http, this.app.oauth2Config);
-            await sendNotification(this.read, this.modify, this.context.getSender(), this.room, "Logged out successfully !");
-        }
-        else {
-            await sendNotification(this.read, this.modify, this.context.getSender(), this.room, "You are not logged in !");
-        }
     }
 
     private async handleSubscribe(){
@@ -226,11 +210,11 @@ export class CommandUtility implements ExecutorProps {
         else {
             switch(this.command[0]){
                 case SubcommandEnum.LOGIN : {
-                    this.handleLogin();
+                    await handleLogin(this.app, this.read, this.modify, this.context, this.room, this.persistence);
                     break;
                 }
                 case SubcommandEnum.LOGOUT : {
-                    this.handleLogout();
+                    await handleLogout(this.app, this.read, this.modify, this.context, this.room, this.persistence, this.sender, this.http);
                     break;
                 }
                 case SubcommandEnum.TEST : {
