@@ -14,10 +14,11 @@ import {
     deleteSubscription,
 } from "../helpers/githubSDK";
 import { sendNotification } from "../lib/message";
+import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { Subscription } from "../persistance/subscriptions";
 
-export async function handleEventSubscription(
+export async function ManageSubscriptions(
     read: IRead,
     context: SlashCommandContext,
     app: GithubApp,
@@ -213,6 +214,47 @@ export async function handleEventUnsubscribe(
             );
         } catch (error) {
             console.log("SubcommandError", error);
+        }
+    } else {
+        await sendNotification(
+            read,
+            modify,
+            context.getSender(),
+            room,
+            "Login to subscribe to repository events ! `/github login`"
+        );
+    }
+}
+
+export async function handleEventSubscription(
+    read: IRead,
+    context: SlashCommandContext,
+    app: GithubApp,
+    persistence: IPersistence,
+    http: IHttp,
+    room: IRoom,
+    modify: IModify
+) {
+    let accessToken = await getAccessTokenForUser(
+        read,
+        context.getSender(),
+        app.oauth2Config
+    );
+    if (accessToken && accessToken.token) {
+        const triggerId = context.getTriggerId();
+        if (triggerId) {
+            const modal = await subsciptionsModal({
+                modify: modify,
+                read: read,
+                persistence: persistence,
+                http: http,
+                slashcommandcontext: context,
+            });
+            await modify
+                .getUiController()
+                .openModalView(modal, { triggerId }, context.getSender());
+        } else {
+            console.log("Invalid Trigger ID !");
         }
     } else {
         await sendNotification(

@@ -11,19 +11,17 @@ import {
 import { initiatorMessage } from "./initiatorMessage";
 import { SubcommandEnum } from "../enum/Subcommands";
 import { GithubApp } from "../GithubApp";
-import { getAccessTokenForUser } from "../persistance/auth";
-import { sendNotification } from "../lib/message";
-import { subsciptionsModal } from "../modals/subscriptionsModal";
-import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
-import { githubSearchModal } from "../modals/githubSearchModal";
 import { basicQueryMessage } from "../helpers/basicQueryMessage";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
 import { ExecutorProps } from "../definitions/ExecutorProps";
 import { handleLogin, handleLogout } from "../handlers/AuthenticationHandler";
 import {
-    handleEventSubscription,
+    ManageSubscriptions,
     handleEventUnsubscribe,
+    handleEventSubscription,
 } from "../handlers/EventHandler";
+import { handleSearch } from "../handlers/SearchHandler";
+import { handleNewIssue } from "../handlers/HandleNewIssue";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -46,117 +44,6 @@ export class CommandUtility implements ExecutorProps {
         this.http = props.http;
         this.persistence = props.persistence;
         this.app = props.app;
-    }
-
-    private async handleSubscribe() {
-        let accessToken = await getAccessTokenForUser(
-            this.read,
-            this.context.getSender(),
-            this.app.oauth2Config
-        );
-        if (accessToken && accessToken.token) {
-            const triggerId = this.context.getTriggerId();
-            if (triggerId) {
-                const modal = await subsciptionsModal({
-                    modify: this.modify,
-                    read: this.read,
-                    persistence: this.persistence,
-                    http: this.http,
-                    slashcommandcontext: this.context,
-                });
-                await this.modify
-                    .getUiController()
-                    .openModalView(
-                        modal,
-                        { triggerId },
-                        this.context.getSender()
-                    );
-            } else {
-                console.log("Invalid Trigger ID !");
-            }
-        } else {
-            await sendNotification(
-                this.read,
-                this.modify,
-                this.context.getSender(),
-                this.room,
-                "Login to subscribe to repository events ! `/github login`"
-            );
-        }
-    }
-
-    private async handleNewIssue() {
-        let accessToken = await getAccessTokenForUser(
-            this.read,
-            this.context.getSender(),
-            this.app.oauth2Config
-        );
-        if (accessToken && accessToken.token) {
-            const triggerId = this.context.getTriggerId();
-            if (triggerId) {
-                const modal = await NewIssueStarterModal({
-                    modify: this.modify,
-                    read: this.read,
-                    persistence: this.persistence,
-                    http: this.http,
-                    slashcommandcontext: this.context,
-                });
-                await this.modify
-                    .getUiController()
-                    .openModalView(
-                        modal,
-                        { triggerId },
-                        this.context.getSender()
-                    );
-            } else {
-                console.log("Inavlid Trigger ID !");
-            }
-        } else {
-            await sendNotification(
-                this.read,
-                this.modify,
-                this.context.getSender(),
-                this.room,
-                "Login to subscribe to repository events ! `/github login`"
-            );
-        }
-    }
-
-    private async handleSearch() {
-        let accessToken = await getAccessTokenForUser(
-            this.read,
-            this.context.getSender(),
-            this.app.oauth2Config
-        );
-        if (accessToken && accessToken.token) {
-            const triggerId = this.context.getTriggerId();
-            if (triggerId) {
-                const modal = await githubSearchModal({
-                    modify: this.modify,
-                    read: this.read,
-                    persistence: this.persistence,
-                    http: this.http,
-                    slashcommandcontext: this.context,
-                });
-                await this.modify
-                    .getUiController()
-                    .openModalView(
-                        modal,
-                        { triggerId },
-                        this.context.getSender()
-                    );
-            } else {
-                console.log("Inavlid Trigger ID !");
-            }
-        } else {
-            await sendNotification(
-                this.read,
-                this.modify,
-                this.context.getSender(),
-                this.room,
-                "Login to subscribe to repository events ! `/github login`"
-            );
-        }
     }
 
     private async handleSingularParamCommands() {
@@ -203,15 +90,39 @@ export class CommandUtility implements ExecutorProps {
                     break;
                 }
                 case SubcommandEnum.SUBSCRIBE: {
-                    this.handleSubscribe();
+                    handleEventSubscription(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    );
                     break;
                 }
                 case SubcommandEnum.NEW_ISSUE: {
-                    this.handleNewIssue();
+                    handleNewIssue(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    );
                     break;
                 }
                 case SubcommandEnum.SEARCH: {
-                    this.handleSearch();
+                    handleSearch(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    );
                     break;
                 }
                 default: {
@@ -233,7 +144,7 @@ export class CommandUtility implements ExecutorProps {
         const repository = this.command[0];
         switch (query) {
             case SubcommandEnum.SUBSCRIBE: {
-                handleEventSubscription(
+                ManageSubscriptions(
                     this.read,
                     this.context,
                     this.app,
