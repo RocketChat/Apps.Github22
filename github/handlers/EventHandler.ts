@@ -18,7 +18,7 @@ import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { Subscription } from "../persistance/subscriptions";
 
-export async function ManageSubscriptions(
+export async function SubscribeAllEvents(
     read: IRead,
     context: SlashCommandContext,
     app: GithubApp,
@@ -121,7 +121,7 @@ export async function ManageSubscriptions(
     }
 }
 
-export async function handleEventUnsubscribe(
+export async function UnsubscribeAllEvents(
     read: IRead,
     context: SlashCommandContext,
     app: GithubApp,
@@ -226,7 +226,7 @@ export async function handleEventUnsubscribe(
     }
 }
 
-export async function handleEventSubscription(
+export async function ManageSubscriptions(
     read: IRead,
     context: SlashCommandContext,
     app: GithubApp,

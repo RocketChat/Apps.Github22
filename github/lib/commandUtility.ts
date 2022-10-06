@@ -16,9 +16,9 @@ import { pullDetailsModal } from "../modals/pullDetailsModal";
 import { ExecutorProps } from "../definitions/ExecutorProps";
 import { handleLogin, handleLogout } from "../handlers/AuthenticationHandler";
 import {
+    SubscribeAllEvents,
+    UnsubscribeAllEvents,
     ManageSubscriptions,
-    handleEventUnsubscribe,
-    handleEventSubscription,
 } from "../handlers/EventHandler";
 import { handleSearch } from "../handlers/SearchHandler";
 import { handleNewIssue } from "../handlers/HandleNewIssue";
@@ -90,7 +90,7 @@ export class CommandUtility implements ExecutorProps {
                     break;
                 }
                 case SubcommandEnum.SUBSCRIBE: {
-                    handleEventSubscription(
+                    ManageSubscriptions(
                         this.read,
                         this.context,
                         this.app,
@@ -144,7 +144,7 @@ export class CommandUtility implements ExecutorProps {
         const repository = this.command[0];
         switch (query) {
             case SubcommandEnum.SUBSCRIBE: {
-                ManageSubscriptions(
+                SubscribeAllEvents(
                     this.read,
                     this.context,
                     this.app,
@@ -157,7 +157,7 @@ export class CommandUtility implements ExecutorProps {
                 break;
             }
             case SubcommandEnum.UNSUBSCRIBE: {
-                handleEventUnsubscribe(
+                UnsubscribeAllEvents(
                     this.read,
                     this.context,
                     this.app,
