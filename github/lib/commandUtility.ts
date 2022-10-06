@@ -49,11 +49,11 @@ export class CommandUtility implements ExecutorProps {
     }
 
     // Authentication
-    async handleLogin(){
+    private async handleLogin(){
         await authorize(this.app, this.read, this.modify, this.context.getSender(), this.room, this.persistence);
     }
 
-    public async handleLogout(){
+    private async handleLogout(){
         let accessToken = await getAccessTokenForUser(this.read, this.context.getSender(), this.app.oauth2Config);
         if (accessToken && accessToken?.token){
             await revokeUserAccessToken(this.read, this.sender, this.persistence, this.http, this.app.oauth2Config);
@@ -64,7 +64,7 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-    public async handleSubscribe(){
+    private async handleSubscribe(){
         let accessToken = await getAccessTokenForUser(this.read, this.context.getSender(), this.app.oauth2Config);
         if (accessToken && accessToken.token){
             const triggerId = this.context.getTriggerId();
@@ -81,7 +81,7 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-    public async handleNewIssue() {
+    private async handleNewIssue() {
         let accessToken = await getAccessTokenForUser(this.read, this.context.getSender(), this.app.oauth2Config);
         if(accessToken && accessToken.token){
             const triggerId= this.context.getTriggerId();
@@ -96,7 +96,7 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-    public async handleSearch() {
+    private async handleSearch() {
         let accessToken = await getAccessTokenForUser(this.read, this.context.getSender(), this.app.oauth2Config);
         if(accessToken && accessToken.token){
             const triggerId= this.context.getTriggerId();
@@ -111,7 +111,7 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-    async handleEventSubscription(){
+    private async handleEventSubscription(){
         let accessToken = await getAccessTokenForUser(this.read, this.context.getSender(), this.app.oauth2Config);
         const repository = this.command[0];
         if(accessToken && accessToken?.token){
@@ -164,7 +164,7 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-    async handleEventUnsubscribe(){
+    private async handleEventUnsubscribe(){
         let accessToken = await getAccessTokenForUser(this.read, this.context.getSender(), this.app.oauth2Config);
         const repository = this.command[0];
         if(accessToken && accessToken?.token){
@@ -214,7 +214,7 @@ export class CommandUtility implements ExecutorProps {
     }
 
 
-    async handleSingularParamCommands() {
+    private async handleSingularParamCommands() {
         const data = {
             room : this.room,
             sender: this.sender,
@@ -256,7 +256,7 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-    async handleDualParamCommands() {
+    private async handleDualParamCommands() {
         const query = this.command[1];
         const repository = this.command[0];
         switch(query){
@@ -275,7 +275,7 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-    async handleTriParamCommand() {
+    private async handleTriParamCommand() {
         const data = {
             repository:this.command[0],
             query:this.command[1],
