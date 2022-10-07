@@ -24,6 +24,7 @@ import { Subscription } from "../persistance/subscriptions";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { githubSearchModal } from "../modals/githubSearchModal"
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
+import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
 
 
 export class GithubCommand implements ISlashCommand {
@@ -128,7 +129,17 @@ export class GithubCommand implements ISlashCommand {
                                 await sendNotification(read,modify,context.getSender(),room,"Login to subscribe to repository events ! `/github login`");
                             }
                             break;
-                        } 
+                        }
+                        case SubcommandEnum.ISSUES :{
+                            const triggerId= context.getTriggerId();
+                            if(triggerId){
+                            const modal = await GitHubIssuesStarterModal({modify,read,persistence,http,slashcommandcontext:context});
+                                await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+                            }else{
+                                console.log("Inavlid Trigger ID !");
+                            }
+                            break;
+                        }
                         default:{
                             await helperMessage({room,read, persistence, modify, http});
                             break;

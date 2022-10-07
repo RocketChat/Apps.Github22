@@ -35,6 +35,7 @@ export async function helperMessage({
     11) Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe
     12) Add New Issues to GitHub Repository -> /github issue
     13) Search Issues and Pull Requests -> /github search
+    14) Assign and Share Issues -> /github issues
     
     `;
 
