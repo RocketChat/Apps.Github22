@@ -24,8 +24,8 @@ import { Subscription } from "../persistance/subscriptions";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { githubSearchModal } from "../modals/githubSearchModal"
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
+import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
-
 
 export class GithubCommand implements ISlashCommand {
     public constructor(private readonly app: GithubApp) {}
@@ -259,7 +259,9 @@ export class GithubCommand implements ISlashCommand {
                         break;
                     }
                     default:{
-                        await basicQueryMessage ({query,repository,room,read,persistence,modify,http});
+                        let user = await context.getSender(); 
+                        let accessToken = await getAccessTokenForUser(read, user, this.app.oauth2Config) as IAuthData;
+                        await basicQueryMessage ({ query, repository, room, read, persistence, modify, http, accessToken });
                         break;
                     }
                 }

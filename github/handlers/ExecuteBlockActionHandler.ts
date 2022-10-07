@@ -77,19 +77,20 @@ export class ExecuteBlockActionHandler {
                             0,
                             lengthOfRepoString
                         ) as String;
-
-                        const room: IRoom = context.getInteractionData()
-                            .room as IRoom;
-                        await basicQueryMessage({
-                            query,
-                            repository,
-                            room,
-                            read: this.read,
-                            persistence: this.persistence,
-                            modify: this.modify,
-                            http: this.http,
-                        });
-
+                        let { user, room } = await context.getInteractionData();
+                        let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                        if(room && user){
+                            await basicQueryMessage({
+                                query,
+                                repository,
+                                room,
+                                read: this.read,
+                                persistence: this.persistence,
+                                modify: this.modify,
+                                http: this.http,
+                                accessToken: accessToken,
+                            });
+                        }
                         return {
                             success: true,
                         };
