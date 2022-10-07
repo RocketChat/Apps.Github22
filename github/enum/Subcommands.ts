@@ -7,4 +7,5 @@ export enum SubcommandEnum {
     TEST = 'test',
     SEARCH = 'search',
     NEW_ISSUE = 'issue',
+    ISSUES = 'issues'
 }
