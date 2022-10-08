@@ -10,6 +10,7 @@ import { contributorListMessage } from "../lib/contributorListMessage";
 import { pullRequestListMessage } from "../lib/pullReqeustListMessage";
 import { repoDataMessage } from "../lib/repoDataMessage";
 import { helperMessage } from "../lib/helperMessage";
+import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 
 export async function basicQueryMessage({
     query,
@@ -19,6 +20,7 @@ export async function basicQueryMessage({
     persistence,
     modify,
     http,
+    accessToken,
 }: {
     query: String,
     repository: String,
@@ -27,23 +29,24 @@ export async function basicQueryMessage({
     persistence: IPersistence;
     modify: IModify;
     http: IHttp;
+    accessToken?: IAuthData
 }) {
 
     switch (query) {
         case "issues": {
-            await issueListMessage({ repository, room, read, persistence, modify, http });
+            await issueListMessage({ repository, room, read, persistence, modify, http, accessToken });
             break;
         }
         case "contributors": {
-            await contributorListMessage({ repository, room, read, persistence, modify, http });
+            await contributorListMessage({ repository, room, read, persistence, modify, http, accessToken });
             break;
         }
         case "pulls": {
-            await pullRequestListMessage({ repository, room, read, persistence, modify, http });
+            await pullRequestListMessage({ repository, room, read, persistence, modify, http, accessToken });
             break;
         }
         case "repo": {
-            await repoDataMessage({ repository, room, read, persistence, modify, http })
+            await repoDataMessage({ repository, room, read, persistence, modify, http, accessToken })
             break;
         }
         default:

@@ -11,6 +11,7 @@ import { ModalsEnum } from "../enum/Modals";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
 import { storeInteractionRoomData, clearInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 import { GithubSearchResultStorage } from "../persistance/searchResults";
+import { GithubRepoIssuesStorage } from "../persistance/githubIssues";
 
 export class ExecuteViewClosedHandler {
     constructor(
@@ -62,6 +63,28 @@ export class ExecuteViewClosedHandler {
                     }
                     let githubSearchStorage = new GithubSearchResultStorage(this.persistence,this.read.getPersistenceReader());
                     await githubSearchStorage.deleteSearchResults(roomId,user);
+                }
+                break;
+            }
+            case ModalsEnum.ISSUE_LIST_VIEW: {
+                const room = context.getInteractionData().room;
+                const user = context.getInteractionData().user;
+        
+                if (user?.id) {
+                    let roomId;
+                    if (room?.id) {
+                        roomId = room.id;
+                        await storeInteractionRoomData(this.persistence, user.id, roomId);
+                    } else {
+                        roomId = (
+                            await getInteractionRoomData(
+                                this.read.getPersistenceReader(),
+                                user.id
+                            )
+                        ).roomId;
+                    }
+                    let githubIssuesStorage = new GithubRepoIssuesStorage(this.persistence,this.read.getPersistenceReader());
+                    await githubIssuesStorage.deleteIssueData(roomId,user);
                 }
                 break;
             }
