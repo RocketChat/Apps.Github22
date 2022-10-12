@@ -1,23 +1,22 @@
 import {
+    IRead,
+    IModify,
+    IHttp,
+    IPersistence,
+} from "@rocket.chat/apps-engine/definition/accessors";
+import {
     ISlashCommand,
     SlashCommandContext,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
-import {
-    IHttp,
-    IModify,
-    IPersistence,
-    IRead,
-} from "@rocket.chat/apps-engine/definition/accessors";
 import { GithubApp } from "../GithubApp";
 import { CommandUtility } from "../lib/commandUtility";
 
-
-export class GithubCommand implements ISlashCommand {
+export class GHCommand implements ISlashCommand {
     public constructor(private readonly app: GithubApp) {}
-    public command = "github";
-    public i18nDescription = "fetching github data";
-    public providesPreview = false;
-    public i18nParamsExample = "";
+    public command: string = "gh";
+    public i18nParamsExample: string = "";
+    public i18nDescription: string = "fetching github data";
+    public providesPreview: boolean = false;
 
     public async executor(
         context: SlashCommandContext,
@@ -26,12 +25,11 @@ export class GithubCommand implements ISlashCommand {
         http: IHttp,
         persistence: IPersistence
     ): Promise<void> {
-
         const command = context.getArguments();
         const sender = context.getSender();
         const room = context.getRoom();
 
-        if(!Array.isArray(command)){
+        if (!Array.isArray(command)) {
             return;
         }
 
@@ -50,5 +48,5 @@ export class GithubCommand implements ISlashCommand {
         );
 
         commandUtility.resolveCommand();
-    }}
-
+    }
+}
