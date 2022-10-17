@@ -4,6 +4,7 @@ import {
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
+import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 
 export async function contributorListMessage({
@@ -13,6 +14,7 @@ export async function contributorListMessage({
     persistence,
     modify,
     http,
+    accessToken,
 }: {
     repository : String,
     room: IRoom;
@@ -20,10 +22,21 @@ export async function contributorListMessage({
     persistence: IPersistence;
     modify: IModify;
     http: IHttp;
+    accessToken?: IAuthData;
 }) {
-    const gitResponse = await http.get(
-        `https://api.github.com/repos/${repository}/contributors`
-    );
+    let gitResponse: any;
+    if(accessToken?.token){
+        gitResponse = await http.get(`https://api.github.com/repos/${repository}/contributors`, {
+            headers: {
+                Authorization: `token ${accessToken?.token}`,
+                "Content-Type": "application/json",
+            },
+        });
+    } else {
+        gitResponse = await http.get(
+            `https://api.github.com/repos/${repository}/contributors`
+        );
+    }
     const resData = gitResponse.data;
     const textSender = await modify
         .getCreator()

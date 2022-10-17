@@ -39,6 +39,7 @@ import { githubWebHooks } from "./endpoints/githubEndpoints";
 import { IJobContext } from "@rocket.chat/apps-engine/definition/scheduler";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
+import { GHCommand } from "./commands/GhCommand";
 
 export class GithubApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -63,7 +64,7 @@ export class GithubApp extends App {
         };
         let text = `GitHub Authentication Succesfull 🚀`;
         let interactionData = await getInteractionRoomData(read.getPersistenceReader(),user.id) ;
-        
+
         if (token) {
             // await registerAuthorizedUser(read, persistence, user);
             await modify.getScheduler().scheduleOnce(deleteTokenTask);
@@ -78,7 +79,7 @@ export class GithubApp extends App {
         }else{
             await sendDirectMessage(read, modify, user, text, persistence);
         }
-       
+
     }
     public oauth2ClientInstance: IOAuth2Client;
     public oauth2Config: IOAuth2ClientOptions = {
@@ -155,8 +156,10 @@ export class GithubApp extends App {
         configuration: IConfigurationExtend
     ): Promise<void> {
         const gitHubCommand: GithubCommand = new GithubCommand(this);
+        const ghCommand: GHCommand = new GHCommand(this);
         await Promise.all([
             configuration.slashCommands.provideSlashCommand(gitHubCommand),
+            configuration.slashCommands.provideSlashCommand(ghCommand),
             this.getOauth2ClientInstance().setup(configuration),
         ]);
         configuration.scheduler.registerProcessors([
