@@ -22,6 +22,7 @@ import {
 } from "../handlers/EventHandler";
 import { handleSearch } from "../handlers/SearchHandler";
 import { handleNewIssue } from "../handlers/HandleNewIssue";
+import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -115,6 +116,18 @@ export class CommandUtility implements ExecutorProps {
                 }
                 case SubcommandEnum.SEARCH: {
                     handleSearch(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    );
+                    break;
+                }
+                case SubcommandEnum.PROFILE: {
+                    await handleUserProfileRequest(
                         this.read,
                         this.context,
                         this.app,
