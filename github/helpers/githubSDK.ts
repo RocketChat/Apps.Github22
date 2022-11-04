@@ -430,6 +430,37 @@ export async function mergePullRequest(
     return JSONResponse;
 }
 
+export async function getBasicUserInfo(
+    http: IHttp,
+    access_token: String,
+){
+    try {
+        const response = await getRequest(
+            http,
+            access_token,
+            BaseApiHost + 'user'
+        );
+        return {
+            username: response.login,
+            name : response.name,
+            email : response.email,
+            bio: response.bio,
+            followers : response.followers,
+            following : response.following,
+            avatar : response.avatar_url
+        }
+    }catch(e){
+        return {
+            name : "",
+            email : "",
+            bio: "",
+            followers : "",
+            following : "",
+            avatar : ""
+        };
+    }
+}
+
 export async function addNewPullRequestComment(
     http: IHttp,
     repoName: string,
