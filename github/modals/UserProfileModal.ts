@@ -90,8 +90,8 @@ export async function userProfileModal({
             }),
             block.newButtonElement(
                 {
-                    actionId: "123",
-                    value: "repo",
+                    actionId: ModalsEnum.TRIGGER_REPOS_MODAL,
+                    value: "Trigger Repos Modal",
                     text: {
                         type: TextObjectType.PLAINTEXT,
                         text: "Repositories"
@@ -101,8 +101,8 @@ export async function userProfileModal({
             ),
             block.newButtonElement(
                 {
-                    actionId: "123",
-                    value: "repo",
+                    actionId: ModalsEnum.TRIGGER_ISSUES_MODAL,
+                    value: "Trigger Issues Modal",
                     text: {
                         type: TextObjectType.PLAINTEXT,
                         text: "Issues"
@@ -112,7 +112,7 @@ export async function userProfileModal({
             ),
             block.newButtonElement(
                 {
-                    actionId: "123",
+                    actionId: ModalsEnum.TRIGGER_NOTIFICATIONS_MODAL,
                     value: "repo",
                     text: {
                         type: TextObjectType.PLAINTEXT,
@@ -123,7 +123,7 @@ export async function userProfileModal({
             ),
             block.newButtonElement(
                 {
-                    actionId: "123",
+                    actionId: ModalsEnum.TRIGGER_ACTIVITY_MODAL,
                     value: "repo",
                     text: {
                         type: TextObjectType.PLAINTEXT,
