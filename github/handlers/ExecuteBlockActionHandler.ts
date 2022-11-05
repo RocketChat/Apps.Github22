@@ -106,6 +106,15 @@ export class ExecuteBlockActionHandler {
                     }
                     break;
                 }
+                case ModalsEnum.TRIGGER_ISSUES_MODAL : {
+                    break;
+                }
+                case ModalsEnum.TRIGGER_REPOS_MODAL : {
+                    break;
+                }
+                case ModalsEnum.TRIGGER_ACTIVITY_MODAL : {
+                    break;
+                }
                 case ModalsEnum.SHARE_PROFILE_PARAMS : {
                     const { user } = context.getInteractionData();
                     const profileInteractionData = context.getInteractionData().value;
