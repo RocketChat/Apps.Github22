@@ -1,4 +1,5 @@
 import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
+import { ModalsEnum } from "../enum/Modals";
 
 const BaseHost = "https://github.com/";
 const BaseApiHost = "https://api.github.com/";
@@ -459,6 +460,39 @@ export async function getBasicUserInfo(
             avatar : ""
         };
     }
+}
+
+// TODO : MAKE THE RESPONSE FORMAT EXPORTABLE
+export async function getUserAssignedIssues(
+    http: IHttp,
+    username: String,
+    access_token : String,
+    filter : {
+        filter : String,
+        state : String,
+        sort : String
+    },
+){
+
+    try {
+        const response = await getRequest(
+            http,
+            access_token,
+            filter.filter == ModalsEnum.CREATED_ISSUE_FILTER ? `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+author:${username}`: (filter.filter == ModalsEnum.ASSIGNED_ISSUE_FILTER ? `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+assignee:${username}`: `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+mentions:${username}`
+        ));
+
+        return response
+    }
+    catch(e){
+
+        console.log("ERROR GENERATED FROM HTTP REQUEST");
+        console.log(e);
+
+        return {
+
+        }
+    }
+
 }
 
 export async function addNewPullRequestComment(
