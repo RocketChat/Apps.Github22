@@ -1,8 +1,9 @@
 import { IModify, IRead, IPersistence, IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
-import { TextObjectType, UIKitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
+import { ButtonStyle, TextObjectType, UIKitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
 import { ModalsEnum } from "../enum/Modals";
+import { OcticonIcons } from "../enum/OcticonIcons";
 import { getBasicUserInfo, getUserAssignedIssues } from "../helpers/githubSDK";
 import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
 
@@ -158,13 +159,6 @@ export async function userIssuesModal ({
         ]
     });
 
-    block.addSectionBlock({
-        text : {
-            text : "Issues",
-            type : TextObjectType.PLAINTEXT
-        },
-    });
-
     if (repoInfo.items.length == 0){
         block.addContextBlock({
             elements : [
@@ -175,25 +169,79 @@ export async function userIssuesModal ({
     else {
         repoInfo.items.map((value) => {
             if (value.pull_request == undefined){
+                const repoURL = value.repository_url as string;
+                const repoName = repoURL.substring(29, repoURL.length);
+                block.addContextBlock({
+                    elements : [
+                        block.newImageElement({
+                            imageUrl : OcticonIcons.REPOSITORY,
+                            altText : "REPO_ICON"
+                        }),
+                        block.newPlainTextObject(repoName, false),
+                        block.newImageElement({
+                            imageUrl : value.user.avatar_url as string,
+                            altText : "User Image"
+                        }),
+                        block.newPlainTextObject(value.user.login)
+                    ]
+                })
                 block.addSectionBlock({
                     text : {
-                        text : value.title ?? "None",
+                        text : `\`#${value.number}\` ${value.title}` ?? "None",
                         type : TextObjectType.MARKDOWN
-                    }
+                    },
                 })
+                const lastUpdated = new Date(value.updated_at);
+                block.addContextBlock({
+                    elements : [
+                        block.newImageElement({
+                            imageUrl : OcticonIcons.COMMENTS,
+                            altText : "Comments"
+                        }),
+                        block.newPlainTextObject(value.comments as string, false),
+                        block.newImageElement({
+                            imageUrl : OcticonIcons.ISSUE_OPEN,
+                            altText : "Assignees Icon"
+                        }),
+                        block.newPlainTextObject(value.assignees.length == 0 ? "No Assignees" : `${value.assignees.length} Assignees`),
+                        block.newImageElement({
+                            imageUrl : value.state == "open" ? OcticonIcons.ISSUE_OPEN : OcticonIcons.ISSUE_CLOSED,
+                            altText : "State"
+                        }),
+                        block.newPlainTextObject(`${value.state}`),
+                        block.newImageElement({
+                            imageUrl : OcticonIcons.PENCIL,
+                            altText : "Last Update At"
+                        }),
+                        block.newPlainTextObject(`Last Updated at ${lastUpdated.toUTCString()}`)
+
+                    ]
+                })
+
+                block.addActionsBlock({
+                    elements : [
+                        block.newButtonElement({
+                            text : {
+                                text : "Share Issue",
+                                type : TextObjectType.PLAINTEXT
+                            },
+                            style : ButtonStyle.PRIMARY
+                        }),
+                        block.newButtonElement({
+                            text : {
+                                text : "Open Issue",
+                                type : TextObjectType.PLAINTEXT
+                            },
+                            style : ButtonStyle.PRIMARY
+                        })
+                    ]
+                })
+
+
                 block.addDividerBlock();
             }
         })
     }
-
-    // if (filter == "By Repository"){
-    //     block.addSectionBlock({
-    //         text : {
-    //             text : "By Repository Added",
-    //             type : TextObjectType.PLAINTEXT
-    //         }
-    //     })
-    // }
 
     return {
         id : viewId,
@@ -203,5 +251,4 @@ export async function userIssuesModal ({
         },
         blocks : block.getBlocks()
     }
-
 }
