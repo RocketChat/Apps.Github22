@@ -7,6 +7,8 @@ import { IGithubReactions } from "../definitions/githubReactions";
 import { ModalsEnum } from "../enum/Modals";
 import { OcticonIcons } from "../enum/OcticonIcons";
 import { getIssueData, getUserAssignedIssues } from "../helpers/githubSDK";
+import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
+import { CreateReactionsBar } from "../lib/CreateReactionsBar";
 import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 
@@ -80,40 +82,7 @@ export async function IssueDisplayModal ({
         ]
     })
 
-    block.addContextBlock({
-        elements: [
-            block.newImageElement({
-                imageUrl: OcticonIcons.COMMENTS,
-                altText: "Comments",
-            }),
-            block.newPlainTextObject(
-                `${issueInfo.comments}`,
-                false
-            ),
-            block.newImageElement({
-                imageUrl: OcticonIcons.ISSUE_OPEN,
-                altText: "Assignees Icon",
-            }),
-            block.newPlainTextObject(
-                issueInfo.assignees ? (issueInfo.assignees.length == 0
-                    ? "No Assignees"
-                    : `${issueInfo.assignees.length} Assignees`) : ""
-            ),
-            block.newImageElement({
-                imageUrl:
-                    issueInfo.state == "open"
-                        ? OcticonIcons.ISSUE_OPEN
-                        : OcticonIcons.ISSUE_CLOSED,
-                altText: "State",
-            }),
-            block.newPlainTextObject(`${issueInfo.state}`),
-            block.newImageElement({
-                imageUrl: issueInfo.user_avatar ?? "",
-                altText: "User Image",
-            }),
-            block.newPlainTextObject(`Created by ${issueInfo.user_login}` ?? ""),
-        ],
-    });
+    CreateIssueStatsBar(issueInfo, block);
 
     block.addSectionBlock({
         text : {
@@ -123,31 +92,36 @@ export async function IssueDisplayModal ({
     })
     block.addDividerBlock();
 
-    // reactions
-
-    const reactions = issueInfo.reactions
-
-    block.addContextBlock({
-        elements : [
-            block.newPlainTextObject(`Total Reactions ${reactions?.total_count}`, true),
-            block.newPlainTextObject(`➕ ${reactions?.plus_one} `, true),
-            block.newPlainTextObject(`➖ ${reactions?.minus_one}`, true),
-            block.newPlainTextObject(`😄 ${reactions?.laugh}`, true),
-            block.newPlainTextObject(`🎉 ${reactions?.hooray}`, true),
-            block.newPlainTextObject(`😕 ${reactions?.confused}`, true),
-            block.newPlainTextObject(`♥️ ${reactions?.heart}`, true),
-            block.newPlainTextObject(`🚀 ${reactions?.rocket}`, true),
-            block.newPlainTextObject(`👀 ${reactions?.eyes}`, true),
-        ]
-    })
+    issueInfo.reactions && CreateReactionsBar(issueInfo.reactions, block);
 
     issueInfo.body && BodyMarkdownRenderer({body : issueInfo.body, block : block})
+
+    block.addActionsBlock({
+        elements : [
+            block.newButtonElement({
+                actionId : ModalsEnum.SHARE_ISSUE_ACTION,
+                value : `${repoName}, ${issueNumber}`,
+                text : {
+                    text : "Share Issue",
+                    type : TextObjectType.PLAINTEXT
+                },
+            }),
+            block.newButtonElement({
+                actionId : ModalsEnum.SHARE_ISSUE_ACTION,
+                value : `${repoName}, ${issueNumber}`,
+                text : {
+                    text : "Assign Issue",
+                    type : TextObjectType.PLAINTEXT
+                },
+            })
+        ]
+    })
 
     return {
         id : viewId,
         title : {
             text : `${repoName} \`#${issueNumber}\``,
-            type : TextObjectType.PLAINTEXT
+            type : TextObjectType.MARKDOWN
         },
         blocks : block.getBlocks()
     }
