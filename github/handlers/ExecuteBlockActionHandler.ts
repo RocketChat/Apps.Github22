@@ -11,13 +11,14 @@ import { basicQueryMessage } from "../helpers/basicQueryMessage";
 import { ModalsEnum } from "../enum/Modals";
 import { fileCodeModal } from "../modals/fileCodeModal";
 import {
+    ButtonStyle,
     IUIKitResponse,
     TextObjectType,
     UIKitBlockInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo } from "../helpers/githubSDK";
+import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -44,6 +45,9 @@ import { shareProfileModal } from "../modals/profileShareModal";
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
 import { userIssuesModal } from "../modals/UserIssuesModal";
 import { IssueDisplayModal } from "../modals/IssueDisplayModal";
+import { IGitHubIssue } from "../definitions/githubIssue";
+import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
+import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
 
 export class ExecuteBlockActionHandler {
 
@@ -108,6 +112,55 @@ export class ExecuteBlockActionHandler {
                         };
                     }
                 }
+                case ModalsEnum.SHARE_ISSUE_ACTION : {
+                    let {user, value, room} = context.getInteractionData();
+                    const access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+
+                    const repoName = value?.split(",")[0] ?? "";
+                    const issueNumber = value?.split(",")[1] ?? "";
+
+                    const issueInfo : IGitHubIssue = await getIssueData(repoName, issueNumber, access_token.token, this.http);
+
+                    const block = this.modify.getCreator().getBlockBuilder();
+
+                    CreateIssueStatsBar(issueInfo, block);
+
+                    block.addSectionBlock({
+                        text : {
+                            text : `*${issueInfo.title}*` ?? "",
+                            type : TextObjectType.MARKDOWN
+                        }
+                    }),
+                    block.addActionsBlock({
+                        elements : [
+                            block.newButtonElement({
+                                text : {
+                                    text : "Open Issue in Browser",
+                                    type : TextObjectType.PLAINTEXT
+                                },
+                                url : issueInfo.html_url,
+                                style : ButtonStyle.PRIMARY
+                            })
+                        ]
+                    })
+                    issueInfo.body && BodyMarkdownRenderer({body : issueInfo.body, block : block});
+
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify, room!, user, `Issue`, block)
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify, room, user, `Issue`, block)
+                        }
+                    }
+                    break;
+                }
                 case ModalsEnum.TRIGGER_ISSUE_DISPLAY_MODAL : {
                     const {user, value} = context.getInteractionData();
                     const access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
@@ -128,89 +181,58 @@ export class ExecuteBlockActionHandler {
 
                     return context.getInteractionResponder().updateModalViewResponse(issueDisplayModal);
                 }
+                case ModalsEnum.SWITCH_ISSUE_SORT :
+                case ModalsEnum.SWITCH_ISSUE_STATE :
                 case ModalsEnum.SWITCH_ISSUE_FILTER : {
                     const record = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ISSUE_MAIN_FILTER");
-                    const issueFilterArray = await this.read.getPersistenceReader().readByAssociation(record);
+
+                    const issueFilterArray = await this.read.getPersistenceReader().readByAssociation(record) as {filter : string, state : string, sort: string, order: string}[];
+
                     const {user, value} = context.getInteractionData();
+
                     let filter : {filter : string, state : string, sort: string, order: string} | undefined;
 
-                    if (issueFilterArray.length != 0){
-                        filter = issueFilterArray[0] as { filter : string, state : string, sort: string, order: string};
-                        filter.filter = value as string;
-                    }else {
-                        filter = {
-                            filter : value as string,
-                            sort : ModalsEnum.ISSUE_SORT_CREATED,
-                            state : ModalsEnum.ISSUE_STATE_OPEN,
-                            order : ModalsEnum.ISSUES_DESCENDING
-                        }
-                    }
+                    const prev_sort = issueFilterArray.length == 0 ? ModalsEnum.ISSUE_SORT_CREATED : issueFilterArray[0].sort;
+                    const prev_filter = issueFilterArray.length == 0 ? ModalsEnum.ASSIGNED_ISSUE_FILTER : issueFilterArray[0].filter;
+                    const prev_state = issueFilterArray.length == 0 ? ModalsEnum.ISSUE_STATE_OPEN : issueFilterArray[0].state;
 
-                    let access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
-                    const issueModal = await userIssuesModal({
-                        access_token : access_token.token,
-                        filter : filter,
-                        modify : this.modify,
-                        read : this.read,
-                        persistence : this.persistence,
-                        http : this.http
-                    })
-
-                    await this.persistence.updateByAssociation(record, filter);
-
-
-                    return context.getInteractionResponder().updateModalViewResponse(issueModal);
-                }
-
-                case ModalsEnum.SWITCH_ISSUE_SORT : {
-                    const record = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ISSUE_MAIN_FILTER");
-                    const issueFilterArray = await this.read.getPersistenceReader().readByAssociation(record);
-                    const {user, value} = context.getInteractionData();
-                    let filter : {filter : string, state : string, sort: string, order: string} | undefined;
-
-                    if (issueFilterArray.length != 0){
-                        filter = issueFilterArray[0] as { filter : string, state : string, sort: string, order: string};
-                        filter.filter = value as string;
-                    }else {
-                        filter = {
-                            filter : ModalsEnum.ASSIGNED_ISSUE_FILTER,
-                            sort : value as string,
-                            state : ModalsEnum.ISSUE_STATE_OPEN,
-                            order : ModalsEnum.ISSUES_DESCENDING
-                        }
-                    }
-
-                    let access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
-                    const issueModal = await userIssuesModal({
-                        access_token : access_token.token,
-                        filter : filter,
-                        modify : this.modify,
-                        read : this.read,
-                        persistence : this.persistence,
-                        http : this.http
-                    })
-
-                    await this.persistence.updateByAssociation(record, filter);
-
-                    return context.getInteractionResponder().updateModalViewResponse(issueModal);
-
-                }
-                case ModalsEnum.SWITCH_ISSUE_STATE : {
-                    const record = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ISSUE_MAIN_FILTER");
-                    const issueFilterArray = await this.read.getPersistenceReader().readByAssociation(record);
-                    const {user, value} = context.getInteractionData();
-                    let filter : {filter : string, state : string, sort: string, order: string} | undefined;
-
-                    if (issueFilterArray.length != 0){
-                        filter = issueFilterArray[0] as { filter : string, state : string, sort: string, order: string};
-                        filter.filter = value as string;
-                    }else {
-                        filter = {
-                            filter : ModalsEnum.ASSIGNED_ISSUE_FILTER,
-                            sort : ModalsEnum.ISSUE_SORT_CREATED,
-                            state : value as string,
-                            order : ModalsEnum.ISSUES_DESCENDING
-                        }
+                    switch (value as string) {
+                        case ModalsEnum.ASSIGNED_ISSUE_FILTER:
+                        case ModalsEnum.MENTIONED_ISSUE_FILTER:
+                        case ModalsEnum.CREATED_ISSUE_FILTER:
+                            filter = {
+                                filter : value as string,
+                                sort : prev_sort,
+                                state : prev_state,
+                                order : ModalsEnum.ISSUES_DESCENDING
+                            }
+                            break;
+                        case ModalsEnum.ISSUE_SORT_CREATED :
+                        case ModalsEnum.ISSUE_SORT_COMMENTS :
+                        case ModalsEnum.ISSUE_SORT_UPDATED :
+                            filter = {
+                                filter : prev_filter,
+                                sort : value as string,
+                                state : prev_state,
+                                order : ModalsEnum.ISSUES_DESCENDING
+                            }
+                            break;
+                        case ModalsEnum.ISSUE_STATE_OPEN :
+                        case ModalsEnum.ISSUE_STATE_CLOSED :
+                            filter = {
+                                filter : prev_filter,
+                                sort : prev_sort,
+                                state : value as string,
+                                order : ModalsEnum.ISSUES_DESCENDING
+                            }
+                            break;
+                        default:
+                            filter = {
+                                filter : ModalsEnum.ASSIGNED_ISSUE_FILTER,
+                                sort : ModalsEnum.ISSUE_SORT_CREATED,
+                                state : ModalsEnum.ISSUE_STATE_OPEN,
+                                order : ModalsEnum.ISSUES_DESCENDING
+                            }
                     }
 
                     let access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
@@ -233,7 +255,14 @@ export class ExecuteBlockActionHandler {
 
                     let access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
 
+                    const filter = {
+                        filter : ModalsEnum.ASSIGNED_ISSUE_FILTER,
+                        state : ModalsEnum.ISSUE_STATE_OPEN,
+                        sort : ModalsEnum.ISSUE_SORT_CREATED
+                    }
+
                     const issuesModal = await userIssuesModal({
+                        filter : filter,
                         access_token : access_token.token,
                         modify: this.modify,
                         read : this.read,

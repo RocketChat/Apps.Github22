@@ -473,12 +473,30 @@ export async function getUserAssignedIssues(
         sort : String
     },
 ) : Promise<IGitHubIssue[]>{
+
+
+    let url;
+
+    switch (filter.filter) {
+        case ModalsEnum.CREATED_ISSUE_FILTER:
+            url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+author:${username}`
+            break;
+        case ModalsEnum.ASSIGNED_ISSUE_FILTER:
+            url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+assignee:${username}`
+            break;
+        case ModalsEnum.MENTIONED_ISSUE_FILTER:
+            url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+mentions:${username}`
+        default:
+            break;
+    }
+
+    console.log(url);
     try {
         const response = await getRequest(
             http,
             access_token,
-            filter.filter == ModalsEnum.CREATED_ISSUE_FILTER ? `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+author:${username}`: (filter.filter == ModalsEnum.ASSIGNED_ISSUE_FILTER ? `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+assignee:${username}`: `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+mentions:${username}`
-        ));
+            url,
+        );
 
         const getAssignees = (assignees : any[]) : string[] => assignees.map((val): string => {
             return val.login as string;
@@ -523,6 +541,7 @@ export async function getIssueData(
         return {
             issue_id : response.id as string,
             issue_compact : response.body as string,
+            html_url : response.html_url as string,
             repo_url : response.repository_url as string,
             user_login : response.user.login as string,
             user_avatar : response.user.avatar_url as string,
