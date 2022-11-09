@@ -4,6 +4,7 @@ import {
     IPersistence,
     IHttp,
 } from "@rocket.chat/apps-engine/definition/accessors";
+import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import {
     ButtonStyle,
@@ -20,11 +21,7 @@ import {
 } from "../persistance/roomInteraction";
 
 export async function userIssuesModal({
-    filter = {
-        filter: ModalsEnum.ALL_ISSUE_FILTER,
-        state: ModalsEnum.ISSUE_STATE_OPEN,
-        sort: ModalsEnum.ISSUE_SORT_CREATED,
-    },
+    filter,
     access_token,
     modify,
     read,
@@ -33,10 +30,10 @@ export async function userIssuesModal({
     slashcommandcontext,
     uikitcontext,
 }: {
-    filter?: {
-        filter: String;
-        state: String;
-        sort: String;
+    filter: {
+        filter: string;
+        state: string;
+        sort: string;
     };
     access_token: String;
     modify: IModify;
@@ -82,12 +79,12 @@ export async function userIssuesModal({
     block.addActionsBlock({
         elements: [
             block.newStaticSelectElement({
-                actionId: ModalsEnum.SWITCH_ISSUE_FILTER,
                 placeholder: {
                     text: "Select an Issue Filter",
                     type: TextObjectType.PLAINTEXT,
                 },
-                initialValue: ModalsEnum.ASSIGNED_ISSUE_FILTER,
+                initialValue: filter.filter,
+                actionId: ModalsEnum.SWITCH_ISSUE_FILTER,
                 options: [
                     {
                         value: ModalsEnum.ASSIGNED_ISSUE_FILTER,
@@ -118,12 +115,12 @@ export async function userIssuesModal({
     block.addActionsBlock({
         elements: [
             block.newStaticSelectElement({
-                actionId: ModalsEnum.SWITCH_ISSUE_STATE,
                 placeholder: {
                     text: "Select Issues State",
                     type: TextObjectType.PLAINTEXT,
                 },
-                initialValue: ModalsEnum.ISSUE_STATE_OPEN,
+                initialValue: filter.state,
+                actionId: ModalsEnum.SWITCH_ISSUE_STATE,
                 options: [
                     {
                         value: ModalsEnum.ISSUE_STATE_OPEN,
@@ -131,18 +128,12 @@ export async function userIssuesModal({
                             text: "Open Issues",
                             type: TextObjectType.PLAINTEXT,
                         },
+
                     },
                     {
                         value: ModalsEnum.ISSUE_STATE_CLOSED,
                         text: {
                             text: "Closed Issues",
-                            type: TextObjectType.PLAINTEXT,
-                        },
-                    },
-                    {
-                        value: ModalsEnum.ISSUE_STATE_ALL,
-                        text: {
-                            text: "All Issues",
                             type: TextObjectType.PLAINTEXT,
                         },
                     },
@@ -154,7 +145,7 @@ export async function userIssuesModal({
                     text: "Sort Issues By...",
                     type: TextObjectType.PLAINTEXT,
                 },
-                initialValue: ModalsEnum.ISSUE_SORT_CREATED,
+                initialValue: filter.sort,
                 options: [
                     {
                         value: ModalsEnum.ISSUE_SORT_CREATED,
@@ -268,6 +259,15 @@ export async function userIssuesModal({
                             value: `${repoName}, ${value.number}`,
                             text: {
                                 text: "Open Issue",
+                                type: TextObjectType.PLAINTEXT,
+                            },
+                            style: ButtonStyle.PRIMARY,
+                        }),
+                        block.newButtonElement({
+                            actionId: ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE,
+                            value: `${repoName} ${value.number} henit-chobisa`,
+                            text: {
+                                text: "Assign Issue",
                                 type: TextObjectType.PLAINTEXT,
                             },
                             style: ButtonStyle.PRIMARY,
