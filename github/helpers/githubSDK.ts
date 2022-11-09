@@ -1,4 +1,5 @@
 import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
+import { IGitHubIssue } from "../definitions/githubIssue";
 import { ModalsEnum } from "../enum/Modals";
 
 const BaseHost = "https://github.com/";
@@ -462,7 +463,6 @@ export async function getBasicUserInfo(
     }
 }
 
-// TODO : MAKE THE RESPONSE FORMAT EXPORTABLE
 export async function getUserAssignedIssues(
     http: IHttp,
     username: String,
@@ -472,8 +472,7 @@ export async function getUserAssignedIssues(
         state : String,
         sort : String
     },
-){
-
+) : Promise<IGitHubIssue[]>{
     try {
         const response = await getRequest(
             http,
@@ -481,18 +480,77 @@ export async function getUserAssignedIssues(
             filter.filter == ModalsEnum.CREATED_ISSUE_FILTER ? `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+author:${username}`: (filter.filter == ModalsEnum.ASSIGNED_ISSUE_FILTER ? `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+assignee:${username}`: `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort}-desc+mentions:${username}`
         ));
 
-        return response
+        const getAssignees = (assignees : any[]) : string[] => assignees.map((val): string => {
+            return val.login as string;
+        })
+
+        const modifiedResponse : Array<IGitHubIssue> = response.items.map((value) : IGitHubIssue => {
+            return {
+                issue_id : value.id as string,
+                issue_compact : value.body as string,
+                repo_url : value.repository_url as string,
+                user_login : value.user.login as string,
+                user_avatar : value.user.avatar_url as string,
+                number : value.number as number,
+                title : value.title as string,
+                body : value.body as string,
+                assignees : getAssignees(value.assignees),
+                state : value.state as string,
+                last_updated_at : value.updated_at as string,
+                comments : value.comments as number,
+            }
+        })
+
+        return modifiedResponse;
     }
     catch(e){
+        return [];
+    }
+}
 
-        console.log("ERROR GENERATED FROM HTTP REQUEST");
-        console.log(e);
+export async function getIssueData(
+    repoInfo:String,
+    issueNumber:String,
+    access_token:String,
+    http:IHttp
+) : Promise<IGitHubIssue> {
+    try {
+        const response = await getRequest(http, access_token, BaseRepoApiHost + repoInfo + '/issues/' + issueNumber);
+        const getAssignees = (assignees : any[]) : string[] => assignees.map((val): string => {
+            return val.login as string;
+        })
 
         return {
-
+            issue_id : response.id as string,
+            issue_compact : response.body as string,
+            repo_url : response.repository_url as string,
+            user_login : response.user.login as string,
+            user_avatar : response.user.avatar_url as string,
+            number : response.number as number,
+            title : response.title as string,
+            body : response.body as string,
+            assignees : getAssignees(response.assignees),
+            state : response.state as string,
+            last_updated_at : response.updated_at as string,
+            comments : response.comments as number,
+            reactions : {
+                total_count : response.reactions["total_count"],
+                plus_one : response.reactions["+1"],
+                minus_one : response.reactions["-1"],
+                laugh : response.reactions["laugh"],
+                hooray : response.reactions["hooray"],
+                confused : response.reactions["confused"],
+                heart : response.reactions["heart"],
+                rocket : response.reactions["rocket"],
+                eyes : response.reactions["eyes"]
+            }
+        }
+    }catch(e) {
+        return {
+            issue_compact : "Error Fetching Issue",
+            issue_id : 0
         }
     }
-
 }
 
 export async function addNewPullRequestComment(
