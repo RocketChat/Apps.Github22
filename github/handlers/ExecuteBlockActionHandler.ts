@@ -43,6 +43,7 @@ import { IGitHubIssueData } from "../definitions/githubIssueData";
 import { shareProfileModal } from "../modals/profileShareModal";
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
 import { userIssuesModal } from "../modals/UserIssuesModal";
+import { IssueDisplayModal } from "../modals/IssueDisplayModal";
 
 export class ExecuteBlockActionHandler {
 
@@ -106,6 +107,26 @@ export class ExecuteBlockActionHandler {
                             success: false,
                         };
                     }
+                }
+                case ModalsEnum.TRIGGER_ISSUE_DISPLAY_MODAL : {
+                    const {user, value} = context.getInteractionData();
+                    const access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+
+                    const repoInfo = value?.split(",")[0] ?? "";
+                    const issueNumber = value?.split(",")[1] ?? "";
+
+                    const issueDisplayModal = await IssueDisplayModal({
+                        repoName : repoInfo,
+                        issueNumber : issueNumber,
+                        access_token : access_token.token,
+                        modify : this.modify,
+                        read : this.read,
+                        persistence : this.persistence,
+                        http : this.http,
+                        uikitcontext : context
+                    })
+
+                    return context.getInteractionResponder().updateModalViewResponse(issueDisplayModal);
                 }
                 case ModalsEnum.SWITCH_ISSUE_FILTER : {
                     const record = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ISSUE_MAIN_FILTER");
@@ -219,7 +240,7 @@ export class ExecuteBlockActionHandler {
                         persistence : this.persistence,
                         http : this.http,
                         uikitcontext : context
-                    })
+                    });
 
                     return context.getInteractionResponder().openModalViewResponse(issuesModal);
                 }

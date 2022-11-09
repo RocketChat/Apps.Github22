@@ -1,4 +1,5 @@
 export enum ModalsEnum {
+    TRIGGER_ISSUE_DISPLAY_MODAL = 'display-issue',
     SWITCH_ISSUE_ORDER = 'switch-issue-order',
     ISSUES_ASCENDING = 'asc',
     ISSUES_DESCENDING = 'desc',
