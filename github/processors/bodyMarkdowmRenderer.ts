@@ -3,6 +3,23 @@ import {
     TextObjectType,
 } from "@rocket.chat/apps-engine/definition/uikit";
 
+
+function cleanHeadingSyntax(text: string) : string{
+    try {
+        text = text.replace(/(#{3}\s)(.*)/g, (val) => `*${val.substring(3, val.length).trim()}*`);
+        text = text.replace(/(#{2}\s)(.*)/g, (val) => `*${val.substring(3, val.length)}*`);
+        text = text.replace(/(#{1}\s)(.*)/g, (val) => `*${val.substring(2, val.length)}*`);
+        text = text.replace(/\[ ] (?!\~|\[\^\d+])/g, (val) => `⭕ ${val.substring(3, val.length)}*`);
+        text = text.replace(/\[X] (?!\~|\[\^\d+])/g, (val) => `✅ ${val.substring(3, val.length)}*`);
+    }
+    catch(e){
+        console.log(e);
+    }
+
+    return text;
+}
+
+
 export async function BodyMarkdownRenderer({
     body,
     block,
@@ -10,7 +27,7 @@ export async function BodyMarkdownRenderer({
     body: string;
     block: BlockBuilder;
 }) {
-    const patterns: { type: string; pattern: RegExp }[] = [
+    const imagePatterns: { type: string; pattern: RegExp }[] = [
         {
             type: "ImageTag",
             pattern: RegExp(/(<img) (width=".*") (alt=".*") (src=".+">)/g, "g"),
@@ -24,7 +41,7 @@ export async function BodyMarkdownRenderer({
     let matches: { beginningIndex: number; match: string; type: string }[] = [];
     var match;
 
-    patterns.forEach((patObj) => {
+    imagePatterns.forEach((patObj) => {
         while ((match = patObj.pattern.exec(body)) != null) {
             matches.push({
                 beginningIndex: match.index,
@@ -55,29 +72,32 @@ export async function BodyMarkdownRenderer({
             );
             const url = rawURL ? rawURL[0] : "";
 
-            block.addSectionBlock({
-                text: {
-                    text: body.substring(start, value.beginningIndex - 1) ?? "",
-                    type: TextObjectType.MARKDOWN,
-                },
-            }),
-                block.addImageBlock({
-                    imageUrl: url,
-                    altText: "ImageURL",
-                });
+            block.addContextBlock({
+                elements: [
+                    block.newMarkdownTextObject(
+                        cleanHeadingSyntax(body.substring(start, value.beginningIndex - 1) ?? "")
+                    ),
+                ],
+            });
+
+            block.addImageBlock({
+                imageUrl: url,
+                altText: "ImageURL",
+            });
 
             if (
                 index == matches.length - 1 &&
                 value.beginningIndex + value.match.length < body.length
             ) {
-                block.addSectionBlock({
-                    text: {
-                        text: body.substring(
-                            value.beginningIndex + value.match.length,
-                            body.length
+                block.addContextBlock({
+                    elements: [
+                        block.newMarkdownTextObject(
+                            cleanHeadingSyntax(body.substring(
+                                value.beginningIndex + value.match.length,
+                                body.length
+                            ))
                         ),
-                        type: TextObjectType.MARKDOWN,
-                    },
+                    ],
                 });
             }
         });

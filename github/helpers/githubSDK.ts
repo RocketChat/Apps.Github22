@@ -489,8 +489,6 @@ export async function getUserAssignedIssues(
         default:
             break;
     }
-
-    console.log(url);
     try {
         const response = await getRequest(
             http,
