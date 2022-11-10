@@ -7,15 +7,14 @@ import {
 function cleanHeadingSyntax(text: string) : string{
     try {
         text = text.replace(/(#{3}\s)(.*)/g, (val) => `*${val.substring(3, val.length).trim()}*`);
-        text = text.replace(/(#{2}\s)(.*)/g, (val) => `*${val.substring(3, val.length)}*`);
-        text = text.replace(/(#{1}\s)(.*)/g, (val) => `*${val.substring(2, val.length)}*`);
+        text = text.replace(/(#{2}\s)(.*)/g, (val) => `*${val.substring(3, val.length).trim()}*`);
+        text = text.replace(/(#{1}\s)(.*)/g, (val) => `*${val.substring(2, val.length).trim()}*`);
         text = text.replace(/\[ ] (?!\~|\[\^\d+])/g, (val) => `⭕ ${val.substring(3, val.length)}*`);
         text = text.replace(/\[X] (?!\~|\[\^\d+])/g, (val) => `✅ ${val.substring(3, val.length)}*`);
     }
     catch(e){
         console.log(e);
     }
-
     return text;
 }
 
@@ -54,7 +53,7 @@ export async function BodyMarkdownRenderer({
     if (matches.length == 0) {
         block.addSectionBlock({
             text: {
-                text: body,
+                text: cleanHeadingSyntax(body),
                 type: TextObjectType.MARKDOWN,
             },
         });
@@ -102,11 +101,4 @@ export async function BodyMarkdownRenderer({
             }
         });
     }
-
-    // block.addSectionBlock({
-    //     text : {
-    //         text : body,
-    //         type : TextObjectType.PLAINTEXT
-    //     }
-    // })
 }
