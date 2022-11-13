@@ -22,6 +22,9 @@ import {
 } from "../handlers/EventHandler";
 import { handleSearch } from "../handlers/SearchHandler";
 import { handleNewIssue } from "../handlers/HandleNewIssue";
+import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
+import { handleGist, sendGistWithNumber } from "../handlers/handleGist";
+import { getUserGist } from "../helpers/githubSDK";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -62,6 +65,18 @@ export class CommandUtility implements ExecutorProps {
             });
         } else {
             switch (this.command[0]) {
+                case SubcommandEnum.GIST : {
+                    await handleGist(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    )
+                    break;
+                }
                 case SubcommandEnum.LOGIN: {
                     await handleLogin(
                         this.app,
@@ -125,6 +140,18 @@ export class CommandUtility implements ExecutorProps {
                     );
                     break;
                 }
+                case SubcommandEnum.PROFILE: {
+                    await handleUserProfileRequest(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    );
+                    break;
+                }
                 default: {
                     await helperMessage({
                         room: this.room,
@@ -141,7 +168,23 @@ export class CommandUtility implements ExecutorProps {
 
     private async handleDualParamCommands() {
         const query = this.command[1];
-        const repository = this.command[0];
+        const command = this.command[0];
+
+
+        if (command == "gist" && command != undefined){
+            await sendGistWithNumber(
+                +query,
+                this.read,
+                this.context,
+                this.app,
+                this.persistence,
+                this.http,
+                this.room,
+                this.modify
+            )
+            return;
+        }
+
         switch (query) {
             case SubcommandEnum.SUBSCRIBE: {
                 SubscribeAllEvents(
@@ -172,7 +215,7 @@ export class CommandUtility implements ExecutorProps {
             default: {
                 await basicQueryMessage({
                     query,
-                    repository,
+                    repository: command,
                     room: this.room,
                     read: this.read,
                     persistence: this.persistence,

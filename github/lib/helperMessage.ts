@@ -21,7 +21,7 @@ export async function helperMessage({
 }) {
     let helperMessageString = `
     Github App
-    
+    - Both /gh and /github commands can be used.
     1) See Interactive Button interface to fetch repository data -> /github Username/RepositoryName
     2) Get details of a Repository -> /github  Username/RepositoryName repo
     3) Get Issues of a Repository -> /github  Username/RepositoryName issues
@@ -30,13 +30,14 @@ export async function helperMessage({
     6) Review a Pull Request -> /github  Username/RepositoryName pulls pullNumber
     7) Login to GitHub -> /github login
     8) Logout from GitHub -> /github logout
-    9) View/Add/Delete/Update Repository Subscriptions -> /github subscribe 
+    9) View/Add/Delete/Update Repository Subscriptions -> /github subscribe
     10) Subscribe to all repository events -> /github Username/RepositoryName subscribe
     11) Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe
     12) Add New Issues to GitHub Repository -> /github issue
     13) Search Issues and Pull Requests -> /github search
     14) Assign and Share Issues -> /github issues
-    
+    15) Review and Share Gist -> /github gist
+    16) Get the latest Gist for the Authorized User -> /github gist 1
     `;
 
     const textSender = await modify
