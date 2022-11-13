@@ -1,4 +1,5 @@
 import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
+import { IGist } from "../definitions/Gist";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { ModalsEnum } from "../enum/Modals";
 
@@ -366,6 +367,22 @@ export async function githubSearchIssuesPulls(
     return resultResponse;
 }
 
+
+export async function loadGist(http: IHttp,url : string, access_token : string){
+    try {
+        const response = await http.get(url, {
+            headers : {
+                "Authorization" : `Bearer ${access_token}`
+            }
+        });
+        return response.content;
+    } catch (error) {
+        console.error("ERROR WHILE LOADING GIST-------------------------------");
+        console.error(error);
+        return "";
+    }
+}
+
 export async function getRepoData(
     http: IHttp,
     repoName: string,
@@ -463,6 +480,21 @@ export async function getBasicUserInfo(
     }
 }
 
+export async function getUserGist(
+    http : IHttp,
+    username : string,
+    access_token: string
+){
+    try {
+        const response = await getRequest(http, access_token, BaseApiHost + 'users/' + username + '/gists');
+        const modRes = response as IGist[];
+        return modRes;
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+}
+
 export async function getUserAssignedIssues(
     http: IHttp,
     username: String,
@@ -473,8 +505,6 @@ export async function getUserAssignedIssues(
         sort : String
     },
 ) : Promise<IGitHubIssue[]>{
-
-
     let url;
 
     switch (filter.filter) {
