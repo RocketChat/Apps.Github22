@@ -1,4 +1,5 @@
 export enum ModalsEnum {
+    SHARE_GIST_ACTION = 'share-gist-action',
     SHARE_ISSUE_ACTION = 'share-issue-action',
     TRIGGER_ISSUE_DISPLAY_MODAL = 'display-issue',
     SWITCH_ISSUE_ORDER = 'switch-issue-order',
