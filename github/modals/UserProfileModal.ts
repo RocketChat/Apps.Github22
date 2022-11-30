@@ -90,44 +90,11 @@ export async function userProfileModal({
             }),
             block.newButtonElement(
                 {
-                    actionId: ModalsEnum.TRIGGER_REPOS_MODAL,
-                    value: "Trigger Repos Modal",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "Repositories"
-                    },
-                    style: ButtonStyle.PRIMARY
-                },
-            ),
-            block.newButtonElement(
-                {
                     actionId: ModalsEnum.TRIGGER_ISSUES_MODAL,
                     value: "Trigger Issues Modal",
                     text: {
                         type: TextObjectType.PLAINTEXT,
                         text: "Issues"
-                    },
-                    style: ButtonStyle.PRIMARY
-                },
-            ),
-            block.newButtonElement(
-                {
-                    actionId: ModalsEnum.TRIGGER_NOTIFICATIONS_MODAL,
-                    value: "repo",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "Notifications"
-                    },
-                    style: ButtonStyle.PRIMARY
-                },
-            ),
-            block.newButtonElement(
-                {
-                    actionId: ModalsEnum.TRIGGER_ACTIVITY_MODAL,
-                    value: "repo",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "Your Feed"
                     },
                     style: ButtonStyle.PRIMARY
                 },
