@@ -265,8 +265,8 @@ export async function userIssuesModal({
                             style: ButtonStyle.PRIMARY,
                         }),
                         block.newButtonElement({
-                            actionId: ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE,
-                            value: `${repoName} ${value.number}`,
+                            actionId: ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE_PROFILE,
+                            value: `${repoName}, ${value.number}`,
                             text: {
                                 text: "Assign Issue",
                                 type: TextObjectType.PLAINTEXT,

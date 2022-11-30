@@ -69,7 +69,7 @@ export async function userProfileModal({
 
     block.addDividerBlock();
 
-    block.addImageBlock({imageUrl : githubActivityGraphUrl(user.username), altText: "Github Contribution Graph"});
+    block.addImageBlock({imageUrl : githubActivityGraphUrl(userInfo.username), altText: "Github Contribution Graph"});
 
 
 

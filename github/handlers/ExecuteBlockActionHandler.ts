@@ -788,6 +788,7 @@ export class ExecuteBlockActionHandler {
                     }
                     break;
                 }
+                case ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE_PROFILE :
                 case ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE: {
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
