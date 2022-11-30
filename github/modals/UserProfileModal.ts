@@ -7,6 +7,7 @@ import { ModalsEnum } from "../enum/Modals";
 import { getBasicUserInfo } from "../helpers/githubSDK";
 import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
 import {} from "@rocket.chat/apps-engine/definition/uikit/"
+import { githubActivityGraphUrl } from "../helpers/githubActivityGraphURL";
 
 export async function userProfileModal({
     access_token,
@@ -68,14 +69,14 @@ export async function userProfileModal({
 
     block.addDividerBlock();
 
-    block.addImageBlock({imageUrl : `https://activity-graph.herokuapp.com/graph?username=${userInfo.username}&bg_color=ffffff&color=708090&line=24292e&point=24292e`, altText: "Github Contribution Graph"});
+    block.addImageBlock({imageUrl : githubActivityGraphUrl(user.username), altText: "Github Contribution Graph"});
 
 
 
     block.addDividerBlock();
 
     block.addSectionBlock({
-        text: block.newPlainTextObject("Where should we teleport ?")
+        text: block.newPlainTextObject("Select from the following options.")
     })
 
     block.addActionsBlock({

@@ -22,7 +22,7 @@ export async function handleUserProfileRequest(
         context.getSender(),
         app.oauth2Config
     );
-    if (access_token && access_token.token){
+    if (access_token?.token){
         const triggerId = context.getTriggerId();
         if (triggerId){
             const modal = await userProfileModal({

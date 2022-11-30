@@ -37,7 +37,7 @@ export async function CreateIssueStatsBar(
                 imageUrl: issueInfo.user_avatar ?? "",
                 altText: "User Image",
             }),
-            block.newPlainTextObject(`Created by ${issueInfo.user_login}` ?? ""),
+            block.newPlainTextObject(issueInfo.user_login ? `Created by ${issueInfo.user_login}` : "Failed to Load Creator"),
         ],
     });
 
