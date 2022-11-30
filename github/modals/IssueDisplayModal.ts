@@ -107,7 +107,7 @@ export async function IssueDisplayModal ({
                 },
             }),
             block.newButtonElement({
-                actionId : ModalsEnum.SHARE_ISSUE_ACTION,
+                actionId : ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE,
                 value : `${repoName}, ${issueNumber}`,
                 text : {
                     text : "Assign Issue",

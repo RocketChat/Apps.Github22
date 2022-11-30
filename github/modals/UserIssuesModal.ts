@@ -247,7 +247,8 @@ export async function userIssuesModal({
                 block.addActionsBlock({
                     elements: [
                         block.newButtonElement({
-                            value: ``,
+                            actionId: ModalsEnum.SHARE_ISSUE_ACTION,
+                            value: `${repoName}, ${value.number}`,
                             text: {
                                 text: "Share Issue",
                                 type: TextObjectType.PLAINTEXT,
@@ -265,7 +266,7 @@ export async function userIssuesModal({
                         }),
                         block.newButtonElement({
                             actionId: ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE,
-                            value: `${repoName} ${value.number} henit-chobisa`,
+                            value: `${repoName} ${value.number}`,
                             text: {
                                 text: "Assign Issue",
                                 type: TextObjectType.PLAINTEXT,
