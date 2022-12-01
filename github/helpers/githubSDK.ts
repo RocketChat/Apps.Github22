@@ -726,3 +726,13 @@ export async function updateGithubIssues(
     }
     return repsonseJSON;
 }
+
+export async function createIssueReaction(){
+
+    //reference: https://docs.github.com/en/rest/reactions#create-reaction-for-an-issue
+}
+
+export async function deleteIssueReaction(){
+
+    // reference: https://docs.github.com/en/rest/reactions#delete-an-issue-reaction
+}
