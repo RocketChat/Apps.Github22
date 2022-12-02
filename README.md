@@ -23,8 +23,10 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
 <h2 align='center'>💡 Usage 💡</h2>
 <ul>
     <li> See Helper Message / Command List -> /github help </li>
+    <li> The app can be accessed with any of the slash commands /gh or /github </li>
     <li> Login to GitHub -> /github login </li>
     <li> Logout from GitHub -> /github logout </li>
+    <li> View your GitHub Profile and Issues -> /github me </li>
     <li> View/Add/Delete/Update Repository Subscriptions -> /github subscribe </li>
     <li> Subscribe to all repository events -> /github Username/RepositoryName subscribe </li>
     <li> Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe </li>

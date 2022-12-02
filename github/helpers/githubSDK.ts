@@ -1,4 +1,6 @@
 import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
+import { IGitHubIssue } from "../definitions/githubIssue";
+import { ModalsEnum } from "../enum/Modals";
 
 const BaseHost = "https://github.com/";
 const BaseApiHost = "https://api.github.com/";
@@ -428,6 +430,144 @@ export async function mergePullRequest(
     }
 
     return JSONResponse;
+}
+
+export async function getBasicUserInfo(
+    http: IHttp,
+    access_token: String,
+){
+    try {
+        const response = await getRequest(
+            http,
+            access_token,
+            BaseApiHost + 'user'
+        );
+        return {
+            username: response.login,
+            name : response.name,
+            email : response.email,
+            bio: response.bio,
+            followers : response.followers,
+            following : response.following,
+            avatar : response.avatar_url
+        }
+    }catch(e){
+        return {
+            name : "",
+            email : "",
+            bio: "",
+            followers : "",
+            following : "",
+            avatar : ""
+        };
+    }
+}
+
+export async function getUserAssignedIssues(
+    http: IHttp,
+    username: String,
+    access_token : String,
+    filter : {
+        filter : String,
+        state : String,
+        sort : String
+    },
+) : Promise<IGitHubIssue[]>{
+
+
+    let url;
+
+    switch (filter.filter) {
+        case ModalsEnum.CREATED_ISSUE_FILTER:
+            url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+author:${username}`
+            break;
+        case ModalsEnum.ASSIGNED_ISSUE_FILTER:
+            url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+assignee:${username}`
+            break;
+        case ModalsEnum.MENTIONED_ISSUE_FILTER:
+            url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+mentions:${username}`
+        default:
+            break;
+    }
+    try {
+        const response = await getRequest(
+            http,
+            access_token,
+            url,
+        );
+
+        const getAssignees = (assignees : any[]) : string[] => assignees.map((val): string => {
+            return val.login as string;
+        })
+
+        const modifiedResponse : Array<IGitHubIssue> = response.items.map((value) : IGitHubIssue => {
+            return {
+                issue_id : value.id as string,
+                issue_compact : value.body as string,
+                repo_url : value.repository_url as string,
+                user_login : value.user.login as string,
+                user_avatar : value.user.avatar_url as string,
+                number : value.number as number,
+                title : value.title as string,
+                body : value.body as string,
+                assignees : getAssignees(value.assignees),
+                state : value.state as string,
+                last_updated_at : value.updated_at as string,
+                comments : value.comments as number,
+            }
+        })
+
+        return modifiedResponse;
+    }
+    catch(e){
+        return [];
+    }
+}
+
+export async function getIssueData(
+    repoInfo:String,
+    issueNumber:String,
+    access_token:String,
+    http:IHttp
+) : Promise<IGitHubIssue> {
+    try {
+        const response = await getRequest(http, access_token, BaseRepoApiHost + repoInfo + '/issues/' + issueNumber);
+        const getAssignees = (assignees : any[]) : string[] => assignees.map((val): string => {
+            return val.login as string;
+        })
+
+        return {
+            issue_id : response.id as string,
+            issue_compact : response.body as string,
+            html_url : response.html_url as string,
+            repo_url : response.repository_url as string,
+            user_login : response.user.login as string,
+            user_avatar : response.user.avatar_url as string,
+            number : response.number as number,
+            title : response.title as string,
+            body : response.body as string,
+            assignees : getAssignees(response.assignees),
+            state : response.state as string,
+            last_updated_at : response.updated_at as string,
+            comments : response.comments as number,
+            reactions : {
+                total_count : response.reactions["total_count"],
+                plus_one : response.reactions["+1"],
+                minus_one : response.reactions["-1"],
+                laugh : response.reactions["laugh"],
+                hooray : response.reactions["hooray"],
+                confused : response.reactions["confused"],
+                heart : response.reactions["heart"],
+                rocket : response.reactions["rocket"],
+                eyes : response.reactions["eyes"]
+            }
+        }
+    }catch(e) {
+        return {
+            issue_compact : "Error Fetching Issue",
+            issue_id : 0
+        }
+    }
 }
 
 export async function addNewPullRequestComment(
