@@ -64,6 +64,12 @@ export async function repoDataMessage({
         });
     }
 
+    let description: string | null = resData.description;
+
+    if(description === null){
+        description = 'No description provided.';
+    }
+
     const textSender = await modify
         .getCreator()
         .startMessage()
@@ -72,9 +78,9 @@ export async function repoDataMessage({
                 stars +
                 issues +
                 forks +
-                "```" +
-                resData.description +
-                "```" +
+                "`" +
+                description +
+                "`" +
                 tags
         );
     if (room) {
