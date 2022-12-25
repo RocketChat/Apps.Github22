@@ -1,4 +1,4 @@
-import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
+import { IHttp, HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { ModalsEnum } from "../enum/Modals";
 
@@ -725,4 +725,23 @@ export async function updateGithubIssues(
         };
     }
     return repsonseJSON;
+}
+
+export async function isRepositoryExist(
+    http: IHttp,
+    repoName: string,
+    access_token: string
+): Promise<boolean> {
+    const response = await http.get(BaseRepoApiHost + repoName, {
+        headers: {
+            Authorization: `token ${access_token}`,
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (response.statusCode == HttpStatusCode.OK) {
+        return true;
+    }
+
+    return false;
 }

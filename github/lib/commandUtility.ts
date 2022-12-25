@@ -23,6 +23,7 @@ import {
 import { handleSearch } from "../handlers/SearchHandler";
 import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
+import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -54,13 +55,27 @@ export class CommandUtility implements ExecutorProps {
             arguments: this.command,
         };
         if (this.command[0].includes("/")) {
-            await initiatorMessage({
-                data,
-                read: this.read,
-                persistence: this.persistence,
-                modify: this.modify,
-                http: this.http,
-            });
+            const repoName = this.command[0];
+            const isValidRepoName = await HandleInvalidRepoName(
+                repoName, 
+                this.http,
+                this.app,
+                this.modify,
+                this.sender,
+                this.read,
+                this.room
+            )
+
+            if(isValidRepoName){
+                await initiatorMessage({
+                    data,
+                    read: this.read,
+                    persistence: this.persistence,
+                    modify: this.modify,
+                    http: this.http,
+                });
+            }
+          
         } else {
             switch (this.command[0]) {
                 case SubcommandEnum.LOGIN: {
