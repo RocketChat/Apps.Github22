@@ -57,16 +57,16 @@ export class CommandUtility implements ExecutorProps {
         if (this.command[0].includes("/")) {
             const repoName = this.command[0];
             const isValidRepoName = await HandleInvalidRepoName(
-                repoName, 
+                repoName,
                 this.http,
                 this.app,
                 this.modify,
                 this.sender,
                 this.read,
                 this.room
-            )
+            );
 
-            if(isValidRepoName){
+            if (isValidRepoName) {
                 await initiatorMessage({
                     data,
                     read: this.read,
@@ -75,7 +75,6 @@ export class CommandUtility implements ExecutorProps {
                     http: this.http,
                 });
             }
-          
         } else {
             switch (this.command[0]) {
                 case SubcommandEnum.LOGIN: {
@@ -182,6 +181,21 @@ export class CommandUtility implements ExecutorProps {
     private async handleDualParamCommands() {
         const query = this.command[1];
         const repository = this.command[0];
+
+        const isValidRepo = await HandleInvalidRepoName(
+            repository,
+            this.http,
+            this.app,
+            this.modify,
+            this.sender,
+            this.read,
+            this.room
+        );
+
+        if (!isValidRepo) {
+            return;
+        }
+
         switch (query) {
             case SubcommandEnum.SUBSCRIBE: {
                 SubscribeAllEvents(
@@ -230,6 +244,21 @@ export class CommandUtility implements ExecutorProps {
             query: this.command[1],
             number: this.command[2],
         };
+
+        const isValidRepo = await HandleInvalidRepoName(
+            data.repository,
+            this.http,
+            this.app,
+            this.modify,
+            this.sender,
+            this.read,
+            this.room
+        );
+
+        if (!isValidRepo) {
+            return;
+        }
+
         const triggerId = this.context.getTriggerId();
         if (triggerId) {
             const modal = await pullDetailsModal({
