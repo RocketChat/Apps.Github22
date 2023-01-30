@@ -23,6 +23,7 @@ import {
 import { handleSearch } from "../handlers/SearchHandler";
 import { handleNewIssue } from "../handlers/HandleNewIssue";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
+import { handleIssuesList } from "../handlers/HandleIssueList";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -128,6 +129,18 @@ export class CommandUtility implements ExecutorProps {
                 }
                 case SubcommandEnum.PROFILE: {
                     await handleUserProfileRequest(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    );
+                    break;
+                }
+                case SubcommandEnum.ISSUES: {
+                    await handleIssuesList(
                         this.read,
                         this.context,
                         this.app,
