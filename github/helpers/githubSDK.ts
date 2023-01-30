@@ -628,6 +628,64 @@ export async function getPullRequestComments(
     return JSONResponse;
 }
 
+export async function getIssuesComments(
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    issueNumber: string | number
+) {
+    const response = await http.get(
+        `https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
+        {
+            headers: {
+                Authorization: `token ${access_token}`,
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse("{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse = JSON.parse(response.content || "{}");
+        JSONResponse["serverError"] = true;
+    } else {
+        JSONResponse["data"] = JSON.parse(response.content || "[]");
+        JSONResponse["serverError"] = false;
+    }
+    return JSONResponse;
+}
+
+export async function addNewIssueComment(
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    issueNumber: string | number,
+    newComment: string
+) {
+    let data = {
+        body: newComment,
+    };
+    const response = await http.post(
+        `https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
+        {
+            headers: {
+                Authorization: `token ${access_token}`,
+                "Content-Type": "application/json",
+            },
+            data,
+        }
+    );
+    // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    } else {
+        JSONResponse["serverError"] = false;
+    }
+
+    return JSONResponse;
+}
+
 export async function getPullRequestData(
     http: IHttp,
     repoName: string,
