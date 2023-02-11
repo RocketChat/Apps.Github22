@@ -12,5 +12,5 @@
     "nameSlug": "github",
     "classFile": "GithubApp.ts",
     "description": "The ultimate app extending Rocket.Chat for all developers collaborating on Github",
-    "implements": []
+    "implements": ["IPreMessageSentExtend"]
 }

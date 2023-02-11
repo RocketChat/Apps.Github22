@@ -38,10 +38,15 @@ import {
 import { githubWebHooks } from "./endpoints/githubEndpoints";
 import { IJobContext } from "@rocket.chat/apps-engine/definition/scheduler";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
+import {
+    clearInteractionRoomData,
+    getInteractionRoomData,
+} from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
+import { IMessage, IPreMessageSentExtend } from "@rocket.chat/apps-engine/definition/messages";
+import { IMessageExtender } from "@rocket.chat/apps-engine/definition/accessors";
 
-export class GithubApp extends App {
+export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
     }
@@ -63,7 +68,10 @@ export class GithubApp extends App {
             },
         };
         let text = `GitHub Authentication Succesfull 🚀`;
-        let interactionData = await getInteractionRoomData(read.getPersistenceReader(),user.id) ;
+        let interactionData = await getInteractionRoomData(
+            read.getPersistenceReader(),
+            user.id
+        );
 
         if (token) {
             // await registerAuthorizedUser(read, persistence, user);
@@ -71,15 +79,14 @@ export class GithubApp extends App {
         } else {
             text = `Authentication Failure 😔`;
         }
-        if(interactionData && interactionData.roomId){
+        if (interactionData && interactionData.roomId) {
             let roomId = interactionData.roomId as string;
-            let room = await read.getRoomReader().getById(roomId) as IRoom;
-            await clearInteractionRoomData(persistence,user.id);
-            await sendNotification(read,modify,user,room,text);
-        }else{
+            let room = (await read.getRoomReader().getById(roomId)) as IRoom;
+            await clearInteractionRoomData(persistence, user.id);
+            await sendNotification(read, modify, user, room, text);
+        } else {
             await sendDirectMessage(read, modify, user, text, persistence);
         }
-
     }
     public oauth2ClientInstance: IOAuth2Client;
     public oauth2Config: IOAuth2ClientOptions = {
@@ -150,6 +157,30 @@ export class GithubApp extends App {
             persistence
         );
         return await handler.run(context);
+    }
+
+    public async checkPreMessageSentExtend(
+        message: IMessage,
+        read: IRead,
+        http: IHttp
+    ): Promise<boolean> {
+        console.log("checkPreMessageSentExtend");
+        return true;
+    }
+
+    public async executePreMessageSentExtend(
+        message: IMessage,
+        extend: IMessageExtender,
+        read: IRead,
+        http: IHttp,
+        persistence: IPersistence
+    ): Promise<IMessage> {
+        console.log("executePreMessageSentExtend");
+        return {
+            room: message.room,
+            sender: message.sender,
+            text: message.text,
+        };
     }
 
     public async extendConfiguration(
