@@ -43,12 +43,19 @@ import {
     getInteractionRoomData,
 } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
-import { IMessage, IPreMessageSentExtend } from "@rocket.chat/apps-engine/definition/messages";
+import {
+    IMessage,
+    IPreMessageSentExtend,
+    MessageActionType,
+} from "@rocket.chat/apps-engine/definition/messages";
 import { IMessageExtender } from "@rocket.chat/apps-engine/definition/accessors";
-
+import { RepoAttachment } from "./lib/repoAttachment";
+import { BlockBuilder } from "@rocket.chat/apps-engine/definition/uikit";
 export class GithubApp extends App implements IPreMessageSentExtend {
+    private readonly appLogger: ILogger;
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
+        this.appLogger = this.getLogger();
     }
 
     public async authorizationCallback(
@@ -164,7 +171,11 @@ export class GithubApp extends App implements IPreMessageSentExtend {
         read: IRead,
         http: IHttp
     ): Promise<boolean> {
-        console.log("checkPreMessageSentExtend");
+        const link = message;
+        // check if the message contains the repo link
+        if (message.parseUrls) {
+            return true;
+        }
         return true;
     }
 
@@ -176,11 +187,34 @@ export class GithubApp extends App implements IPreMessageSentExtend {
         persistence: IPersistence
     ): Promise<IMessage> {
         console.log("executePreMessageSentExtend");
-        return {
-            room: message.room,
-            sender: message.sender,
-            text: message.text,
-        };
+        // attach the actions buttons with guide
+        const buttons = new RepoAttachment(
+            [
+                {
+                    type: MessageActionType.BUTTON,
+                    text: "star",
+                    url: "https://github.com/Nabhag8848",
+                },
+                {
+                    type: MessageActionType.BUTTON,
+                    text: "open-issue",
+                    url: "https://github.com/Nabhag8848",
+                },
+                {
+                    type: MessageActionType.BUTTON,
+                    text: "issue",
+                    url: "https://github.com/Nabhag8848",
+                },
+                {
+                    type: MessageActionType.BUTTON,
+                    text: "pull request",
+                    url: "https://github.com/Nabhag8848",
+                },
+            ],
+            "Hey Whats up?"
+        );
+        const extendedMessage = extend.addAttachment(buttons).getMessage();
+        return extendedMessage;
     }
 
     public async extendConfiguration(
