@@ -49,8 +49,9 @@ import {
     MessageActionType,
 } from "@rocket.chat/apps-engine/definition/messages";
 import { IMessageExtender } from "@rocket.chat/apps-engine/definition/accessors";
-import { RepoAttachment } from "./lib/repoAttachment";
 import { BlockBuilder } from "@rocket.chat/apps-engine/definition/uikit";
+import { AppEnum } from "./enum/App";
+import { repoLinkExtendActions } from "./lib/repoLinkExtendActions";
 export class GithubApp extends App implements IPreMessageSentExtend {
     private readonly appLogger: ILogger;
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -173,10 +174,13 @@ export class GithubApp extends App implements IPreMessageSentExtend {
     ): Promise<boolean> {
         const link = message;
         // check if the message contains the repo link
-        if (message.parseUrls) {
+        const isRepoLink: boolean | undefined =
+            message?.customFields?.[AppEnum.CONTAINS_REPO_LINK];
+
+        if (message.groupable && isRepoLink) {
             return true;
         }
-        return true;
+        return false;
     }
 
     public async executePreMessageSentExtend(
@@ -188,33 +192,15 @@ export class GithubApp extends App implements IPreMessageSentExtend {
     ): Promise<IMessage> {
         console.log("executePreMessageSentExtend");
         // attach the actions buttons with guide
-        const buttons = new RepoAttachment(
-            [
-                {
-                    type: MessageActionType.BUTTON,
-                    text: "star",
-                    url: "https://github.com/Nabhag8848",
-                },
-                {
-                    type: MessageActionType.BUTTON,
-                    text: "open-issue",
-                    url: "https://github.com/Nabhag8848",
-                },
-                {
-                    type: MessageActionType.BUTTON,
-                    text: "issue",
-                    url: "https://github.com/Nabhag8848",
-                },
-                {
-                    type: MessageActionType.BUTTON,
-                    text: "pull request",
-                    url: "https://github.com/Nabhag8848",
-                },
-            ],
-            "Hey Whats up?"
-        );
-        const extendedMessage = extend.addAttachment(buttons).getMessage();
-        return extendedMessage;
+        const room = message.room;
+        const user = message.sender;
+
+        await repoLinkExtendActions(message, read, http, user, room);
+
+        return {
+            room,
+            sender: user,
+        };
     }
 
     public async extendConfiguration(

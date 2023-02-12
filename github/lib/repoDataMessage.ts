@@ -40,22 +40,12 @@ export async function repoDataMessage({
     }
     const resData = gitResponse.data;
     const fullName =
-        "[" +
-        resData.full_name +
-        "](" +
-        resData.html_url +
-        ")" +
-        " ▫️ ";
-    const stars =
-        "` ⭐ Stars " + resData.stargazers_count + " ` ";
+        "[" + resData.full_name + "](" + resData.html_url + ")" + " ▫️ ";
+    const stars = "` ⭐ Stars " + resData.stargazers_count + " ` ";
     const issues = "` ❗ Issues " + resData.open_issues + " ` ";
     const forks = "` 🍴 Forks " + resData.forks_count + " ` ";
     let tags = "";
-    if (
-        resData &&
-        resData.topics &&
-        Array.isArray(resData.topics)
-    ) {
+    if (resData && resData.topics && Array.isArray(resData.topics)) {
         resData.topics.forEach((topic: string) => {
             let tempTopic = " ` ";
             tempTopic += topic;
@@ -64,21 +54,29 @@ export async function repoDataMessage({
         });
     }
 
+    const sender = read.getNotifier().getMessageBuilder().getSender();
+
     const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText(
-            fullName +
+        .setData({
+            room,
+            sender,
+            customFields: {
+                repo_link: resData.html_url,
+                contains_repo_link: true,
+            },
+            text:
+                fullName +
                 stars +
                 issues +
                 forks +
                 "```" +
                 resData.description +
                 "```" +
-                tags
-        );
-    if (room) {
-        textSender.setRoom(room);
-    }
+                tags,
+            groupable: true,
+        });
+
     await modify.getCreator().finish(textSender);
 }
