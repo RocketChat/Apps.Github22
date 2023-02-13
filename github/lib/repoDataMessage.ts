@@ -64,11 +64,7 @@ export async function repoDataMessage({
         });
     }
 
-    let description: string | null = resData.description;
-
-    if(description === null){
-        description = 'No description provided.';
-    }
+    const description = resData.description || 'No description provided.';
 
     const textSender = await modify
         .getCreator()
