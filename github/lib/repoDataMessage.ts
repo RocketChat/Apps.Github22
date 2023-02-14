@@ -65,6 +65,7 @@ export async function repoDataMessage({
             customFields: {
                 repo_link: resData.html_url,
                 contains_repo_link: true,
+                repo_name: resData.full_name
             },
             text:
                 fullName +

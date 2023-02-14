@@ -48,7 +48,7 @@ import { IssueDisplayModal } from "../modals/IssueDisplayModal";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
-
+import { handleOpenIssue } from "./handleOpenIssue";
 export class ExecuteBlockActionHandler {
 
     constructor(
@@ -946,6 +946,20 @@ export class ExecuteBlockActionHandler {
                             }
                     }
                     break;
+                }
+                case "repo-link-open": {
+                    const room = context.getInteractionData().room as IRoom;
+                     await handleOpenIssue(
+                         this.read,
+                         context,
+                         this.app,
+                         this.persistence,
+                         this.http,
+                         room,
+                         this.modify
+                    );
+                    break;
+
                 }
             }
         } catch (error) {

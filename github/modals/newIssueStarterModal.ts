@@ -15,6 +15,7 @@ import {
     storeInteractionRoomData,
     getInteractionRoomData,
 } from "../persistance/roomInteraction";
+import { UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 
 export async function NewIssueStarterModal({
     modify,
@@ -29,7 +30,7 @@ export async function NewIssueStarterModal({
     persistence: IPersistence;
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
-    uikitcontext?: UIKitInteractionContext;
+    uikitcontext?: UIKitBlockInteractionContext;
 }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.NEW_ISSUE_STARTER_VIEW;
     const block = modify.getCreator().getBlockBuilder();

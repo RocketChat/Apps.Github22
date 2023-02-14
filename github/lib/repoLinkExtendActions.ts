@@ -4,6 +4,7 @@ import { IMessage } from "@rocket.chat/apps-engine/definition/messages";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { BlockBuilder } from "@rocket.chat/apps-engine/definition/uikit";
 import { ButtonStyle } from "@rocket.chat/apps-engine/definition/uikit";
+import { ModalsEnum } from "../enum/Modals";
 export async function repoLinkExtendActions(
     message: IMessage,
     read: IRead,
@@ -13,6 +14,8 @@ export async function repoLinkExtendActions(
 ): Promise<void> {
     const appId = user.appId as string;
     const block = new BlockBuilder(appId);
+
+    const repositoryName: string = message?.customFields?.["repo_name"];
     block.addActionsBlock({
         blockId: "repo-link",
         elements: [
@@ -23,7 +26,7 @@ export async function repoLinkExtendActions(
                 style: ButtonStyle.PRIMARY,
             }),
             block.newButtonElement({
-                actionId: "repo-link-issue",
+                actionId: "repo-link-open",
                 text: block.newPlainTextObject("Open Issue"),
                 value: `open-issue`,
                 style: ButtonStyle.PRIMARY,
@@ -33,12 +36,14 @@ export async function repoLinkExtendActions(
                 text: block.newPlainTextObject("Issues"),
                 value: `issues`,
                 style: ButtonStyle.PRIMARY,
+                url: `https://github.com/${repositoryName}/issues`,
             }),
             block.newButtonElement({
                 actionId: "repo-link-pullrequest",
                 text: block.newPlainTextObject("Pull Requests"),
                 value: `pull request`,
                 style: ButtonStyle.PRIMARY,
+                url: `https://github.com/${repositoryName}/pulls`,
             }),
         ],
     });
