@@ -43,6 +43,17 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
 
 
 <h2 align='center'>🖥️ Quick Setup 🖥️</h2>
+
+<h2 align='center'> Gitpod 🍊 </h2>
+
+Start developing and make changes to your code via a single click **Anytime-Anywhere**!
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/RocketChat/Apps.Github22)
+
+Using [Thrust](https://github.com/henit-chobisa/Thrust.RC) for quickly setup your Rocket.Chat workspace & hot-reload for develping and deploying Github App, no need to worry about setting up any Rocket.Chat server before hand.
+
+<h2 align='center'> Manual Setup 🐳 </h2>
+
 <ol>
   <li>Rocket.Chat Apps Run on a Rocket.Chat server. If you dont have a server setup, please go through this <a href="https://developer.rocket.chat/rocket.chat/rocket-chat-environment-setup">setup</a> and setup a development environment and setup you server</li> 
   <li>To start with development on Rocket.Chat Apps, you need to install the Rocket.Chat Apps Engline CLI. Enter the following commands : </li>
