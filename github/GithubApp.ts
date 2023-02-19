@@ -162,7 +162,7 @@ export class GithubApp extends App {
             configuration.slashCommands.provideSlashCommand(ghCommand),
             this.getOauth2ClientInstance().setup(configuration),
         ]);
-        configuration.scheduler.registerProcessors([
+        await configuration.scheduler.registerProcessors([
             {
                 id: ProcessorsEnum.REMOVE_GITHUB_LOGIN,
                 processor: async (jobContext, read, modify, http, persis) => {
@@ -189,7 +189,7 @@ export class GithubApp extends App {
                 },
             },
         ]);
-        configuration.api.provideApi({
+        await configuration.api.provideApi({
             visibility: ApiVisibility.PUBLIC,
             security: ApiSecurity.UNSECURE,
             endpoints: [new githubWebHooks(this)],

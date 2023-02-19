@@ -38,7 +38,7 @@ export async function contributorListMessage({
         );
     }
     const resData = gitResponse.data;
-    const textSender = await modify
+    const textSender = modify
         .getCreator()
         .startMessage()
         .setText(`*CONTRIBUTOR LIST*`);
@@ -53,7 +53,7 @@ export async function contributorListMessage({
             const login = contributor.login;
             const html_url = contributor.html_url;
 
-            const textSender = await modify
+            const textSender = modify
                 .getCreator()
                 .startMessage()
                 .setText(`[ ${login} ](${html_url})`);

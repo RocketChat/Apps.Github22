@@ -139,7 +139,7 @@ export async function UnsubscribeAllEvents(
     const repository = command[0];
     if (accessToken && accessToken?.token) {
         try {
-            let user = await context.getSender();
+            let user = context.getSender();
             let events: Array<string> = [
                 "pull_request",
                 "push",

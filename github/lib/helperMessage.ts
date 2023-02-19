@@ -40,7 +40,7 @@ export async function helperMessage({
 
     `;
 
-    const textSender = await modify
+    const textSender = modify
         .getCreator()
         .startMessage()
         .setText("```" + helperMessageString + "```");

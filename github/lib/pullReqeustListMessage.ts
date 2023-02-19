@@ -41,7 +41,7 @@ export async function pullRequestListMessage({
         );
     }
     const resData = gitResponse.data;
-    const textSender = await modify
+    const textSender = modify
         .getCreator()
         .startMessage()
         .setText(`*PULL REQUESTS*`);
@@ -54,7 +54,7 @@ export async function pullRequestListMessage({
     resData.forEach(async (pull, ind) => {
         if (ind < 10) {
             const url = pull.html_url;
-            const textSender = await modify
+            const textSender = modify
                 .getCreator()
                 .startMessage()
                 .setText(`[ #${pull.number} ](${url})  *${pull.title}*`);

@@ -100,7 +100,7 @@ export async function createSubscription(
     access_token: string,
     events: Array<String>
 ) {
-    return postReqeust(
+    return await postReqeust(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks",
@@ -121,7 +121,7 @@ export async function deleteSubscription(
     access_token: string,
     hookId: string
 ) {
-    return deleteReqeust(
+    return await deleteReqeust(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks/" + hookId
@@ -135,7 +135,7 @@ export async function updateSubscription(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(
+    return await patchReqeust(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks/" + hookId,
@@ -153,7 +153,7 @@ export async function addSubscribedEvents(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(
+    return await patchReqeust(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks/" + hookId,
@@ -171,7 +171,7 @@ export async function removeSubscribedEvents(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(
+    return await patchReqeust(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks/" + hookId,
@@ -190,7 +190,7 @@ export async function createNewIssue(
     issueAssignees: Array<string>,
     access_token: string
 ) {
-    return postReqeust(
+    return await postReqeust(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/issues",

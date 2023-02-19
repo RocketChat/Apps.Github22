@@ -49,6 +49,6 @@ export class GithubCommand implements ISlashCommand {
             }
         );
 
-        commandUtility.resolveCommand();
+        await commandUtility.resolveCommand();
     }}
 

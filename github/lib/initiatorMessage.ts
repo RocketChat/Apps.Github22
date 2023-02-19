@@ -21,7 +21,7 @@ export async function initiatorMessage({
     modify: IModify;
     http: IHttp;
 }) {
-    const greetBuilder = await modify
+    const greetBuilder = modify
         .getCreator()
         .startMessage()
         .setRoom(data.room)
@@ -35,7 +35,7 @@ export async function initiatorMessage({
         await modify.getCreator().finish(greetBuilder);
     }
 
-    const builder = await modify.getCreator().startMessage().setRoom(data.room);
+    const builder = modify.getCreator().startMessage().setRoom(data.room);
 
     const block = modify.getCreator().getBlockBuilder();
 

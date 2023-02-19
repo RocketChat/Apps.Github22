@@ -93,7 +93,7 @@ export class githubWebHooks extends ApiEndpoint {
             const room: IRoom = (await read
                 .getRoomReader()
                 .getById(roomId)) as IRoom;
-            const textSender = await modify
+            const textSender = modify
                 .getCreator()
                 .startMessage()
                 .setText(messageText);

@@ -47,6 +47,6 @@ export class GHCommand implements ISlashCommand {
             }
         );
 
-        commandUtility.resolveCommand();
+        await commandUtility.resolveCommand();
     }
 }

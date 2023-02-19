@@ -88,7 +88,7 @@ export class ExecuteBlockActionHandler {
                             0,
                             lengthOfRepoString
                         ) as String;
-                        let { user, room } = await context.getInteractionData();
+                        let { user, room } = context.getInteractionData();
                         let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                         if(room && user){
                             await basicQueryMessage({
@@ -123,7 +123,7 @@ export class ExecuteBlockActionHandler {
 
                     const block = this.modify.getCreator().getBlockBuilder();
 
-                    CreateIssueStatsBar(issueInfo, block);
+                    await CreateIssueStatsBar(issueInfo, block);
 
                     block.addSectionBlock({
                         text : {
@@ -350,7 +350,7 @@ export class ExecuteBlockActionHandler {
                         }
                     }
 
-                    this.persistence.removeByAssociation(idRecord);
+                    await this.persistence.removeByAssociation(idRecord);
 
                     break;
                 }
@@ -449,7 +449,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.ISSUE_TEMPLATE_SELECTION_ACTION:{
-                    let { user } = await context.getInteractionData();
+                    let { user } = context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                     let value: string = context.getInteractionData().value as string;
                     let actionDetailsArray = value?.trim()?.split(" ");
@@ -502,7 +502,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.SHARE_SEARCH_RESULT_ACTION:{
-                    let { user, room } = await context.getInteractionData();
+                    let { user, room } = context.getInteractionData();
                     let value: string = context.getInteractionData().value as string;
                     if(user?.id){
                         if(room?.id){
@@ -521,7 +521,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES:{
-                    let { user, room } = await context.getInteractionData();
+                    let { user, room } = context.getInteractionData();
                     let value: string = context.getInteractionData().value as string;
                     let PullRequestDetails = value.split(" ");
                     if(PullRequestDetails.length==2){
@@ -564,7 +564,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.MULTI_SHARE_ADD_SEARCH_RESULT_ACTION:{
-                    let { user, room } = await context.getInteractionData();
+                    let { user, room } = context.getInteractionData();
                     let searchResultId: string = context.getInteractionData().value as string;
                     let roomId:string="";
                     if(user?.id){
@@ -608,7 +608,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.MULTI_SHARE_REMOVE_SEARCH_RESULT_ACTION:{
-                    let { user, room } = await context.getInteractionData();
+                    let { user, room } = context.getInteractionData();
                     let searchResultId: string = context.getInteractionData().value as string;
                     let roomId="";
                     if(user?.id && searchResultId){
@@ -654,7 +654,7 @@ export class ExecuteBlockActionHandler {
                 case ModalsEnum.MERGE_PULL_REQUEST_ACTION:{
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
-                    let { user } = await context.getInteractionData();
+                    let { user } = context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                     if(splittedValues.length==2 && accessToken?.token){
                         let data={
@@ -695,7 +695,7 @@ export class ExecuteBlockActionHandler {
                 case ModalsEnum.COMMENT_PR_ACTION:{
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
-                    let { user } = await context.getInteractionData();
+                    let { user } = context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                     if(splittedValues.length==2 && accessToken?.token){
                         let data={
@@ -733,7 +733,7 @@ export class ExecuteBlockActionHandler {
                 case ModalsEnum.PR_COMMENT_LIST_ACTION:{
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
-                    let { user } = await context.getInteractionData();
+                    let { user } = context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                     if(splittedValues.length==2 && accessToken?.token){
                         let repoName = splittedValues[0];
@@ -823,7 +823,7 @@ export class ExecuteBlockActionHandler {
                 case ModalsEnum.REFRESH_GITHUB_ISSUES_ACTION: {
                     let repository: string = context.getInteractionData().value as string;
                     repository=repository?.trim();
-                    let { user } = await context.getInteractionData();
+                    let { user } = context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
                     if (!accessToken) {
                         let response =  await getRepositoryIssues(this.http,repository);
@@ -848,7 +848,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.MULTI_SHARE_ADD_GITHUB_ISSUE_ACTION:{
-                    let { user, room } = await context.getInteractionData();
+                    let { user, room } = context.getInteractionData();
                     let issueId: string = context.getInteractionData().value as string;
                     let roomId:string="";
                     if(user?.id){
@@ -898,7 +898,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.MULTI_SHARE_REMOVE_GITHUB_ISSUE_ACTION:{
-                    let { user, room } = await context.getInteractionData();
+                    let { user, room } = context.getInteractionData();
                     let issueId: string = context.getInteractionData().value as string;
                     let roomId:string="";
                     if(user?.id){

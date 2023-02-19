@@ -44,7 +44,7 @@ export async function issueListMessage({
         );
     }
     const resData = gitResponse.data;
-    const textSender = await modify
+    const textSender = modify
         .getCreator()
         .startMessage()
         .setText(`*ISSUES LIST*`);
@@ -56,7 +56,7 @@ export async function issueListMessage({
     await modify.getCreator().finish(textSender);
     resData.forEach(async (issue) => {
         if (typeof issue.pull_request === "undefined" && ind < 10) {
-            const textSender = await modify
+            const textSender = modify
                 .getCreator()
                 .startMessage()
                 .setText(

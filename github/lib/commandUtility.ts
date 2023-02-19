@@ -91,7 +91,7 @@ export class CommandUtility implements ExecutorProps {
                     break;
                 }
                 case SubcommandEnum.SUBSCRIBE: {
-                    ManageSubscriptions(
+                    await ManageSubscriptions(
                         this.read,
                         this.context,
                         this.app,
@@ -103,7 +103,7 @@ export class CommandUtility implements ExecutorProps {
                     break;
                 }
                 case SubcommandEnum.NEW_ISSUE: {
-                    handleNewIssue(
+                    await handleNewIssue(
                         this.read,
                         this.context,
                         this.app,
@@ -115,7 +115,7 @@ export class CommandUtility implements ExecutorProps {
                     break;
                 }
                 case SubcommandEnum.SEARCH: {
-                    handleSearch(
+                    await handleSearch(
                         this.read,
                         this.context,
                         this.app,
@@ -157,7 +157,7 @@ export class CommandUtility implements ExecutorProps {
         const repository = this.command[0];
         switch (query) {
             case SubcommandEnum.SUBSCRIBE: {
-                SubscribeAllEvents(
+                await SubscribeAllEvents(
                     this.read,
                     this.context,
                     this.app,
@@ -170,7 +170,7 @@ export class CommandUtility implements ExecutorProps {
                 break;
             }
             case SubcommandEnum.UNSUBSCRIBE: {
-                UnsubscribeAllEvents(
+                await UnsubscribeAllEvents(
                     this.read,
                     this.context,
                     this.app,
@@ -234,15 +234,15 @@ export class CommandUtility implements ExecutorProps {
                 break;
             }
             case 1: {
-                this.handleSingularParamCommands();
+                await this.handleSingularParamCommands();
                 break;
             }
             case 2: {
-                this.handleDualParamCommands();
+                await this.handleDualParamCommands();
                 break;
             }
             case 3: {
-                this.handleTriParamCommand();
+                await this.handleTriParamCommand();
                 break;
             }
             default: {
