@@ -22,21 +22,21 @@ export async function helperMessage({
     let helperMessageString = `
     Github App
     *The app can be accessed with any of the slash commands /gh or /github*
-    1) See Interactive Button interface to fetch repository data -> /github Username/RepositoryName
-    2) Get details of a Repository -> /github  Username/RepositoryName repo
-    3) Get Issues of a Repository -> /github  Username/RepositoryName issues
-    4) Get Contributors of a Repository -> /github  Username/RepositoryName contributors
-    5) Get Recent Pull Request of a Repository -> /github  Username/RepositoryName pulls
-    6) Review a Pull Request -> /github  Username/RepositoryName pulls pullNumber
-    7) Login to GitHub -> /github login
-    8) Logout from GitHub -> /github logout
-    9) View your GitHub Profile and Issues -> /github me
-    10) View/Add/Delete/Update Repository Subscriptions -> /github subscribe
-    11) Subscribe to all repository events -> /github Username/RepositoryName subscribe
-    12) Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe
-    13) Add New Issues to GitHub Repository -> /github issue
-    14) Search Issues and Pull Requests -> /github search
-    15) Assign and Share Issues -> /github issues
+    1. See Interactive Button interface to fetch repository data -> /github Username/RepositoryName
+    2. Get details of a Repository -> /github  Username/RepositoryName repo
+    3. Get Issues of a Repository -> /github  Username/RepositoryName issues
+    4. Get Contributors of a Repository -> /github  Username/RepositoryName contributors
+    5. Get Recent Pull Request of a Repository -> /github  Username/RepositoryName pulls
+    6. Review a Pull Request -> /github  Username/RepositoryName pulls pullNumber
+    7. Login to GitHub -> /github login
+    8. Logout from GitHub -> /github logout
+    9. View your GitHub Profile and Issues -> /github me
+    10. View/Add/Delete/Update Repository Subscriptions -> /github subscribe
+    11. Subscribe to all repository events -> /github Username/RepositoryName subscribe
+    12. Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe
+    13. Add New Issues to GitHub Repository -> /github issue
+    14. Search Issues and Pull Requests -> /github search
+    15. Assign and Share Issues -> /github issues
 
     `;
 
