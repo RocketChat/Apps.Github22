@@ -302,7 +302,7 @@ export class ExecuteBlockActionHandler {
                     let profileShareParams: string[] = [];
 
                     if (profileData.length == 0){
-                        profileShareParams = ['username', 'avatar', 'email', 'bio', 'followers', 'following' , 'contributionGraph'];
+                        profileShareParams = ['username', 'avatar', 'email', 'bio', 'followers', 'following' ];
                     }
                     else {
                         const dat = profileData[0] as {profileParams : string[]};
@@ -317,7 +317,7 @@ export class ExecuteBlockActionHandler {
                     }
 
                     profileShareParams.map((value) => {
-                        if (value != 'contributionGraph' && value != 'avatar'){
+                        if ( value != 'avatar'){
                             block.addSectionBlock({
                                 text : block.newPlainTextObject(value),
                             })
@@ -330,9 +330,7 @@ export class ExecuteBlockActionHandler {
                         }
                     })
 
-                    if (profileShareParams.includes('contributionGraph')){
-                        block.addImageBlock({imageUrl : `https://activity-graph.herokuapp.com/graph?username=${userProfile.username}&bg_color=ffffff&color=708090&line=24292e&point=24292e`, altText: "Github Contribution Graph"})
-                    }
+
 
 
                     if(user?.id){

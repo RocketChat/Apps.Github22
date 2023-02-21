@@ -67,17 +67,9 @@ export async function userProfileModal({
         ]
     });
 
-    block.addDividerBlock();
-
-    block.addImageBlock({imageUrl : githubActivityGraphUrl(userInfo.username), altText: "Github Contribution Graph"});
-
-
-
-    block.addDividerBlock();
-
-    block.addSectionBlock({
-        text: block.newPlainTextObject("Select from the following options.")
-    })
+    // block.addSectionBlock({
+    //     text: block.newPlainTextObject("Select from the following options.")
+    // })
 
     block.addActionsBlock({
         elements : [
