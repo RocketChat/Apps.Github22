@@ -36,6 +36,7 @@ export async function NewIssueStarterModal({
     const block = modify.getCreator().getBlockBuilder();
     const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
     const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
+    const repoName = uikitcontext?.getInteractionData().value || undefined;
 
     if (user?.id) {
         let roomId;
@@ -65,6 +66,7 @@ export async function NewIssueStarterModal({
                     text: ModalsEnum.REPO_NAME_PLACEHOLDER,
                     type: TextObjectType.PLAINTEXT,
                 },
+                initialValue: repoName
             }),
         });
 

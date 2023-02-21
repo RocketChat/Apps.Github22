@@ -15,7 +15,7 @@ export async function repoLinkExtendActions(
     const appId = user.appId as string;
     const block = new BlockBuilder(appId);
 
-    const repositoryName: string = message?.customFields?.["repo_name"];
+    const repositoryName: string | undefined = message?.customFields?.["repo_name"];
     block.addActionsBlock({
         blockId: "repo-link",
         elements: [
@@ -28,7 +28,7 @@ export async function repoLinkExtendActions(
             block.newButtonElement({
                 actionId: "repo-link-open",
                 text: block.newPlainTextObject("Open Issue"),
-                value: `open-issue`,
+                value: repositoryName,
                 style: ButtonStyle.PRIMARY,
             }),
             block.newButtonElement({
