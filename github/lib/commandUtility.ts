@@ -21,7 +21,7 @@ import {
     ManageSubscriptions,
 } from "../handlers/EventHandler";
 import { handleSearch } from "../handlers/SearchHandler";
-import { handleNewIssue } from "../handlers/HandleNewIssue";
+import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
 
 export class CommandUtility implements ExecutorProps {
@@ -136,6 +136,18 @@ export class CommandUtility implements ExecutorProps {
                         this.room,
                         this.modify
                     );
+                    break;
+                }
+                case SubcommandEnum.ISSUES :{
+                    handleIssues(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    )
                     break;
                 }
                 default: {
