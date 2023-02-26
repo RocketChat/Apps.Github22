@@ -64,6 +64,8 @@ export async function repoDataMessage({
         });
     }
 
+    const description = resData.description || 'No description provided.';
+
     const textSender = await modify
         .getCreator()
         .startMessage()
@@ -72,9 +74,9 @@ export async function repoDataMessage({
                 stars +
                 issues +
                 forks +
-                "```" +
-                resData.description +
-                "```" +
+                "`" +
+                description +
+                "`" +
                 tags
         );
     if (room) {
