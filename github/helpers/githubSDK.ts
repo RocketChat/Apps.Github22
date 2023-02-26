@@ -727,12 +727,51 @@ export async function updateGithubIssues(
     return repsonseJSON;
 }
 
-export async function createIssueReaction(){
-    
+export async function createIssueReaction(
+    repoName: string,
+    owner: string,
+    issueNumber: number,
+    http: IHttp,
+    access_token: string,
+    reaction: string
+) {
+    try {
+        const request_data = {
+            content: reaction,
+        };
+
+        const response = await http.post(
+            `${BaseApiHost}repos/${repoName}/issues/${issueNumber}/reactions`,
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                    "Content-Type": "application/json",
+                },
+                data: request_data,
+            }
+        );
+
+        const { data } = response;
+        const responseJSON: any = {};
+        if (response.statusCode.toString().startsWith("2")) {
+            const { id } = data;
+            responseJSON["reaction_id"] = id;
+            responseJSON["serverError"] = false;
+        } else {
+            responseJSON["serverError"] = true;
+            responseJSON["message"] = response.content;
+        }
+        return responseJSON;
+    } catch (e) {
+        return {
+            error: "Error While Creating Reaction to Issue",
+            issue_number: issueNumber,
+        };
+    }
+
     // https://docs.github.com/en/rest/reactions?apiVersion=2022-11-28#create-reaction-for-an-issue
 }
 
-export async function removeIssueReaction(){
-
+export async function removeIssueReaction() {
     // https://docs.github.com/en/rest/reactions?apiVersion=2022-11-28#delete-an-issue-reaction
 }

@@ -69,10 +69,12 @@ export async function issueListMessage({
                     sender,
                     text: `[ #${issue.number} ](${issue.html_url})  *[${issue.title}](${issue.html_url})*`,
                     customFields: {
-                        "issue": true,
-                        "issue_url": issue.html_url,
-                        "issue_title": issue.title
-                    }
+                        issue: true,
+                        issue_url: issue.html_url,
+                        issue_number: issue.number,
+                        owner: issue.user.login,
+                        repo_name: repository,
+                    },
                 });
 
             await modify.getCreator().finish(textSender);

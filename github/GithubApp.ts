@@ -47,6 +47,10 @@ import {
     IMessageReactionContext,
     IPostMessageReacted,
 } from "@rocket.chat/apps-engine/definition/messages";
+import { createIssueReaction } from "./helpers/githubSDK";
+import { getAccessTokenForUser } from "./persistance/auth";
+import { IssueReactions } from "./enum/OcticonIcons";
+import { isAvailableReaction } from "./helpers/githubIssueReaction";
 
 export class GithubApp extends App implements IPostMessageReacted {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -169,12 +173,39 @@ export class GithubApp extends App implements IPostMessageReacted {
         modify: IModify
     ): Promise<void> {
         if (context.message.customFields?.["issue"]) {
-            console.log(context.message.text);
-            
-            // when user reacts to those 6 emojis
-            if (context.isReacted) {
-            } else {
-                // when user removes the reaction
+            const { includes_emoji, emoji } = isAvailableReaction(context);
+            // when user reacts to those 8 emojis
+            if (includes_emoji) {
+                const user = context.user;
+                const auth = await getAccessTokenForUser(
+                    read,
+                    user,
+                    this.oauth2Config
+                );
+
+                if (auth) {
+                    const { issue_number, owner, repo_name } =
+                        context.message?.customFields;
+                    const token = auth.token;
+
+                    // remove true later as issue raised for isReacted field undefined
+                    if (context.isReacted || true) {
+                        const response = await createIssueReaction(
+                            repo_name,
+                            owner,
+                            issue_number,
+                            http,
+                            token,
+                            emoji
+                        );
+
+                        // make an association with the reactionId for deleting the issue reaction
+                    } else {
+                        // when user removes the reaction
+                    }
+                } else {
+                    // notify in direct message by bot for letting user know that your changes to reaction won't change issue in github
+                }
             }
         }
     }
