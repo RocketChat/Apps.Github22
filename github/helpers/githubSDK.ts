@@ -765,6 +765,7 @@ export async function createIssueReaction(
     } catch (e) {
         return {
             error: "Error While Creating Reaction to Issue",
+            repo_name: repoName,
             issue_number: issueNumber,
         };
     }
@@ -772,6 +773,37 @@ export async function createIssueReaction(
     // https://docs.github.com/en/rest/reactions?apiVersion=2022-11-28#create-reaction-for-an-issue
 }
 
-export async function removeIssueReaction() {
+export async function removeIssueReaction(
+    repoName: string,
+    owner: string,
+    issueNumber: number,
+    http: IHttp,
+    access_token: string,
+    reactionId: string
+) {
+    try {
+        const response = await http.del(
+            `${BaseApiHost}repos/${repoName}/issues/${issueNumber}/reactions/${reactionId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        if (response.statusCode.toString().startsWith("2")) {
+            return true;
+        }
+
+        return false;
+    } catch (e) {
+        return {
+            error: "Error While Removing Reaction to Issue",
+            repo_name: repoName,
+            issue_number: issueNumber,
+        };
+    }
+    
     // https://docs.github.com/en/rest/reactions?apiVersion=2022-11-28#delete-an-issue-reaction
 }

@@ -9,23 +9,19 @@ export enum OcticonIcons {
 }
 
 export enum IssueReactions {
-    "LAUGH" = "laughing",
     "PLUS_ONE" = "thumbsup",
     "MINUS_ONE" = "thumbsdown",
     "HEART" = "heart",
     "CONFUSED" = "confused",
     "ROCKET" = "rocket",
     "EYES" = "eyes",
-    // "HOORAY" = "partying_face",
 }
 
 export enum IssueReactionsAliases {
-    laughing = "laugh",
     thumbsup = "+1",
     thumbsdown = "-1",
     heart = "heart",
     confused = "confused",
     rocket = "rocket",
     eyes = "eyes",
-    // partying_face = "hooray",
 }
