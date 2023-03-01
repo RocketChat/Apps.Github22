@@ -1,6 +1,8 @@
 import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { IGitHubIssue } from "../definitions/githubIssue";
+import { IGithubActivity } from "../definitions/IGithubActivity";
 import { ModalsEnum } from "../enum/Modals";
+import { parseUserActivity } from "./ParseGithubActivity";
 
 const BaseHost = "https://github.com/";
 const BaseApiHost = "https://api.github.com/";
@@ -734,7 +736,7 @@ export async function getUserActivity (
     page: number,
     till_last : "WEEK" | "MONTH",
     per_page?: number,
-) : Promise<any> {
+) : Promise<IGithubActivity[]> {
     per_page = per_page ?? 15;
 
     const oneWeekAgo = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -748,5 +750,9 @@ export async function getUserActivity (
       new Date(event.created_at) >= oneWeekAgo
     );
 
-    return lastWeekEvents
+    const userActivity: IGithubActivity[] = lastWeekEvents.map((event: any) : IGithubActivity => {
+        return parseUserActivity(event)
+    })
+
+    return userActivity
 }
