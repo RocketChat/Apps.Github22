@@ -288,15 +288,17 @@ export class CommandUtility implements ExecutorProps {
 
         const data = await getUserActivity(this.http, "henit-chobisa", accessToken, 1, "WEEK", 5);
 
-        blocks.addSectionBlock({
-            text: blocks.newMarkdownTextObject(`The current date-time is\n${data}`), // [4]
-            accessory: { // [5]
-                type: BlockElementType.BUTTON,
-                actionId: 'date',
-                text: blocks.newPlainTextObject('Refresh'),
-                value: date,
-            },
-        });
+        data.forEach((activity) => {
+            blocks.addSectionBlock({
+                text: blocks.newMarkdownTextObject(activity.repo.name), // [4]
+                accessory: { // [5]
+                    type: BlockElementType.BUTTON,
+                    actionId: 'repositoryList',
+                    text: blocks.newPlainTextObject('Refresh'),
+                    value: date,
+                },
+            });
+        })
 
         return { // [6]
             id: 'contextualbarId',
