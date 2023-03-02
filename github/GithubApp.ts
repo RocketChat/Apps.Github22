@@ -8,11 +8,7 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { App } from "@rocket.chat/apps-engine/definition/App";
-import {
-    IAppInfo,
-    RocketChatAssociationModel,
-    RocketChatAssociationRecord,
-} from "@rocket.chat/apps-engine/definition/metadata";
+import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
 import { GithubCommand } from "./commands/GithubCommand";
 import {
     IUIKitResponse,
@@ -51,10 +47,6 @@ import {
     IMessageReactionContext,
     IPostMessageReacted,
 } from "@rocket.chat/apps-engine/definition/messages";
-import { createIssueReaction, removeIssueReaction } from "./helpers/githubSDK";
-import { getAccessTokenForUser } from "./persistance/auth";
-import { IssueReactions } from "./enum/OcticonIcons";
-import { isAvailableReaction } from "./helpers/githubIssueReaction";
 import { HandleIssueReaction } from "./handlers/HandleIssueReaction";
 
 export class GithubApp extends App implements IPostMessageReacted {
