@@ -55,6 +55,7 @@ import { createIssueReaction, removeIssueReaction } from "./helpers/githubSDK";
 import { getAccessTokenForUser } from "./persistance/auth";
 import { IssueReactions } from "./enum/OcticonIcons";
 import { isAvailableReaction } from "./helpers/githubIssueReaction";
+import { HandleIssueReaction } from "./handlers/HandleIssueReaction";
 
 export class GithubApp extends App implements IPostMessageReacted {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -176,83 +177,7 @@ export class GithubApp extends App implements IPostMessageReacted {
         persistence: IPersistence,
         modify: IModify
     ): Promise<void> {
-        if (context.message.customFields?.["issue"]) {
-            const { includes_emoji, emoji } = isAvailableReaction(context);
-            // when user reacts to those 8 emojis
-            if (includes_emoji) {
-                const user = context.user;
-                const auth = await getAccessTokenForUser(
-                    read,
-                    user,
-                    this.oauth2Config
-                );
-
-                if (auth) {
-                    const { issue_number, owner, repo_name } =
-                        context.message?.customFields;
-                    const token = auth.token;
-
-                    const associations: Array<RocketChatAssociationRecord> = [
-                        new RocketChatAssociationRecord(
-                            RocketChatAssociationModel.USER,
-                            user.id
-                        ),
-                        new RocketChatAssociationRecord(
-                            RocketChatAssociationModel.MISC,
-                            repo_name as string
-                        ),
-                        new RocketChatAssociationRecord(
-                            RocketChatAssociationModel.MISC,
-                            issue_number as string
-                        ),
-                        new RocketChatAssociationRecord(
-                            RocketChatAssociationModel.MISC,
-                            context.reaction
-                        )
-                    ];
-                    // remove true later as issue raised for isReacted field undefined
-                    if (context.isReacted) {
-                        const response = await createIssueReaction(
-                            repo_name,
-                            owner,
-                            issue_number,
-                            http,
-                            token,
-                            emoji
-                        );
-
-                        await persistence.updateByAssociations(
-                            associations,
-                            response,
-                            true
-                        );
-                    } else {
-                        const persistanceRead =
-                            await read.getPersistenceReader();
-                        const issueReactionData =
-                            await persistanceRead.readByAssociations(
-                                associations
-                            );
-                        console.log(issueReactionData[0]);
-                        const reactionId =
-                            issueReactionData[0]?.["reaction_id"];
-
-                        const response = await removeIssueReaction(
-                            repo_name,
-                            owner,
-                            issue_number,
-                            http,
-                            token,
-                            reactionId
-                        );
-                        // when user removes the reaction
-                        await persistence.removeByAssociations(associations);
-                    }
-                } else {
-                    // notify in direct message by bot for letting user know that your changes to reaction won't change issue in github
-                }
-            }
-        }
+        await HandleIssueReaction(this, context, read, http, persistence);
     }
 
     public async extendConfiguration(

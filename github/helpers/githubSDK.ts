@@ -1,5 +1,6 @@
 import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { IGitHubIssue } from "../definitions/githubIssue";
+import { IGithubIssueReaction } from "../definitions/githubIssueReaction";
 import { ModalsEnum } from "../enum/Modals";
 
 const BaseHost = "https://github.com/";
@@ -733,8 +734,9 @@ export async function createIssueReaction(
     issueNumber: number,
     http: IHttp,
     access_token: string,
-    reaction: string
-) {
+    reaction: string,
+    user_id: string
+): Promise<IGithubIssueReaction | any> {
     try {
         const request_data = {
             content: reaction,
@@ -752,21 +754,29 @@ export async function createIssueReaction(
         );
 
         const { data } = response;
-        const responseJSON: any = {};
         if (response.statusCode.toString().startsWith("2")) {
             const { id } = data;
-            responseJSON["reaction_id"] = id;
-            responseJSON["serverError"] = false;
-        } else {
-            responseJSON["serverError"] = true;
-            responseJSON["message"] = response.content;
+
+            return {
+                reaction_id: id as string,
+                repo_name: repoName,
+                user_id,
+                reaction,
+                issue_number: issueNumber,
+            };
         }
-        return responseJSON;
+
+        return {
+            message: response.content,
+            error: true,
+        };
     } catch (e) {
         return {
             error: "Error While Creating Reaction to Issue",
             repo_name: repoName,
             issue_number: issueNumber,
+            user_id,
+            reaction,
         };
     }
 
