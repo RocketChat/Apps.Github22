@@ -11,7 +11,7 @@ export async function hasCodeLink(message: IMessage): Promise<Boolean> {
 }
 
 export async function isGithubLink(message: IMessage) {
-    let githubLink: RegExp = /^(?:https?:\/\/)?(?:www\.)?github\.com\//;
+    let githubLink: RegExp = /(?:https?:\/\/)?(?:www\.)?github\.com\//;
     if (githubLink.test(message.text!)) {
         return true;
     }
