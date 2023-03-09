@@ -23,9 +23,7 @@ import {
 import { handleSearch } from "../handlers/SearchHandler";
 import { handleNewIssue } from "../handlers/HandleNewIssue";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
-import { BlockElementType } from "@rocket.chat/apps-engine/definition/uikit";
-import { getUserActivity } from "../helpers/githubSDK";
-import { getAccessTokenForUser } from "../persistance/auth";
+import { UserActivityHandler } from "../handlers/UserActivityHandler";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -142,23 +140,15 @@ export class CommandUtility implements ExecutorProps {
                     break;
                 }
                 case SubcommandEnum.ACTIVITY: {
-                    let access_token = await getAccessTokenForUser(
+                    await UserActivityHandler(
                         this.read,
-                        this.context.getSender(),
-                        this.app.oauth2Config
-                    );
-
-                    if (access_token != undefined && access_token.token != undefined) {
-                        const triggerID = this.context.getTriggerId() as string;
-                        const block = await this.getDummyBlock(access_token.token)
-                        const user = this.context.getSender();
-                        await this.modify.getUiController().openContextualBarView(
-                            block,
-                            { triggerId: triggerID },
-                            user
-                        );
-                    }
-
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    )
                     break;
                 }
                 default: {
@@ -281,32 +271,5 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-    public async getDummyBlock(accessToken: string) {
-        const blocks = this.modify.getCreator().getBlockBuilder();
 
-        const date = new Date().toISOString();
-
-        const data = await getUserActivity(this.http, "henit-chobisa", accessToken, 1, "WEEK", 5);
-
-        data.forEach((activity) => {
-            blocks.addSectionBlock({
-                text: blocks.newMarkdownTextObject(activity.repo.name), // [4]
-                accessory: { // [5]
-                    type: BlockElementType.BUTTON,
-                    actionId: 'repositoryList',
-                    text: blocks.newPlainTextObject('Refresh'),
-                    value: date,
-                },
-            });
-        })
-
-        return { // [6]
-            id: 'contextualbarId',
-            title: blocks.newPlainTextObject('Contextual Bar'),
-            submit: blocks.newButtonElement({
-                text: blocks.newPlainTextObject('Submit'),
-            }),
-            blocks: blocks.getBlocks(),
-        };
-    }
 }
