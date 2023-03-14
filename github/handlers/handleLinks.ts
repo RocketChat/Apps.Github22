@@ -9,8 +9,8 @@ import { IMessageExtender } from "@rocket.chat/apps-engine/definition/accessors"
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit";
 
 async function checkLines(content, url) {
-    const regex:RegExp = /(?:L(\d+)+-L(\d+)|L(\d+))/;
-    const match:RegExpMatchArray = url.match(regex);
+    const regex: RegExp = /(?:L(\d+)+-L(\d+)|L(\d+))/;
+    const match: RegExpMatchArray = url.match(regex);
     if (match[2]) {
         const endLine = parseInt(match[2]) - parseInt(match[1]);
         const lines = new RegExp(
@@ -50,9 +50,8 @@ export async function handleCodeLink(
     let code = await checkLines(content, url);
 
     let attachment: IMessageAttachment = {
-        text: code,
+        text: `\`\`\`\n${code}\n\`\`\``,
         type: TextObjectType.MARKDOWN,
-        color: "#171515",
     };
 
     extend.addAttachment(attachment);
