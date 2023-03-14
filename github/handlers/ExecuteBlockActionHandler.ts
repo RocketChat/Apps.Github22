@@ -48,6 +48,7 @@ import { IssueDisplayModal } from "../modals/IssueDisplayModal";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
+import { UserActivityContextualBar } from "../ContextualBars/UserActivityContextualBar";
 
 export class ExecuteBlockActionHandler {
 
@@ -111,6 +112,29 @@ export class ExecuteBlockActionHandler {
                             success: false,
                         };
                     }
+                }
+                case ModalsEnum.SWITCH_ACTIVITY_PAGE_PREV : {
+                    const {value, user } = context.getInteractionData();
+                    // value will include both the current page and No_More_Elements boolean for us
+
+                    const currentPageNumber = value == undefined ? 1 : +value
+
+                    const access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+
+                    const activityContextualBar = await UserActivityContextualBar(access_token.token, this.modify, this.http, currentPageNumber - 1 )
+
+                    return context.getInteractionResponder().updateContextualBarViewResponse(activityContextualBar);
+                }
+                case ModalsEnum.SWITCH_ACTIVITY_PAGE_NEXT : {
+                    let {user, value } = context.getInteractionData();
+
+                    const currentPageNumber = value == undefined ? 1 : +value
+
+                    const access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+
+                    const activityContextualBar = await UserActivityContextualBar(access_token.token, this.modify, this.http, currentPageNumber + 1 )
+
+                    return context.getInteractionResponder().updateContextualBarViewResponse(activityContextualBar);
                 }
                 case ModalsEnum.SHARE_ISSUE_ACTION : {
                     let {user, value, room} = context.getInteractionData();

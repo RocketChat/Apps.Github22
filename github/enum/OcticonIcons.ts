@@ -5,5 +5,6 @@ export enum OcticonIcons {
     COMMIT = "https://raw.githubusercontent.com/primer/octicons/main/icons/commit-24.svg",
     PERSON = "https://raw.githubusercontent.com/primer/octicons/main/icons/person-24.svg",
     REPOSITORY = "https://raw.githubusercontent.com/primer/octicons/main/icons/repo-24.svg",
+    PULL_REQUEST = "https://raw.githubusercontent.com/primer/octicons/main/icons/git-pull-request-16.svg",
     PENCIL = "https://raw.githubusercontent.com/primer/octicons/main/icons/pencil-24.svg"
 }

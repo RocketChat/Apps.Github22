@@ -1,6 +1,8 @@
 import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { IGitHubIssue } from "../definitions/githubIssue";
+import { IGithubActivity } from "../definitions/IGithubActivity";
 import { ModalsEnum } from "../enum/Modals";
+import { parseUserActivity } from "./ParseGithubActivity";
 
 const BaseHost = "https://github.com/";
 const BaseApiHost = "https://api.github.com/";
@@ -725,4 +727,38 @@ export async function updateGithubIssues(
         };
     }
     return repsonseJSON;
+}
+
+export async function getUserActivity (
+    http: IHttp,
+    username: String,
+    access_token : String,
+    page: number,
+    till_last : "WEEK" | "MONTH",
+    per_page?: number,
+) : Promise<IGithubActivity[]> {
+    per_page = per_page ?? 15;
+
+    let timeAgo = new Date()
+
+    if (till_last === "WEEK"){
+        timeAgo = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else {
+        timeAgo = new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    // A request need to be made to get the raw data from GitHub Events
+    const rawFetched = await getRequest(http, access_token, `https://api.github.com/users/${username}/events?per_page=${per_page}&page=${page}`) as any
+
+    // the data needs to be processed to get the last week or month's data
+    const lastWeekEvents = rawFetched.filter((event: any) =>
+      ['PullRequestEvent', 'IssueCommentEvent', 'IssuesEvent'].includes(event.type) &&
+      new Date(event.created_at) >= timeAgo
+    );
+
+    const userActivity: IGithubActivity[] = lastWeekEvents.map((event: any) : IGithubActivity => {
+        return parseUserActivity(event)
+    })
+
+    return userActivity
 }

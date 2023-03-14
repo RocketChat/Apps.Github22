@@ -23,6 +23,7 @@ import {
 import { handleSearch } from "../handlers/SearchHandler";
 import { handleNewIssue } from "../handlers/HandleNewIssue";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
+import { UserActivityHandler } from "../handlers/UserActivityHandler";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -136,6 +137,18 @@ export class CommandUtility implements ExecutorProps {
                         this.room,
                         this.modify
                     );
+                    break;
+                }
+                case SubcommandEnum.ACTIVITY: {
+                    await UserActivityHandler(
+                        this.read,
+                        this.context,
+                        this.app,
+                        this.persistence,
+                        this.http,
+                        this.room,
+                        this.modify
+                    )
                     break;
                 }
                 default: {
@@ -257,4 +270,6 @@ export class CommandUtility implements ExecutorProps {
             }
         }
     }
+
+
 }

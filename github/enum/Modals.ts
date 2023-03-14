@@ -1,4 +1,6 @@
 export enum ModalsEnum {
+    SWITCH_ACTIVITY_PAGE_PREV = 'switch-activity-page-prev',
+    SWITCH_ACTIVITY_PAGE_NEXT = 'switch-activity-page-next',
     ADD_GITHUB_ISSUE_ASSIGNEE_PROFILE = 'add-github-issue-assignee-profile',
     SHARE_ISSUE_ACTION = 'share-issue-action',
     TRIGGER_ISSUE_DISPLAY_MODAL = 'display-issue',
