@@ -37,13 +37,12 @@ export async function helperMessage({
     13) Add New Issues to GitHub Repository -> /github issue
     14) Search Issues and Pull Requests -> /github search
     15) Assign and Share Issues -> /github issues
-
     `;
 
     const textSender = await modify
         .getCreator()
         .startMessage()
-        .setText("```" + helperMessageString + "```");
+        .setText(`${helperMessageString}`);
 
     if (room) {
         textSender.setRoom(room);
