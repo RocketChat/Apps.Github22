@@ -50,9 +50,8 @@ export async function handleCodeLink(
     let code = await checkLines(content, url);
 
     let attachment: IMessageAttachment = {
-        text: `\`\`\`\n${code}\n\`\`\``,
+        text: `\`\`\`\n${code}\n\`\`\` \n[Show more...](${result})`,
         type: TextObjectType.MARKDOWN,
     };
-
     extend.addAttachment(attachment);
 }
