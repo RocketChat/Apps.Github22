@@ -5,6 +5,7 @@ import { GithubApp } from "../GithubApp";
 import { sendNotification } from "../lib/message";
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
 import { getAccessTokenForUser } from "../persistance/auth";
+import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
 
 export async function handleNewIssue(
     read: IRead,
@@ -49,4 +50,23 @@ export async function handleNewIssue(
             "Login to subscribe to repository events ! `/github login`"
         );
     }
+}
+
+export async function handleIssues(
+    read: IRead,
+    context: SlashCommandContext,
+    app: GithubApp,
+    persistence: IPersistence,
+    http: IHttp,
+    room: IRoom,
+    modify: IModify
+){
+    const triggerId= context.getTriggerId();
+    if(triggerId){
+        const modal = await GitHubIssuesStarterModal({modify,read,persistence,http,slashcommandcontext:context});
+        await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+    }else{
+        console.log("Inavlid Trigger ID !");
+    }
+
 }
