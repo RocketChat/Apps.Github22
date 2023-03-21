@@ -1,5 +1,6 @@
 import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { IGitHubIssue } from "../definitions/githubIssue";
+import { IGithubIssueReaction } from "../definitions/githubIssueReaction";
 import { ModalsEnum } from "../enum/Modals";
 
 const BaseHost = "https://github.com/";
@@ -725,4 +726,94 @@ export async function updateGithubIssues(
         };
     }
     return repsonseJSON;
+}
+
+export async function createIssueReaction(
+    repoName: string,
+    owner: string,
+    issueNumber: number,
+    http: IHttp,
+    access_token: string,
+    reaction: string,
+    user_id: string
+): Promise<IGithubIssueReaction | any> {
+    try {
+        const request_data = {
+            content: reaction,
+        };
+
+        const response = await http.post(
+            `${BaseApiHost}repos/${repoName}/issues/${issueNumber}/reactions`,
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                    "Content-Type": "application/json",
+                },
+                data: request_data,
+            }
+        );
+
+        const { data } = response;
+        if (response.statusCode.toString().startsWith("2")) {
+            const { id } = data;
+
+            return {
+                reaction_id: id as string,
+                repo_name: repoName,
+                user_id,
+                reaction,
+                issue_number: issueNumber,
+            };
+        }
+
+        return {
+            message: response.content,
+            error: true,
+        };
+    } catch (e) {
+        return {
+            error: "Error While Creating Reaction to Issue",
+            repo_name: repoName,
+            issue_number: issueNumber,
+            user_id,
+            reaction,
+        };
+    }
+
+    // https://docs.github.com/en/rest/reactions?apiVersion=2022-11-28#create-reaction-for-an-issue
+}
+
+export async function removeIssueReaction(
+    repoName: string,
+    owner: string,
+    issueNumber: number,
+    http: IHttp,
+    access_token: string,
+    reactionId: string
+) {
+    try {
+        const response = await http.del(
+            `${BaseApiHost}repos/${repoName}/issues/${issueNumber}/reactions/${reactionId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        if (response.statusCode.toString().startsWith("2")) {
+            return true;
+        }
+
+        return false;
+    } catch (e) {
+        return {
+            error: "Error While Removing Reaction to Issue",
+            repo_name: repoName,
+            issue_number: issueNumber,
+        };
+    }
+    
+    // https://docs.github.com/en/rest/reactions?apiVersion=2022-11-28#delete-an-issue-reaction
 }

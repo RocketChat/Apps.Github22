@@ -12,6 +12,7 @@ import {
     ISlashCommand,
     SlashCommandContext,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
+import { IUser } from "@rocket.chat/apps-engine/definition/users";
 
 export async function issueListMessage({
     repository,
@@ -22,7 +23,7 @@ export async function issueListMessage({
     http,
     accessToken,
 }: {
-    repository : String,
+    repository: String;
     room: IRoom;
     read: IRead;
     persistence: IPersistence;
@@ -30,14 +31,17 @@ export async function issueListMessage({
     http: IHttp;
     accessToken?: IAuthData;
 }) {
-    let gitResponse:any;
-    if(accessToken?.token){
-        gitResponse = await http.get(`https://api.github.com/repos/${repository}/issues`, {
-            headers: {
-                Authorization: `token ${accessToken?.token}`,
-                "Content-Type": "application/json",
-            },
-        });
+    let gitResponse: any;
+    if (accessToken?.token) {
+        gitResponse = await http.get(
+            `https://api.github.com/repos/${repository}/issues`,
+            {
+                headers: {
+                    Authorization: `token ${accessToken?.token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
     } else {
         gitResponse = await http.get(
             `https://api.github.com/repos/${repository}/issues`
@@ -54,17 +58,25 @@ export async function issueListMessage({
     }
     let ind = 0;
     await modify.getCreator().finish(textSender);
+    const sender = (await read.getUserReader().getAppUser()) as IUser;
     resData.forEach(async (issue) => {
         if (typeof issue.pull_request === "undefined" && ind < 10) {
             const textSender = await modify
                 .getCreator()
                 .startMessage()
-                .setText(
-                    `[ #${issue.number} ](${issue.html_url})  *[${issue.title}](${issue.html_url})*`
-                );
-            if (room) {
-                textSender.setRoom(room);
-            }
+                .setData({
+                    room,
+                    sender,
+                    text: `[ #${issue.number} ](${issue.html_url})  *[${issue.title}](${issue.html_url})*`,
+                    customFields: {
+                        issue: true,
+                        issue_url: issue.html_url,
+                        issue_number: issue.number,
+                        owner: issue.user.login,
+                        repo_name: repository,
+                    },
+                });
+
             await modify.getCreator().finish(textSender);
             ind++;
         }
