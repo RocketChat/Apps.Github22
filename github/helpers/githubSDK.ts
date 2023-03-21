@@ -729,17 +729,15 @@ export async function updateGithubIssues(
 
 export async function isRepositoryExist(
     http: IHttp,
-    repoName: string,
-    access_token: string
+    repoName: string
 ): Promise<boolean> {
-    const response = await http.get(BaseRepoApiHost + repoName, {
+    const response = await http.get(`${BaseRepoApiHost}${repoName}`, {
         headers: {
-            Authorization: `token ${access_token}`,
             "Content-Type": "application/json",
         },
     });
 
-    if (response.statusCode == HttpStatusCode.OK) {
+    if (response.statusCode.toString().startsWith("2")) {
         return true;
     }
 

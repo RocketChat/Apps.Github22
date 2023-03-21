@@ -19,15 +19,10 @@ export async function HandleInvalidRepoName(
     read: IRead,
     room: IRoom
 ): Promise<boolean> {
-    const { token } = await getAccessTokenForUser(
-        read,
-        sender,
-        app.oauth2Config
-    ) as IAuthData;
+
     const isValidRepository: boolean = await isRepositoryExist(
         http,
         repoName,
-        token
     );
 
     if (!isValidRepository) {
@@ -36,7 +31,7 @@ export async function HandleInvalidRepoName(
             .startMessage()
             .setRoom(room)
             .setText(
-                `Hey ${sender.username} ! Provided username and/or repository doesn't exist`
+                `Hey ${sender.username}! Provided username and/or repository doesn't exist`
             );
 
         if (room.type !== "l") {
