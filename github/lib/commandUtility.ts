@@ -182,20 +182,6 @@ export class CommandUtility implements ExecutorProps {
         const query = this.command[1];
         const repository = this.command[0];
 
-        const isValidRepo = await HandleInvalidRepoName(
-            repository,
-            this.http,
-            this.app,
-            this.modify,
-            this.sender,
-            this.read,
-            this.room
-        );
-
-        if (!isValidRepo) {
-            return;
-        }
-
         switch (query) {
             case SubcommandEnum.SUBSCRIBE: {
                 SubscribeAllEvents(
