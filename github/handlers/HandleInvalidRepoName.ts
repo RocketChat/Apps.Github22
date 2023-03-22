@@ -19,28 +19,33 @@ export async function HandleInvalidRepoName(
     read: IRead,
     room: IRoom
 ): Promise<boolean> {
-    const accessTokenInfo = (await getAccessTokenForUser(
+    const accessToken = (await getAccessTokenForUser(
         read,
         sender,
         app.oauth2Config
     )) as IAuthData;
 
-    const access_token = (accessTokenInfo == undefined) ? undefined : accessTokenInfo.token;
-    
     const isValidRepository: boolean = await isRepositoryExist(
         http,
         repoName,
-        access_token
+        accessToken?.token
     );
 
     if (!isValidRepository) {
         const warningBuilder = await modify
             .getCreator()
             .startMessage()
-            .setRoom(room)
-            .setText(
+            .setRoom(room);
+
+        if (accessToken) {
+            warningBuilder.setText(
+                `Hey ${sender.username}! Provided repository doesn't exist.`
+            );
+        } else {
+            warningBuilder.setText(
                 `Hey ${sender.username}! Provided repository doesn't exist or you need to login to access private repo.`
             );
+        }
 
         if (room.type !== "l") {
             await modify
@@ -53,4 +58,3 @@ export async function HandleInvalidRepoName(
 
     return isValidRepository;
 }
-
