@@ -118,6 +118,14 @@ export async function SubscribeAllEvents(
         } catch (error) {
             console.log("SubcommandError", error);
         }
+    } else {
+        await sendNotification(
+            read,
+            modify,
+            context.getSender(),
+            room,
+            "Login to subscribe to repository events ! `/github login`"
+        );
     }
 }
 
