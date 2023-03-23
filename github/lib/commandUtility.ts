@@ -157,6 +157,7 @@ export class CommandUtility implements ExecutorProps {
                         persistence: this.persistence,
                         modify: this.modify,
                         http: this.http,
+                        user: this.sender
                     });
                     break;
                 }
@@ -203,6 +204,7 @@ export class CommandUtility implements ExecutorProps {
                     persistence: this.persistence,
                     modify: this.modify,
                     http: this.http,
+                    user: this.sender
                 });
                 break;
             }
@@ -242,6 +244,7 @@ export class CommandUtility implements ExecutorProps {
                     persistence: this.persistence,
                     modify: this.modify,
                     http: this.http,
+                    user: this.sender
                 });
                 break;
             }
@@ -264,6 +267,7 @@ export class CommandUtility implements ExecutorProps {
                     persistence: this.persistence,
                     modify: this.modify,
                     http: this.http,
+                    user: this.sender
                 });
                 break;
             }
