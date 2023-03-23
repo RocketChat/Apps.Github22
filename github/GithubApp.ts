@@ -51,18 +51,15 @@ export class GithubApp extends App implements IPreMessageSentExtend{
     }
     public async checkPreMessageSentExtend(message: IMessage, read: IRead, http: IHttp): Promise<boolean> {
         if(await isGithubLink(message)){
-            console.log("github link")
             return true;
         }
         return false;
     }
     public async executePreMessageSentExtend(message: IMessage, extend: IMessageExtender, read: IRead, http: IHttp, persistence: IPersistence): Promise<IMessage> {
         if(await hasRepoLink(message)){
-            console.log("is repo link");
             await handleRepoLink(message,read,http,message.sender,message.room,extend);
 
         }
-        console.log(extend.getMessage());
         return extend.getMessage();
     }
     public async authorizationCallback(

@@ -9,10 +9,12 @@ export async function isGithubLink(message: IMessage) {
 }
 
 export async function hasRepoLink(message: IMessage) {
-    let repoLink1: RegExp = /https:\/\/github\.com\/\S+\/\S+\/?\s/;
-    let repoLink2: RegExp = /https:\/\/github\.com\/\S+\/\S+\/?$/;
+    // const repoLink1: RegExp = /https:\/\/github\.com\/\S+\/\S+\/?\s/;
+    const repoLink1 = /https?:\/\/github\.com\/[A-Za-z0-9-]+\/[A-Za-z0-9-_.]+\s(?!\/)/;
+    const repoLink2 = /https?:\/\/github\.com\/[A-Za-z0-9-]+\/[A-Za-z0-9-_.]+\/?$/;
 
     if (repoLink1.test(message.text!) || repoLink2.test(message.text!)) {
+
         return true;
     }
     return false;

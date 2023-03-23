@@ -1,4 +1,9 @@
-import { IMessage, IMessageAttachment, MessageActionButtonsAlignment, MessageActionType } from "@rocket.chat/apps-engine/definition/messages";
+import {
+    IMessage,
+    IMessageAttachment,
+    MessageActionButtonsAlignment,
+    MessageActionType,
+} from "@rocket.chat/apps-engine/definition/messages";
 import { IRead, IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
@@ -12,27 +17,35 @@ export async function handleRepoLink(
     room: IRoom,
     extend: IMessageExtender
 ) {
-    console.log("Here");
-    const regex =
-    /github\.com\/([A-Za-z0-9-]+)\/([A-Za-z0-9-_]+)/;
-    const url = message.text!;
-    console.log("Here");
 
+    const regex = /github\.com\/([A-Za-z0-9-]+)\/([A-Za-z0-9-_.]+)/;
+    const url = message.text!;
     const matches = url.match(regex)!;
-    console.log("Here");
-    console.log(matches);
-    const owner = matches[0];
-    const repo = matches[1];
-    console.log("here");
-    console.log(owner+repo);
-    const attachment:IMessageAttachment={
-        actionButtonsAlignment:MessageActionButtonsAlignment.HORIZONTAL,
-        actions:[{
-            type:MessageActionType.BUTTON,
-            text:"Overview",
-            msg:`/github ${owner}/${repo}`,
-            msg_in_chat_window:false
-        }]
-    }
+    const owner = matches[1];
+    const repo = matches[2];
+    const attachment: IMessageAttachment = {
+        actionButtonsAlignment: MessageActionButtonsAlignment.HORIZONTAL,
+        actions: [
+            {
+                type: MessageActionType.BUTTON,
+                text: "Issues",
+                msg: `/github ${owner}/${repo} issues`,
+                msg_in_chat_window: true,
+            },
+            {
+                type: MessageActionType.BUTTON,
+                text: "Contributors",
+                msg: `/github ${owner}/${repo} contributors`,
+                msg_in_chat_window: true,
+            },
+            {
+                type: MessageActionType.BUTTON,
+                text: "Pull Requests",
+                msg: `/github ${owner}/${repo} pulls`,
+                msg_in_chat_window: true,
+            },
+
+        ],
+    };
     extend.addAttachment(attachment);
 }
