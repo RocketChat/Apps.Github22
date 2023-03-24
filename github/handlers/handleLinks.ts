@@ -28,21 +28,19 @@ export async function handleRepoLink(
         actions: [
             {
                 type: MessageActionType.BUTTON,
-                text: "Issues",
-                msg: `/github ${owner}/${repo} issues`,
+                text: "Create issue",
+                msg: `/github ${owner}/${repo} issue`,
                 msg_in_chat_window: true,
             },
             {
                 type: MessageActionType.BUTTON,
-                text: "Contributors",
-                msg: `/github ${owner}/${repo} contributors`,
-                msg_in_chat_window: true,
+                text: "Issues",
+                url:`https://www.github.com/${owner}/${repo}/issues`
             },
             {
                 type: MessageActionType.BUTTON,
                 text: "Pull Requests",
-                msg: `/github ${owner}/${repo} pulls`,
-                msg_in_chat_window: true,
+                url:`https://www.github.com/${owner}/${repo}/pulls`
             },
 
         ],

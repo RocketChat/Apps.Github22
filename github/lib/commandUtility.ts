@@ -23,6 +23,7 @@ import {
 import { handleSearch } from "../handlers/SearchHandler";
 import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
+import { NewIssueModal } from "../modals/newIssueModal";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -138,7 +139,7 @@ export class CommandUtility implements ExecutorProps {
                     );
                     break;
                 }
-                case SubcommandEnum.ISSUES :{
+                case SubcommandEnum.ISSUES: {
                     handleIssues(
                         this.read,
                         this.context,
@@ -147,7 +148,7 @@ export class CommandUtility implements ExecutorProps {
                         this.http,
                         this.room,
                         this.modify
-                    )
+                    );
                     break;
                 }
                 default: {
@@ -192,6 +193,26 @@ export class CommandUtility implements ExecutorProps {
                     this.room,
                     this.modify
                 );
+                break;
+            }
+            case SubcommandEnum.NEW_ISSUE: {
+                const data = { repository: repository };
+                const modal = await NewIssueModal({
+                    data: data,
+                    modify: this.modify,
+                    read: this.read,
+                    persistence: this.persistence,
+                    http: this.http,
+                    slashcommandcontext: this.context,
+                });
+                const triggerId = this.context.getTriggerId()!;
+                await this.modify
+                    .getUiController()
+                    .openModalView(
+                        modal,
+                        { triggerId },
+                        this.context.getSender()
+                    );
                 break;
             }
             default: {

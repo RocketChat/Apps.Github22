@@ -34,8 +34,9 @@ export async function helperMessage({
     11. Subscribe to all repository events -> \`/github Username/RepositoryName subscribe\`
     12. Unsubscribe to all repository events -> \`/github Username/RepositoryName unsubscribe\`
     13. Add New Issues to GitHub Repository -> \`/github issue\`
-    14. Search Issues and Pull Requests -> \`/github search\`
-    15. Assign and Share Issues -> \`/github issues\`
+    14. Add New Issue to a GitHub Repository -> \`/github Username/RepositoryName issue\`
+    15. Search Issues and Pull Requests -> \`/github search\`
+    16. Assign and Share Issues -> \`/github issues\`
     `;
 
     const textSender = await modify
