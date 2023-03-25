@@ -17,6 +17,7 @@ import { sendNotification } from "../lib/message";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { Subscription } from "../persistance/subscriptions";
+import { HandleInvalidRepoName } from "./HandleInvalidRepoName";
 
 export async function SubscribeAllEvents(
     read: IRead,
@@ -36,6 +37,21 @@ export async function SubscribeAllEvents(
     const repository = command[0];
     if (accessToken && accessToken?.token) {
         try {
+            const sender = context.getSender();
+            const isValidRepo = await HandleInvalidRepoName(
+                repository,
+                http,
+                app,
+                modify,
+                sender,
+                read,
+                room
+            );
+
+            if (!isValidRepo) {
+                return;
+            }
+
             let events: Array<string> = [
                 "pull_request",
                 "push",
@@ -118,6 +134,14 @@ export async function SubscribeAllEvents(
         } catch (error) {
             console.log("SubcommandError", error);
         }
+    } else {
+        await sendNotification(
+            read,
+            modify,
+            context.getSender(),
+            room,
+            "Login to subscribe to repository events ! `/github login`"
+        );
     }
 }
 
@@ -140,6 +164,20 @@ export async function UnsubscribeAllEvents(
     if (accessToken && accessToken?.token) {
         try {
             let user = await context.getSender();
+            const isValidRepo = await HandleInvalidRepoName(
+                repository,
+                http,
+                app,
+                modify,
+                user,
+                read,
+                room
+            );
+
+            if (!isValidRepo) {
+                return;
+            }
+            
             let events: Array<string> = [
                 "pull_request",
                 "push",

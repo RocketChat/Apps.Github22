@@ -21,9 +21,9 @@ import {
     ManageSubscriptions,
 } from "../handlers/EventHandler";
 import { handleSearch } from "../handlers/SearchHandler";
-import { handleNewIssue } from "../handlers/HandleNewIssue";
+import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
-import { handleIssuesList } from "../handlers/HandleIssueList";
+import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -55,13 +55,26 @@ export class CommandUtility implements ExecutorProps {
             arguments: this.command,
         };
         if (this.command[0].includes("/")) {
-            await initiatorMessage({
-                data,
-                read: this.read,
-                persistence: this.persistence,
-                modify: this.modify,
-                http: this.http,
-            });
+            const repoName = this.command[0];
+            const isValidRepoName = await HandleInvalidRepoName(
+                repoName,
+                this.http,
+                this.app,
+                this.modify,
+                this.sender,
+                this.read,
+                this.room
+            );
+
+            if (isValidRepoName) {
+                await initiatorMessage({
+                    data,
+                    read: this.read,
+                    persistence: this.persistence,
+                    modify: this.modify,
+                    http: this.http,
+                });
+            }
         } else {
             switch (this.command[0]) {
                 case SubcommandEnum.LOGIN: {
@@ -139,8 +152,8 @@ export class CommandUtility implements ExecutorProps {
                     );
                     break;
                 }
-                case SubcommandEnum.ISSUES: {
-                    await handleIssuesList(
+                case SubcommandEnum.ISSUES :{
+                    handleIssues(
                         this.read,
                         this.context,
                         this.app,
@@ -148,7 +161,7 @@ export class CommandUtility implements ExecutorProps {
                         this.http,
                         this.room,
                         this.modify
-                    );
+                    )
                     break;
                 }
                 default: {
@@ -168,6 +181,7 @@ export class CommandUtility implements ExecutorProps {
     private async handleDualParamCommands() {
         const query = this.command[1];
         const repository = this.command[0];
+
         switch (query) {
             case SubcommandEnum.SUBSCRIBE: {
                 SubscribeAllEvents(
@@ -216,6 +230,21 @@ export class CommandUtility implements ExecutorProps {
             query: this.command[1],
             number: this.command[2],
         };
+
+        const isValidRepo = await HandleInvalidRepoName(
+            data.repository,
+            this.http,
+            this.app,
+            this.modify,
+            this.sender,
+            this.read,
+            this.room
+        );
+
+        if (!isValidRepo) {
+            return;
+        }
+
         const triggerId = this.context.getTriggerId();
         if (triggerId) {
             const modal = await pullDetailsModal({

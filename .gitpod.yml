@@ -1,0 +1,16 @@
+tasks:
+  - name: Thrust Off Github App
+    command: thrust start ./github
+
+ports:
+  - port: 3000
+    visibility: public
+
+vscode:
+  extensions:
+    - "ms-vscode.vscode-typescript-next"
+    - "esbenp.prettier-vscode"
+    - "github.vscode-pull-request-github"
+
+image:
+  file: .gitpod.Dockerfile

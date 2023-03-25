@@ -10,6 +10,7 @@
  
 The GitHub Rocket.Chat App provides a seamless integration between GitHub and Rocket.Chat and improves collaboration between developers. The application allows users to search and share Issues and Pull Request, Subscribe to Repository Events, create New Issues, Review and Merge Pull Requests and do much more right from Rocket.Chat. 
 
+
 <h2 align='center'>🚀 Features 🚀</h2>
 <ul>
   <li>Quick and Easy Setup</li> 
@@ -41,8 +42,36 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
     <li> Get Recent Pull Request of a Repository -> /github  Username/RepositoryName pulls </li>
 </ul>
 
+<h2 align='center'>🚀 Contributing 🚀</h2>
 
-<h2 align='center'>🖥️ Quick Setup 🖥️</h2>
+<div align='center' width='100%'>
+<a href="https://www.middlewarehq.com/">
+<img src="https://open-source-assets.middlewarehq.com/svgs/RocketChat-Apps.Github22-contributor-metrics-dark-widget.svg?metrics=true"></img>
+</a>
+</div>
+
+<ul>
+  <li>Set up the Application on your server using our <a href="#desktop_computer-quick-setup-desktop_computer">Quick Setup</a> and <a href="#desktop_computer-application-setup-desktop_computer">Application Setup</a>.</li>
+ <li>Explore the app and look for existing issues to solve. We look forward to new PRs :100:.</li>
+ <li>If you find a bug or a missing feature, feel free to open a new Issue.</li>
+ <li>If you are new to Rocket.Chat App Development, follow the <a href="https://developer.rocket.chat/apps-engine/rocket.chat-app">developement documentation</a> and <a href="https://rocketchat.github.io/Rocket.Chat.Apps-engine/">RocketChat Apps Engine TypeScript Defenitions</a></li>
+  <li>You can also follow other Rocket.Chat Apps for inspiration : <a href="https://github.com/Poll-Plus/rocket.chat.app-poll">Polls Plus App</a>, <a href="https://github.com/RocketChat/Apps.ClickUp">ClickUp Rocket.Chat App</a> , <a href="https://github.com/RocketChat/Apps.Figma">Figma Rocket.Chat App</a>
+</ul>
+
+
+
+<h2 align='center' id="quick-setup">:desktop_computer: Quick Setup :desktop_computer:</h2>
+
+<h2 align='center'> Gitpod 🍊 </h2>
+
+Start developing and make changes to your code via a single click **Anytime-Anywhere**!
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/RocketChat/Apps.Github22)
+
+Using [Thrust](https://github.com/henit-chobisa/Thrust.RC) for quickly setup your Rocket.Chat workspace & hot-reload for develping and deploying Github App, no need to worry about setting up any Rocket.Chat server before hand.
+
+<h2 align='center'> Manual Setup 🐳 </h2>
+
 <ol>
   <li>Rocket.Chat Apps Run on a Rocket.Chat server. If you dont have a server setup, please go through this <a href="https://developer.rocket.chat/rocket.chat/rocket-chat-environment-setup">setup</a> and setup a development environment and setup you server</li> 
   <li>To start with development on Rocket.Chat Apps, you need to install the Rocket.Chat Apps Engline CLI. Enter the following commands : </li>
@@ -51,7 +80,7 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
     npm install -g @rocket.chat/apps-cli
   ```
   
-  Check of the CLI has been installed 
+  Check if the CLI has been installed 
   
   ```
   rc-apps -v
@@ -94,7 +123,7 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
 The Application is now installed on the server. You can verify this by checking the installed applications from the administration panel.
 Enter `/github` or  `/github help` in the message input box of any channel on the server to know about different features and how to trigger them using different slash commands.
 
-<h2 align='center'>🖥️ Application Setup 🖥️</h2>
+<h2 align='center'>:desktop_computer: Application Setup :desktop_computer:</h2>
 
 <p>The GitHub App uses the GitHub OAth2 and you must setup a GitHub OAuth App to unlock the full potential of the GitHub App.</p>
 
@@ -120,13 +149,4 @@ Once the GitHub OAuth app is setup, open the GitHub Application Settings and ent
 The users can login to GitHub by entering the slash command `/github login` and then clicking on the `Login` button.
 
 Users are logged out after a week but the users can also logout at any time by entering `/github logout`.
-
-<h2 align='center'>🚀 Contrubuting 🚀</h2>
-
-<ul>
-  <li>After Setting up the Application on your server, look for open issues.</li>
-  <li>If you are new to Rocket.Chat App Development, follow the <a href="https://developer.rocket.chat/apps-engine/rocket.chat-app">developement documentation</a> and <a href="https://rocketchat.github.io/Rocket.Chat.Apps-engine/">RocketChat Apps Engine TypeScript Defenitions</a></li>
-  <li>You can also follow other Rocket.Chat Apps for inspiration : <a href="https://github.com/Poll-Plus/rocket.chat.app-poll">Polls Plus App</a>, <a href="https://github.com/RocketChat/Apps.ClickUp">ClickUp Rocket.Chat App</a> , <a href="https://github.com/RocketChat/Apps.Figma">Figma Rocket.Chat App</a>
-</ul>
-
 
