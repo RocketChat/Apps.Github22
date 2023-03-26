@@ -260,7 +260,7 @@ export async function UnsubscribeAllEvents(
         }
     } else {
         const user = context.getSender();
-        const message = `Login to subscribe to repository events!`;
+        const message = `Login to unsubscribe from repository events!`;
         const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
@@ -305,7 +305,7 @@ export async function ManageSubscriptions(
         }
     } else {
         const user = context.getSender();
-        const message = `Login to subscribe to repository events!`;
+        const message = `Login to manage repository events!`;
         const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,

@@ -45,7 +45,7 @@ export async function handleNewIssue(
         }
     } else {
         const user = context.getSender();
-        const message = `Login to subscribe to repository events!`;
+        const message = `Login to add a new issue!`;
         const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
@@ -82,7 +82,7 @@ export async function handleIssues(
         }
     } else {
         const user = context.getSender();
-        const message = `Login to assign!`;
+        const message = `Login to assign issues!`;
         const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
