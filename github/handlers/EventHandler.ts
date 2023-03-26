@@ -15,6 +15,7 @@ import {
 } from "../helpers/githubSDK";
 import { sendNotification } from "../lib/message";
 import { subsciptionsModal } from "../modals/subscriptionsModal";
+import { getGithubOauthBlock } from "../oath2/authentication";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { Subscription } from "../persistance/subscriptions";
 import { HandleInvalidRepoName } from "./HandleInvalidRepoName";
@@ -135,12 +136,16 @@ export async function SubscribeAllEvents(
             console.log("SubcommandError", error);
         }
     } else {
+        const user = context.getSender();
+        const message = `Login to subscribe to repository events!`;
+        const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
             modify,
-            context.getSender(),
+            user,
             room,
-            "Login to subscribe to repository events ! `/github login`"
+            message,
+            block
         );
     }
 }
@@ -254,12 +259,16 @@ export async function UnsubscribeAllEvents(
             console.log("SubcommandError", error);
         }
     } else {
+        const user = context.getSender();
+        const message = `Login to subscribe to repository events!`;
+        const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
             modify,
-            context.getSender(),
+            user,
             room,
-            "Login to subscribe to repository events ! `/github login`"
+            message,
+            block
         );
     }
 }
@@ -295,12 +304,16 @@ export async function ManageSubscriptions(
             console.log("Invalid Trigger ID !");
         }
     } else {
+        const user = context.getSender();
+        const message = `Login to subscribe to repository events!`;
+        const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
             modify,
-            context.getSender(),
+            user,
             room,
-            "Login to subscribe to repository events ! `/github login`"
+            message,
+            block
         );
     }
 }
