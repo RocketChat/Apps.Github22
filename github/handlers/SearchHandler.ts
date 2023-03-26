@@ -43,7 +43,7 @@ export async function handleSearch(
         }
     } else {
         const user = context.getSender();
-        const message = `"Login to subscribe to repository events!`;
+        const message = `Login to subscribe to repository events!`;
         const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,

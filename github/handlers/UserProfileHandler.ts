@@ -43,7 +43,7 @@ export async function handleUserProfileRequest(
         }
     }else {
         const user = context.getSender();
-        const message = `"Login to get your user info!`;
+        const message = `Login to get your user info!`;
         const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
