@@ -67,12 +67,31 @@ export async function handleIssues(
     room: IRoom,
     modify: IModify
 ){
-    const triggerId= context.getTriggerId();
-    if(triggerId){
-        const modal = await GitHubIssuesStarterModal({modify,read,persistence,http,slashcommandcontext:context});
-        await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
-    }else{
-        console.log("Inavlid Trigger ID !");
+    let accessToken = await getAccessTokenForUser(
+        read,
+        context.getSender(),
+        app.oauth2Config
+    );
+    if (accessToken && accessToken.token) {
+        const triggerId= context.getTriggerId();
+        if(triggerId){
+            const modal = await GitHubIssuesStarterModal({modify,read,persistence,http,slashcommandcontext:context});
+            await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
+        }else{
+            console.log("Inavlid Trigger ID !");
+        }
+    } else {
+        const user = context.getSender();
+        const message = `Login to assign!`;
+        const block = await getGithubOauthBlock(app, user, modify, message);
+        await sendNotification(
+            read,
+            modify,
+            user,
+            room,
+            message,
+            block
+        );
     }
 
 }
