@@ -6,6 +6,8 @@ import { sendNotification } from "../lib/message";
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
+import { getGithubOauthBlock } from "../oath2/authentication";
+import { createSectionBlock } from "../lib/blocks";
 
 export async function handleNewIssue(
     read: IRead,
@@ -42,12 +44,16 @@ export async function handleNewIssue(
             console.log("Inavlid Trigger ID !");
         }
     } else {
+        const user = context.getSender();
+        const message = `"Login to subscribe to repository events!`;
+        const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
             modify,
-            context.getSender(),
+            user,
             room,
-            "Login to subscribe to repository events ! `/github login`"
+            message,
+            block
         );
     }
 }

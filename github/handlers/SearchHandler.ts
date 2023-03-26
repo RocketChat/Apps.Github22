@@ -4,6 +4,7 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import { GithubApp } from "../GithubApp";
 import { sendNotification } from "../lib/message";
 import { githubSearchModal } from "../modals/githubSearchModal";
+import { getGithubOauthBlock } from "../oath2/authentication";
 import { getAccessTokenForUser } from "../persistance/auth";
 
 export async function handleSearch(
@@ -41,12 +42,16 @@ export async function handleSearch(
             console.log("Inavlid Trigger ID !");
         }
     } else {
+        const user = context.getSender();
+        const message = `"Login to subscribe to repository events!`;
+        const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
             modify,
-            context.getSender(),
+            user,
             room,
-            "Login to subscribe to repository events ! `/github login`"
+            message,
+            block
         );
     }
 }

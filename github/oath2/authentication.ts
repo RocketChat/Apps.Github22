@@ -18,6 +18,13 @@ export async function authorize(
     room: IRoom,
     persistence: IPersistence
 ): Promise<void> {
+    const message = `Login to GitHub`;
+    const block = await getGithubOauthBlock(app, user, modify, message);
+    await storeInteractionRoomData(persistence,user.id,room.id);
+    await sendNotification(read, modify, user, room, message, block);
+}
+
+export async function getGithubOauthBlock(app: GithubApp, user: IUser, modify: IModify, message: string) {
     const url = await app
         .getOauth2ClientInstance()
         .getUserAuthorizationUrl(user);
@@ -26,8 +33,7 @@ export async function authorize(
         text: "GitHub Login",
         url: url.toString(),
     };
-    const message = `Login to GitHub`;
+
     const block = await createSectionBlock(modify, message, button);
-    await storeInteractionRoomData(persistence,user.id,room.id);
-    await sendNotification(read, modify, user, room, message, block);
+    return block;
 }
