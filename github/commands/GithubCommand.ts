@@ -15,7 +15,7 @@ import { CommandUtility } from "../lib/commandUtility";
 export class GithubCommand implements ISlashCommand {
     public constructor(private readonly app: GithubApp) {}
     public command = "github";
-    public i18nDescription = 'cmd_description';
+    public i18nDescription = "cmd_description";
     public providesPreview = false;
     public i18nParamsExample = "";
 
