@@ -26,7 +26,7 @@ import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 import { sendMessage, sendNotification } from "../lib/message";
 import { subscriptionsModal } from "../modals/subscriptionsModal";
-import { mergePullRequestModal } from "../modals/mergePullReqeustModal";
+import { mergePullRequestModal } from "../modals/mergePullRequestModal";
 import { messageModal } from "../modals/messageModal";
 import { getRepoData } from "../helpers/githubSDK";
 import { addPullRequestCommentsModal } from "../modals/addPullRequestCommentsModal";

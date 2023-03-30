@@ -56,13 +56,13 @@ export class githubWebHooks extends ApiEndpoint {
             messageText = `*New Commits to* *[${payload.repository.full_name}](${payload.repository.html_url}) by ${payload.pusher.name}*`;
         } else if (event == "pull_request") {
             if(payload.action == "opened"){
-                messageText = `*[New Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+                messageText = `*[New Pull Request](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
             }else if(payload.action == "closed" && payload.pull_request.merged ){
-                messageText = `*[Merged Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+                messageText = `*[Merged Pull Request](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
             }else if(payload.action == "closed" && !payload.pull_request.merged){
-                messageText = `*[Closed Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+                messageText = `*[Closed Pull Request](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
             }else if(payload.action =="reopened"){
-                messageText = `*[ReOpened Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+                messageText = `*[ReOpened Pull Request](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
             }else{
                 return this.success();
             }
