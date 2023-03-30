@@ -56,7 +56,7 @@ export async function issueListMessage({
     await modify.getCreator().finish(textSender);
     resData.forEach(async (issue) => {
         if (typeof issue.pull_request === "undefined" && ind < 10) {
-            issue.title = issue.title.replace(/[\[\]()`]/g, "");
+            issue.title = issue.title.replace(/[^a-zA-Z0-9:/?=.&-]/g, "");
             const textSender = await modify
                 .getCreator()
                 .startMessage()
