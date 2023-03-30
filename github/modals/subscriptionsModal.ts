@@ -30,13 +30,13 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
         }
     
         let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader());
-        let roomSubsciptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
+        let roomSubscriptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
 
         block.addDividerBlock();
         
     
         let repositoryData = new Map<string,IRepositorySubscriptions>;
-        for (let subsciption of roomSubsciptions) {
+        for (let subsciption of roomSubscriptions) {
 
             let repoName = subsciption.repoName;
             let userId = subsciption.user;

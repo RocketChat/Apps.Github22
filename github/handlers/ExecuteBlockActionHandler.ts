@@ -17,7 +17,7 @@ import {
     UIKitBlockInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
-import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
+import { deleteSubscriptionsModal } from "../modals/deleteSubscriptions";
 import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
@@ -380,7 +380,7 @@ export class ExecuteBlockActionHandler {
                         .openModalViewResponse(addSubscriptionModal);
                 }
                 case ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_MODAL: {
-                    const addSubscriptionModal = await deleteSubsciptionsModal({
+                    const addSubscriptionModal = await deleteSubscriptionsModal({
                         modify: this.modify,
                         read: this.read,
                         persistence: this.persistence,
@@ -439,7 +439,7 @@ export class ExecuteBlockActionHandler {
                         await sendNotification(this.read, this.modify, user, userRoom, `Unsubscribed to ${repoName} 🔕`);
                     }
 
-                    const modal = await deleteSubsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                    const modal = await deleteSubscriptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                     await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     break;
                 }

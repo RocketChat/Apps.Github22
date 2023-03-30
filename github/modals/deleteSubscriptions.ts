@@ -12,7 +12,7 @@ import { Subscription } from '../persistance/subscriptions';
 import { ISubscription } from '../definitions/subscription';
 import { IRepositorySubscriptions } from '../definitions/repositorySubscriptions';
 
-export async function deleteSubsciptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
+export async function deleteSubscriptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.DELETE_SUBSCRIPTION_VIEW;
 
     const block = modify.getCreator().getBlockBuilder();
@@ -30,12 +30,12 @@ export async function deleteSubsciptionsModal({ modify, read, persistence, http,
         }
     
         let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader());
-        let roomSubsciptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
+        let roomSubscriptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
 
         block.addDividerBlock();
 
         let repositoryData = new Map<string,IRepositorySubscriptions>;
-        for (let subsciption of roomSubsciptions) {
+        for (let subsciption of roomSubscriptions) {
 
             let repoName = subsciption.repoName;
             let userId = subsciption.user;

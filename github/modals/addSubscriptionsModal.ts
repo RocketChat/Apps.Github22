@@ -65,7 +65,7 @@ export async function AddSubscriptionModal({
             persistence,
             read.getPersistenceReader()
         );
-        let roomSubsciptions: Array<ISubscription> =
+        let roomSubscriptions: Array<ISubscription> =
             await subsciptionStorage.getSubscriptions(roomId);
 
         // shows indentations in input blocks but not inn section block
