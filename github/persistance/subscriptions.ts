@@ -59,7 +59,7 @@ export class Subscription {
                 true
             );
         } catch (error) {
-            console.warn("Subsciption Error :", error);
+            console.warn("Subscription Error :", error);
             return false;
         }
         return true;
@@ -116,7 +116,7 @@ export class Subscription {
                 )) as Array<ISubscription>;
             return subsciptions;
         } catch (error) {
-            console.warn("Get Subsciption Error :", error);
+            console.warn("Get Subscription Error :", error);
             let subsciptions: Array<ISubscription> = [];
             return subsciptions;
         }
@@ -148,7 +148,7 @@ export class Subscription {
             ];
             await this.persistence.removeByAssociations(associations);
         } catch (error) {
-            console.warn("Delete Subsciption Error :", error);
+            console.warn("Delete Subscription Error :", error);
             return false;
         }
         return true;
@@ -179,7 +179,7 @@ export class Subscription {
             ];
             await this.persistence.removeByAssociations(associations);
         } catch (error) {
-            console.warn("Delete Subsciption Error :", error);
+            console.warn("Delete Subscription Error :", error);
             return false;
         }
         return true;
@@ -199,7 +199,7 @@ export class Subscription {
             ];
             await this.persistence.removeByAssociations(associations);
         } catch (error) {
-            console.warn("Delete All Room Subsciption Error :", error);
+            console.warn("Delete All Room Subscription Error :", error);
             return false;
         }
         return true;
