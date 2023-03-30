@@ -25,7 +25,7 @@ import { GithubApp } from "../GithubApp";
 import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 import { sendMessage, sendNotification } from "../lib/message";
-import { subsciptionsModal } from "../modals/subscriptionsModal";
+import { subscriptionsModal } from "../modals/subscriptionsModal";
 import { mergePullRequestModal } from "../modals/mergePullReqeustModal";
 import { messageModal } from "../modals/messageModal";
 import { getRepoData } from "../helpers/githubSDK";
@@ -444,7 +444,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.SUBSCRIPTION_REFRESH_ACTION:{
-                    const modal = await subsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                    const modal = await subscriptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                     await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     break;
                 }

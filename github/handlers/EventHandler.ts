@@ -14,7 +14,7 @@ import {
     deleteSubscription,
 } from "../helpers/githubSDK";
 import { sendNotification } from "../lib/message";
-import { subsciptionsModal } from "../modals/subscriptionsModal";
+import { subscriptionsModal } from "../modals/subscriptionsModal";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { Subscription } from "../persistance/subscriptions";
 import { HandleInvalidRepoName } from "./HandleInvalidRepoName";
@@ -281,7 +281,7 @@ export async function ManageSubscriptions(
     if (accessToken && accessToken.token) {
         const triggerId = context.getTriggerId();
         if (triggerId) {
-            const modal = await subsciptionsModal({
+            const modal = await subscriptionsModal({
                 modify: modify,
                 read: read,
                 persistence: persistence,

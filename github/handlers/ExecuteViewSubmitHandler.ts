@@ -8,7 +8,7 @@ import { Subscription } from '../persistance/subscriptions';
 import { GithubApp } from '../GithubApp';
 import { getWebhookUrl } from '../helpers/getWebhookURL';
 import { getAccessTokenForUser } from '../persistance/auth';
-import { subsciptionsModal } from '../modals/subscriptionsModal';
+import { subscriptionsModal } from '../modals/subscriptionsModal';
 import { messageModal } from '../modals/messageModal';
 import { pullRequestCommentsModal } from '../modals/pullRequestCommentsModal';
 import { githubSearchResultModal } from '../modals/githubSearchResultModal';
@@ -109,7 +109,7 @@ export class ExecuteViewSubmitHandler {
                                 }
 
                             }
-                            const modal = await subsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                            const modal = await subscriptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                             await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                             return context.getInteractionResponder().successResponse();
                         }

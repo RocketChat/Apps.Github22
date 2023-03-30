@@ -12,7 +12,7 @@ import { Subscription } from '../persistance/subscriptions';
 import { ISubscription } from '../definitions/subscription';
 import { IRepositorySubscriptions } from '../definitions/repositorySubscriptions';
 
-export async function subsciptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
+export async function subscriptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.SUBSCRIPTION_VIEW;
 
     const block = modify.getCreator().getBlockBuilder();
