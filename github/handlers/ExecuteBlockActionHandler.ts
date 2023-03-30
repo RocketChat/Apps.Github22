@@ -544,7 +544,7 @@ export class ExecuteBlockActionHandler {
                                     .getInteractionResponder()
                                     .openModalViewResponse(resultsModal);
                         }else{
-                            console.log("Inavlid Trigger ID !");
+                            console.log("invalid Trigger ID !");
                         }
                     }
                     if(user?.id){
