@@ -41,12 +41,12 @@ export class githubWebHooks extends ApiEndpoint {
             read.getPersistenceReader()
         );
 
-        const subsciptions: Array<ISubscription> =
+        const subscriptions: Array<ISubscription> =
             await subsciptionStorage.getSubscribedRooms(
                 payload.repository.full_name,
                 event
             );
-        if (!subsciptions || subsciptions.length == 0) {
+        if (!subscriptions || subscriptions.length == 0) {
             return this.success();
         }
         const eventCaps = event.toUpperCase();
@@ -85,7 +85,7 @@ export class githubWebHooks extends ApiEndpoint {
                 return this.success();
             }
         }
-        for (let subsciption of subsciptions) {
+        for (let subsciption of subscriptions) {
             let roomId = subsciption.room;
             if (!roomId) {
                 continue;

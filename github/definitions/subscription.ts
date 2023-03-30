@@ -1,4 +1,4 @@
-//subsciptions which will be saved in the apps local storage
+//subscriptions which will be saved in the apps local storage
 export interface ISubscription{
     webhookId : string,
     user: string, 

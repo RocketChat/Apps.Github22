@@ -84,15 +84,15 @@ export class Subscription {
                     event
                 ),
             ];
-            let subsciptions: Array<ISubscription> =
+            let subscriptions: Array<ISubscription> =
                 (await this.persistenceRead.readByAssociations(
                     associations
                 )) as Array<ISubscription>;
-            return subsciptions;
+            return subscriptions;
         } catch (error) {
             console.warn("Get Subscribed Rooms Error :", error);
-            let subsciptions: Array<ISubscription> = [];
-            return subsciptions;
+            let subscriptions: Array<ISubscription> = [];
+            return subscriptions;
         }
     }
 
@@ -110,15 +110,15 @@ export class Subscription {
                     roomId
                 ),
             ];
-            let subsciptions: Array<ISubscription> =
+            let subscriptions: Array<ISubscription> =
                 (await this.persistenceRead.readByAssociations(
                     associations
                 )) as Array<ISubscription>;
-            return subsciptions;
+            return subscriptions;
         } catch (error) {
             console.warn("Get Subscription Error :", error);
-            let subsciptions: Array<ISubscription> = [];
-            return subsciptions;
+            let subscriptions: Array<ISubscription> = [];
+            return subscriptions;
         }
     }
 
@@ -209,7 +209,7 @@ export class Subscription {
         repoName: string,
         userId: string
     ): Promise<Array<ISubscription>> {
-        let subsciptions: Array<ISubscription> = [];
+        let subscriptions: Array<ISubscription> = [];
         try {
             const associations: Array<RocketChatAssociationRecord> = [
                 new RocketChatAssociationRecord(
@@ -225,13 +225,13 @@ export class Subscription {
                     `${userId}`
                 ),
             ];
-            subsciptions = (await this.persistenceRead.readByAssociations(
+            subscriptions = (await this.persistenceRead.readByAssociations(
                 associations
             )) as Array<ISubscription>;
         } catch (error) {
             console.warn("Get Subscriptions By Repo Error :", error);
-            return subsciptions;
+            return subscriptions;
         }
-        return subsciptions;
+        return subscriptions;
     }
 }
