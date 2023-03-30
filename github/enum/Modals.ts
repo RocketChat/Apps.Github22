@@ -44,7 +44,7 @@ export enum ModalsEnum {
     OPEN_ADD_SUBSCRIPTIONS_MODAL='open-add-subscriptions',
     OPEN_UPDATE_SUBSCRIPTIONS_MODAL='open-update-subscriptions',
     OPEN_DELETE_SUBSCRIPTIONS_MODAL='open-update-subscriptions',
-    OPEN_ADD_SUBSCRIPTIONS_LABEL='Add Subsciptions',
+    OPEN_ADD_SUBSCRIPTIONS_LABEL='Add Subscriptions',
     OPEN_UPDATE_SUBSCRIPTIONS_LABEL='Update Subscriptions',
     OPEN_DELETE_SUBSCRIPTIONS_LABEL='Delete Subscriptions',
     DELETE_SUBSCRIPTION_ACTION='delete-subscription',

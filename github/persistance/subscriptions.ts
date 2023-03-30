@@ -229,7 +229,7 @@ export class Subscription {
                 associations
             )) as Array<ISubscription>;
         } catch (error) {
-            console.warn("Get Subsciptions By Repo Error :", error);
+            console.warn("Get Subscriptions By Repo Error :", error);
             return subsciptions;
         }
         return subsciptions;
