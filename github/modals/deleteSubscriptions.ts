@@ -29,17 +29,17 @@ export async function deleteSubscriptionsModal({ modify, read, persistence, http
             roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
         }
     
-        let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader());
-        let roomSubscriptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
+        let subscriptionStorage = new Subscription(persistence,read.getPersistenceReader());
+        let roomSubscriptions: Array<ISubscription> = await subscriptionStorage.getSubscriptions(roomId);
 
         block.addDividerBlock();
 
         let repositoryData = new Map<string,IRepositorySubscriptions>;
-        for (let subsciption of roomSubscriptions) {
+        for (let subscription of roomSubscriptions) {
 
-            let repoName = subsciption.repoName;
-            let userId = subsciption.user;
-            let event = subsciption.event;
+            let repoName = subscription.repoName;
+            let userId = subscription.user;
+            let event = subscription.event;
             let user = await read.getUserReader().getById(userId);
             
             if(repositoryData.has(repoName)){
@@ -51,7 +51,7 @@ export async function deleteSubscriptionsModal({ modify, read, persistence, http
                 let events:Array<string> = [];
                 events.push(event);
                 let repoData:IRepositorySubscriptions={
-                    webhookId:subsciption.webhookId,
+                    webhookId:subscription.webhookId,
                     events:events,
                     user:user,
                     repoName:repoName

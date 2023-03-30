@@ -62,12 +62,12 @@ export class ExecuteViewSubmitHandler {
 
                                     let url = await getWebhookUrl(this.app);
 
-                                    let subsciptionStorage = new Subscription(this.persistence, this.read.getPersistenceReader());
+                                    let subscriptionStorage = new Subscription(this.persistence, this.read.getPersistenceReader());
                                     let subscribedEvents = new Map<string, boolean>;
                                     let hookId = "";
 
 
-                                    let subscriptions = await subsciptionStorage.getSubscriptionsByRepo(repository, user.id);
+                                    let subscriptions = await subscriptionStorage.getSubscriptionsByRepo(repository, user.id);
                                     if (subscriptions && subscriptions.length) {
                                         for (let subscription of subscriptions) {
                                             subscribedEvents.set(subscription.event, true);
@@ -100,7 +100,7 @@ export class ExecuteViewSubmitHandler {
                                     let createdEntry = false;
                                     //subscribe rooms to hook events
                                     for (let event of events) {
-                                        createdEntry = await subsciptionStorage.createSubscription(repository, event, response?.id, room, user);
+                                        createdEntry = await subscriptionStorage.createSubscription(repository, event, response?.id, room, user);
                                     }
                                     if (!createdEntry) {
                                         throw new Error("Error creating new subscription entry");

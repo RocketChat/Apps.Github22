@@ -413,15 +413,15 @@ export class ExecuteBlockActionHandler {
                         await subscriptionStorage.deleteSubscriptionsByRepoUser(repoName, roomId, user.id);
                         //check if any subscription events of the repo is left in any other room
                         let eventSubscriptions = new Map<string, boolean>;
-                        for (let subsciption of oldSubscriptions) {
-                            eventSubscriptions.set(subsciption.event, false);
+                        for (let subscription of oldSubscriptions) {
+                            eventSubscriptions.set(subscription.event, false);
                         }
                         let updatedsubscriptions = await subscriptionStorage.getSubscriptionsByRepo(repoName, user.id);
                         if (updatedsubscriptions.length == 0) {
                             await deleteSubscription(this.http, repoName, accessToken.token, hookId);
                         } else {
-                            for (let subsciption of updatedsubscriptions) {
-                                eventSubscriptions.set(subsciption.event, true);
+                            for (let subscription of updatedsubscriptions) {
+                                eventSubscriptions.set(subscription.event, true);
                             }
                             let updatedEvents: Array<string> = [];
                             let sameEvents = true;

@@ -66,13 +66,13 @@ export async function SubscribeAllEvents(
                 eventSusbcriptions.set(event, false);
             }
             let url = await getWebhookUrl(app);
-            let subsciptionStorage = new Subscription(
+            let subscriptionStorage = new Subscription(
                 persistence,
                 read.getPersistenceReader()
             );
             let user = context.getSender();
             let repositorySubscriptions =
-                await subsciptionStorage.getSubscriptionsByRepo(
+                await subscriptionStorage.getSubscriptionsByRepo(
                     repository,
                     user.id
                 );
@@ -112,7 +112,7 @@ export async function SubscribeAllEvents(
                 }
             }
             for (let event of events) {
-                createdEntry = await subsciptionStorage.createSubscription(
+                createdEntry = await subscriptionStorage.createSubscription(
                     repository,
                     event,
                     hookId,
@@ -185,16 +185,16 @@ export async function UnsubscribeAllEvents(
                 "deployment_status",
                 "star",
             ];
-            let subsciptionStorage = new Subscription(
+            let subscriptionStorage = new Subscription(
                 persistence,
                 read.getPersistenceReader()
             );
             let oldSubscriptions =
-                await subsciptionStorage.getSubscriptionsByRepo(
+                await subscriptionStorage.getSubscriptionsByRepo(
                     repository,
                     user.id
                 );
-            await subsciptionStorage.deleteSubscriptionsByRepoUser(
+            await subscriptionStorage.deleteSubscriptionsByRepoUser(
                 repository,
                 room.id,
                 user.id
@@ -202,14 +202,14 @@ export async function UnsubscribeAllEvents(
             let hookId = "";
             //check if any subscription events of the repo is left in any other room
             let eventSubscriptions = new Map<string, boolean>();
-            for (let subsciption of oldSubscriptions) {
-                eventSubscriptions.set(subsciption.event, false);
+            for (let subscription of oldSubscriptions) {
+                eventSubscriptions.set(subscription.event, false);
                 if (hookId == "") {
-                    hookId = subsciption.webhookId;
+                    hookId = subscription.webhookId;
                 }
             }
             let updatedsubscriptions =
-                await subsciptionStorage.getSubscriptionsByRepo(
+                await subscriptionStorage.getSubscriptionsByRepo(
                     repository,
                     user.id
                 );
@@ -221,8 +221,8 @@ export async function UnsubscribeAllEvents(
                     hookId
                 );
             } else {
-                for (let subsciption of updatedsubscriptions) {
-                    eventSubscriptions.set(subsciption.event, true);
+                for (let subscription of updatedsubscriptions) {
+                    eventSubscriptions.set(subscription.event, true);
                 }
                 let updatedEvents: Array<string> = [];
                 let sameEvents = true;

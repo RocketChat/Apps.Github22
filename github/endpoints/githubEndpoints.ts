@@ -36,13 +36,13 @@ export class githubWebHooks extends ApiEndpoint {
             payload = request.content;
         }
 
-        let subsciptionStorage = new Subscription(
+        let subscriptionStorage = new Subscription(
             persis,
             read.getPersistenceReader()
         );
 
         const subscriptions: Array<ISubscription> =
-            await subsciptionStorage.getSubscribedRooms(
+            await subscriptionStorage.getSubscribedRooms(
                 payload.repository.full_name,
                 event
             );
@@ -85,8 +85,8 @@ export class githubWebHooks extends ApiEndpoint {
                 return this.success();
             }
         }
-        for (let subsciption of subscriptions) {
-            let roomId = subsciption.room;
+        for (let subscription of subscriptions) {
+            let roomId = subscription.room;
             if (!roomId) {
                 continue;
             }
