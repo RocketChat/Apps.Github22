@@ -18,6 +18,7 @@ import {
     storeInteractionRoomData,
     getInteractionRoomData,
 } from "../persistance/roomInteraction";
+import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 
 export async function NewIssueModal({
     data,
@@ -25,6 +26,8 @@ export async function NewIssueModal({
     read,
     persistence,
     http,
+    user,
+    room,
     slashcommandcontext,
     uikitcontext,
 }: {
@@ -33,13 +36,19 @@ export async function NewIssueModal({
     read: IRead;
     persistence: IPersistence;
     http: IHttp;
+    user?: IUser,
+    room? : IRoom,
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
 }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.NEW_ISSUE_VIEW;
     const block = modify.getCreator().getBlockBuilder();
-    const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
-    const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
+    if (user == undefined && slashcommandcontext != undefined){
+        user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
+    }
+    if (room == undefined && slashcommandcontext != undefined){
+        room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
+    }
 
     if (user?.id) {
         let roomId;
@@ -88,7 +97,7 @@ export async function NewIssueModal({
                 }),
             });
         }
-        
+
 
         block.addInputBlock({
             blockId: ModalsEnum.ISSUE_TITLE_INPUT,
