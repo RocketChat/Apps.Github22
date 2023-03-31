@@ -6,6 +6,7 @@ import {
     IBlockElement,
     TextObjectType,
 } from "@rocket.chat/apps-engine/definition/uikit";
+import { uiKitModal } from "@rocket.chat/ui-kit";
 import { IGithubActivity } from "../definitions/IGithubActivity";
 import { ModalsEnum } from "../enum/Modals";
 import { OcticonIcons } from "../enum/OcticonIcons";
@@ -38,6 +39,21 @@ function LoadUserActivityEntry(
                     ),
                 ],
             });
+            blocks.addActionsBlock({
+                elements: [
+                    blocks.newButtonElement({
+                        actionId: ModalsEnum.SHOW_ISSUE_VIEW_CONTEXTUAL_BAR,
+                        value: JSON.stringify(activity),
+                        text: blocks.newPlainTextObject("View Issue"),
+                        style: ButtonStyle.PRIMARY
+                    }),
+                    blocks.newButtonElement({
+                        actionId: "anything",
+                        text: blocks.newPlainTextObject("Share Issue"),
+                        style: ButtonStyle.PRIMARY
+                    })
+                ]
+            })
             break;
         case "PullRequestEvent":
             blocks.addContextBlock({
@@ -53,7 +69,20 @@ function LoadUserActivityEntry(
                     ),
                 ],
             });
-
+            blocks.addActionsBlock({
+                elements: [
+                    blocks.newButtonElement({
+                        actionId: "anything",
+                        text: blocks.newPlainTextObject("View Pull Request"),
+                        style: ButtonStyle.PRIMARY
+                    }),
+                    blocks.newButtonElement({
+                        actionId: "anything",
+                        text: blocks.newPlainTextObject("Share Pull Request"),
+                        style: ButtonStyle.PRIMARY
+                    })
+                ]
+            })
             break;
         case "IssueCommentEvent":
             console.log(activity.payload.comment?.body);
@@ -72,6 +101,20 @@ function LoadUserActivityEntry(
                     ),
                 ],
             });
+            blocks.addActionsBlock({
+                elements: [
+                    blocks.newButtonElement({
+                        actionId: "anything",
+                        text: blocks.newPlainTextObject("View Comment"),
+                        style: ButtonStyle.PRIMARY
+                    }),
+                    blocks.newButtonElement({
+                        actionId: "anything",
+                        text: blocks.newPlainTextObject("Share Comment"),
+                        style: ButtonStyle.PRIMARY
+                    })
+                ]
+            })
             break;
     }
 
@@ -103,7 +146,7 @@ export async function UserActivityContextualBar(
         user.username ?? "",
         accessToken,
         pageNumber,
-        "WEEK",
+        "MONTH",
         10
     );
 

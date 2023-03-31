@@ -1,4 +1,7 @@
 export enum ModalsEnum {
+    SHOW_COMMENT_VIEW_CONTEXTUAL_BAR = 'show-comment-view-contextual-bar',
+    SHOW_PULLREQUEST_VIEW_CONTEXTUAL_BAR = 'show-pullrequest-view-contextual-bar',
+    SHOW_ISSUE_VIEW_CONTEXTUAL_BAR = 'show-issue-view-contextual-bar',
     SWITCH_ACTIVITY_PAGE_PREV = 'switch-activity-page-prev',
     SWITCH_ACTIVITY_PAGE_NEXT = 'switch-activity-page-next',
     ADD_GITHUB_ISSUE_ASSIGNEE_PROFILE = 'add-github-issue-assignee-profile',

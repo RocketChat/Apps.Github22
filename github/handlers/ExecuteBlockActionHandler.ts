@@ -49,6 +49,8 @@ import { IGitHubIssue } from "../definitions/githubIssue";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
 import { UserActivityContextualBar } from "../ContextualBars/UserActivityContextualBar";
+import { IGithubActivity } from "../definitions/IGithubActivity";
+import { UserIssueView } from "../ContextualBars/UserIssueView";
 
 export class ExecuteBlockActionHandler {
 
@@ -112,6 +114,14 @@ export class ExecuteBlockActionHandler {
                             success: false,
                         };
                     }
+                }
+                case ModalsEnum.SHOW_ISSUE_VIEW_CONTEXTUAL_BAR : {
+                    const { value } = context.getInteractionData();
+                    const activity: IGithubActivity = JSON.parse(value!) as IGithubActivity;
+                    console.log("===================================================")
+                    console.log(activity.payload.issue)
+                    const issueViewContextualBar = UserIssueView(this.modify, activity);
+                    return context.getInteractionResponder().updateContextualBarViewResponse(issueViewContextualBar);
                 }
                 case ModalsEnum.SWITCH_ACTIVITY_PAGE_PREV : {
                     const {value, user } = context.getInteractionData();
