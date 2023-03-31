@@ -1,3 +1,4 @@
 {
-    "cmd_description": "Search, Share, Review, Merge, Subscribe GitHub Resources and do much more from Rocket.Chat."
+    "cmd_description": "Search, Share, Review, Merge, Subscribe GitHub Resources and do much more from Rocket.Chat.",
+    "open_issue_message": "🎈 Open Github Issue"
 }

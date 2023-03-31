@@ -8,6 +8,53 @@
         "homepage": "https://github.com/samad-yar-khan",
         "support": "https://github.com/samad-yar-khan"
     },
+    "permissions": [
+        {
+            "name": "ui.registerButtons"
+        },
+        {
+            "name": "api"
+        },
+        {
+            "name": "slashcommand"
+        },
+        {
+            "name": "scheduler"
+        },
+        {
+            "name": "server-setting.read"
+        },
+        {
+            "name": "server-setting.write"
+        },
+        {
+            "name": "room.read"
+        },
+        {
+            "name": "room.write"
+        },
+        {
+            "name": "message.read"
+        },
+        {
+            "name": "message.write"
+        },
+        {
+            "name": "ui.interact"
+        },
+        {
+            "name": "persistence"
+        },
+        {
+            "name": "networking"
+        },
+        {
+            "name": "user.read"
+        },
+        {
+            "name": "user.write"
+        }
+    ],
     "name": "Github",
     "nameSlug": "github",
     "classFile": "GithubApp.ts",
