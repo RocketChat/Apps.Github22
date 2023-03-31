@@ -1,6 +1,7 @@
 import {
     IAppAccessors,
     IConfigurationExtend,
+    IEnvironmentRead,
     IHttp,
     ILogger,
     IModify,
@@ -12,6 +13,7 @@ import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
 import { GithubCommand } from "./commands/GithubCommand";
 import {
     IUIKitResponse,
+    UIKitActionButtonInteractionContext,
     UIKitBlockInteractionContext,
     UIKitViewCloseInteractionContext,
     UIKitViewSubmitInteractionContext,
@@ -40,6 +42,9 @@ import { IJobContext } from "@rocket.chat/apps-engine/definition/scheduler";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
+import { ModalsEnum } from "./enum/Modals";
+import { UIActionButtonContext } from "@rocket.chat/apps-engine/definition/ui";
+import { ExecuteButtonActionHandler } from "./handlers/executeActionButtonHandler";
 
 export class GithubApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -101,6 +106,24 @@ export class GithubApp extends App {
         return this.oauth2ClientInstance;
     }
 
+    public async executeActionButtonHandler(
+        context: UIKitActionButtonInteractionContext,
+        read: IRead,
+        http: IHttp,
+        persistence: IPersistence,
+        modify: IModify,
+    ) : Promise<IUIKitResponse> {
+
+        const handler = new ExecuteButtonActionHandler(
+            this,
+            read,
+            http,
+            modify,
+            persistence
+        )
+        return await handler.run(context)
+    }
+
     public async executeBlockActionHandler(
         context: UIKitBlockInteractionContext,
         read: IRead,
@@ -153,7 +176,7 @@ export class GithubApp extends App {
     }
 
     public async extendConfiguration(
-        configuration: IConfigurationExtend
+        configuration: IConfigurationExtend,
     ): Promise<void> {
         const gitHubCommand: GithubCommand = new GithubCommand(this);
         const ghCommand: GHCommand = new GHCommand(this);
@@ -189,6 +212,11 @@ export class GithubApp extends App {
                 },
             },
         ]);
+        configuration.ui.registerButton({
+            labelI18n: "open_issue_message",
+            actionId: ModalsEnum.NEW_ISSUE_ACTION,
+            context: UIActionButtonContext.MESSAGE_ACTION,
+        })
         configuration.api.provideApi({
             visibility: ApiVisibility.PUBLIC,
             security: ApiSecurity.UNSECURE,
