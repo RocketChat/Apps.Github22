@@ -736,7 +736,6 @@ export class ExecuteBlockActionHandler {
                     let splittedValues = value?.split(" ");
                     let { user } = await context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
-                    this.app.getLogger().debug(accessToken.token)
                     if(splittedValues.length==2){
                         let repoName = splittedValues[0];
                         let issueNumber = splittedValues[1];
