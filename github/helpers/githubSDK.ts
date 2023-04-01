@@ -547,7 +547,6 @@ export async function getIssueData(
 
         const response = JSON.parse(result.content || "{}");
 
-        // const response = await getRequest(http, access_token, BaseRepoApiHost + repoInfo + '/issues/' + issueNumber);
         const getAssignees = (assignees: any[]): string[] => assignees.map((val): string => {
             return val.login as string;
         })
