@@ -48,6 +48,7 @@ import { IssueDisplayModal } from "../modals/IssueDisplayModal";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
+import { IMessageAttachment } from "@rocket.chat/apps-engine/definition/messages";
 
 export class ExecuteBlockActionHandler {
 
@@ -291,7 +292,10 @@ export class ExecuteBlockActionHandler {
                 }
                 case ModalsEnum.SHARE_PROFILE_EXEC : {
                     let {user, room} = context.getInteractionData();
-                    const block = this.modify.getCreator().getBlockBuilder();
+                    const message=this.modify.getCreator().startMessage();
+                    let text:string="";
+                    let attachment:Array<IMessageAttachment>=[{}];
+                    const block=this.modify.getCreator().getBlockBuilder();
                     let accessToken = await getAccessTokenForUser(this.read, user ,this.app.oauth2Config) as IAuthData;
                     const userProfile = await getBasicUserInfo(this.http, accessToken.token);
 
@@ -310,25 +314,15 @@ export class ExecuteBlockActionHandler {
                     }
 
                     if (profileShareParams.includes('avatar')){
-                        block.addImageBlock({
-                            imageUrl : userProfile.avatar,
-                            altText : "User Info"
-                        })
+                        Object.assign(attachment[0],{thumbnailUrl:userProfile.avatar});
                     }
 
                     profileShareParams.map((value) => {
                         if (value != 'contributionGraph' && value != 'avatar'){
-                            block.addSectionBlock({
-                                text : block.newPlainTextObject(value),
-                            })
-                            block.addContextBlock({
-                                elements : [
-                                    block.newPlainTextObject(userProfile[value], true),
-                                ]
-                            });
-                            block.addDividerBlock();
+                            text=text+`## ${value}\n${userProfile[value]}\n`
                         }
                     })
+                    Object.assign(attachment[0],{text:text})
 
                     if (profileShareParams.includes('contributionGraph')){
                         block.addImageBlock({imageUrl : `https://activity-graph.herokuapp.com/graph?username=${userProfile.username}&bg_color=ffffff&color=708090&line=24292e&point=24292e`, altText: "Github Contribution Graph"})
@@ -337,8 +331,8 @@ export class ExecuteBlockActionHandler {
 
                     if(user?.id){
                         if(room?.id){
-                            await sendMessage(this.modify, room!, user, `${userProfile.name}'s Github Profile`, block)
-                        }else{
+                            message.setRoom(room).setAttachments(attachment).setBlocks(block.getBlocks()).setSender(user);
+                            await this.modify.getCreator().finish(message);                        }else{
                             let roomId = (
                                 await getInteractionRoomData(
                                     this.read.getPersistenceReader(),
@@ -346,7 +340,8 @@ export class ExecuteBlockActionHandler {
                                 )
                             ).roomId;
                             room = await this.read.getRoomReader().getById(roomId) as IRoom;
-                            await sendMessage(this.modify, room, user, `${userProfile.name}'s Github Profile`, block)
+                            message.setRoom(room).setAttachments(attachment).setBlocks(block.getBlocks()).setSender(user);
+                            await this.modify.getCreator().finish(message);
                         }
                     }
 
