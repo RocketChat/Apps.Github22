@@ -481,7 +481,7 @@ export class ExecuteViewSubmitHandler {
                                         .getInteractionResponder()
                                         .openModalViewResponse(unauthorizedMessageModal);
                                 }else{                               
-                                    let issueComments = await getIssuesComments(this.http,repository,accessToken.token,issueNumber);
+                                    let issueComments = await getIssuesComments(this.http,repository,issueNumber);
                                     let issueData = await getIssueData(repository,issueNumber,accessToken.token,this.http);
                                     if(issueData?.issue_compact === "Error Fetching Issue" || issueComments?.issueData){
                                         if(issueData?.issue_compact === "Error Fetching Issue"){

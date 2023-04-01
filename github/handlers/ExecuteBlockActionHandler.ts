@@ -735,12 +735,11 @@ export class ExecuteBlockActionHandler {
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
                     let { user } = await context.getInteractionData();
-                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
-                    if(splittedValues.length==2 && accessToken?.token){
+                    if(splittedValues.length==2){
                         let repoName = splittedValues[0];
                         let issueNumber = splittedValues[1];
-                        let issueComments = await getIssuesComments(this.http,repoName,accessToken.token,issueNumber);
-                        let issueData = await getIssueData(repoName,issueNumber,accessToken.token,this.http);
+                        let issueComments = await getIssuesComments(this.http,repoName,issueNumber);
+                        let issueData = await getIssueData(repoName,issueNumber,' ',this.http);
                         if(issueData?.issue_compact === "Error Fetching Issue" || issueComments?.issueData){
                             if(issueData?.issue_compact === "Error Fetching Issue"){
                                 const unauthorizedMessageModal = await messageModal({
@@ -811,6 +810,18 @@ export class ExecuteBlockActionHandler {
                         return context
                                 .getInteractionResponder()
                                 .openModalViewResponse(addIssueCommentModal);
+                    }else{
+                        const unauthorizedMessageModal = await messageModal({
+                            message:`🤖 Error in adding comments, make sure you are logged in`,
+                            modify: this.modify,
+                            read: this.read,
+                            persistence: this.persistence,
+                            http: this.http,
+                            uikitcontext: context
+                        })
+                        return context
+                            .getInteractionResponder()
+                            .openModalViewResponse(unauthorizedMessageModal);
                     }
                     break;
                 }
