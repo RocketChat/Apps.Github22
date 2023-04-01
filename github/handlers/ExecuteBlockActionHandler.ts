@@ -1,11 +1,9 @@
 import {
     IHttp,
-    ILogger,
     IModify,
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
-import { IApp } from "@rocket.chat/apps-engine/definition/IApp";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { basicQueryMessage } from "../helpers/basicQueryMessage";
 import { ModalsEnum } from "../enum/Modals";
@@ -43,7 +41,7 @@ import { GithubRepoIssuesStorage } from "../persistance/githubIssues";
 import { IGitHubIssueData } from "../definitions/githubIssueData";
 import { shareProfileModal } from "../modals/profileShareModal";
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
-import { userIssuesModal } from "../modals/UserIssuesModal";
+import { userIssuesContextualBar } from "../ContextualBars/UserIssuesContextualBar";
 import { IssueDisplayModal } from "../modals/IssueDisplayModal";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
@@ -179,7 +177,7 @@ export class ExecuteBlockActionHandler {
                         uikitcontext : context
                     })
 
-                    return context.getInteractionResponder().updateModalViewResponse(issueDisplayModal);
+                    return context.getInteractionResponder().openContextualBarViewResponse(issueDisplayModal);
                 }
                 case ModalsEnum.SWITCH_ISSUE_SORT :
                 case ModalsEnum.SWITCH_ISSUE_STATE :
@@ -236,7 +234,7 @@ export class ExecuteBlockActionHandler {
                     }
 
                     let access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
-                    const issueModal = await userIssuesModal({
+                    const issuesContextualBar = await userIssuesContextualBar({
                         access_token : access_token.token,
                         filter : filter,
                         modify : this.modify,
@@ -247,9 +245,9 @@ export class ExecuteBlockActionHandler {
 
                     await this.persistence.updateByAssociation(record, filter);
 
-                    return context.getInteractionResponder().updateModalViewResponse(issueModal);
+                    return context.getInteractionResponder().updateContextualBarViewResponse(issuesContextualBar);
                 }
-                case ModalsEnum.TRIGGER_ISSUES_MODAL : {
+                case ModalsEnum.TRIGGER_ISSUES_CONTEXTUAL_BAR : {
 
                     const {user} = context.getInteractionData();
 
@@ -261,7 +259,7 @@ export class ExecuteBlockActionHandler {
                         sort : ModalsEnum.ISSUE_SORT_CREATED
                     }
 
-                    const issuesModal = await userIssuesModal({
+                    const issuesContextualBar = await userIssuesContextualBar({
                         filter : filter,
                         access_token : access_token.token,
                         modify: this.modify,
@@ -271,7 +269,7 @@ export class ExecuteBlockActionHandler {
                         uikitcontext : context
                     });
 
-                    return context.getInteractionResponder().openModalViewResponse(issuesModal);
+                    return context.getInteractionResponder().openContextualBarViewResponse(issuesContextualBar);
                 }
                 case ModalsEnum.TRIGGER_REPOS_MODAL : {
                     break;

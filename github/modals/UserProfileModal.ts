@@ -91,7 +91,7 @@ export async function userProfileModal({
             }),
             block.newButtonElement(
                 {
-                    actionId: ModalsEnum.TRIGGER_ISSUES_MODAL,
+                    actionId: ModalsEnum.TRIGGER_ISSUES_CONTEXTUAL_BAR,
                     value: "Trigger Issues Modal",
                     text: {
                         type: TextObjectType.PLAINTEXT,
@@ -110,7 +110,7 @@ export async function userProfileModal({
             type: TextObjectType.PLAINTEXT,
             text: userInfo.name
         },
-        blocks: block.getBlocks()
+        blocks: block.getBlocks(),
     }
 
 }
