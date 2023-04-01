@@ -527,25 +527,29 @@ export async function getUserAssignedIssues(
 export async function getIssueData(
     repoInfo: String,
     issueNumber: String,
-    access_token: String,
+    access_token: String | null,
     http: IHttp
 ): Promise<IGitHubIssue> {
     try {
-        let result = await http.get(
-            `https://api.github.com/repos/${repoInfo}/issues/${issueNumber}`,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
+        if(access_token){
+            var response = await getRequest(http, access_token, BaseRepoApiHost + repoInfo + '/issues/' + issueNumber);
+        }else{
+            const result = await http.get(
+                `https://api.github.com/repos/${repoInfo}/issues/${issueNumber}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+    
+            // If it isn't a 2xx code, something wrong happened
+            if (!result.statusCode.toString().startsWith("2")) {
+                throw result;
             }
-        );
-
-        // If it isn't a 2xx code, something wrong happened
-        if (!result.statusCode.toString().startsWith("2")) {
-            throw result;
+    
+            var response = JSON.parse(result.content || "{}");
         }
-
-        const response = JSON.parse(result.content || "{}");
 
         const getAssignees = (assignees: any[]): string[] => assignees.map((val): string => {
             return val.login as string;
@@ -646,16 +650,29 @@ export async function getPullRequestComments(
 export async function getIssuesComments(
     http: IHttp,
     repoName: string,
+    access_token: String | null,
     issueNumber: string | number
 ) {
-    const response = await http.get(
-        `https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
-        {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        }
-    );
+    if(access_token){
+        var response = await http.get(
+            `https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
+            {
+                headers: {
+                    Authorization: `token ${access_token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }else{
+        var response = await http.get(
+            `https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }
     // If it isn't a 2xx code, something wrong happened
     let JSONResponse = JSON.parse("{}");
     if (!response.statusCode.toString().startsWith("2")) {
