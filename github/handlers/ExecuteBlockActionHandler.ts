@@ -48,6 +48,7 @@ import { IssueDisplayModal } from "../modals/IssueDisplayModal";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
+import { githubActivityGraphUrl } from "../helpers/githubActivityGraphURL";
 
 export class ExecuteBlockActionHandler {
 
@@ -331,7 +332,7 @@ export class ExecuteBlockActionHandler {
                     })
 
                     if (profileShareParams.includes('contributionGraph')){
-                        block.addImageBlock({imageUrl : `https://activity-graph.herokuapp.com/graph?username=${userProfile.username}&bg_color=ffffff&color=708090&line=24292e&point=24292e`, altText: "Github Contribution Graph"})
+                        block.addImageBlock({imageUrl : githubActivityGraphUrl(userProfile.username), altText: "Github Contribution Graph"})
                     }
 
 
