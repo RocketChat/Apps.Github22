@@ -17,7 +17,7 @@ import { IGitHubSearchResultData } from '../definitions/searchResultData';
 import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
-import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues, getBasicUserInfo } from '../helpers/githubSDK';
 import { NewIssueModal } from '../modals/newIssueModal';
 import { issueTemplateSelectionModal } from '../modals/issueTemplateSelectionModal';
 import { githubIssuesListModal } from '../modals/githubIssuesListModal';
@@ -25,6 +25,8 @@ import { IGitHubIssue } from '../definitions/githubIssue';
 import { GithubRepoIssuesStorage } from '../persistance/githubIssues';
 import { IGitHubIssueData } from '../definitions/githubIssueData';
 import { githubIssuesShareModal } from '../modals/githubIssuesShareModal';
+import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { IAuthData } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -151,12 +153,12 @@ export class ExecuteViewSubmitHandler {
                             }else{
                                 await sendNotification(this.read,this.modify,user,room,`Invalid Issue !`);
                             }
-                        } 
+                        }
                         break;
                     }
                     case ModalsEnum.NEW_ISSUE_STARTER_VIEW:{
                         const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
-        
+
                         if (roomId) {
                             let room = await this.read.getRoomReader().getById(roomId) as IRoom;
                             let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
@@ -164,7 +166,7 @@ export class ExecuteViewSubmitHandler {
                             if (!accessToken) {
                                 await sendNotification(this.read, this.modify, user, room, `Login To Github ! -> /github login`);
                             }else{
-                                
+
                                 repository=repository?.trim();
                                 let response = await getIssueTemplates(this.http,repository,accessToken.token);
                                 if((!response.template_not_found) && response?.templates?.length){
@@ -182,7 +184,7 @@ export class ExecuteViewSubmitHandler {
                                     .openModalViewResponse(createNewIssue);
                                 }
                             }
-                        } 
+                        }
                         break;
                     }
                     case ModalsEnum.SEARCH_VIEW: {
@@ -224,7 +226,7 @@ export class ExecuteViewSubmitHandler {
                             }else{
                                 resourceState = resourceState?.trim();
                             }
- 
+
                             let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
                             if(repository?.length == 0 && labelsArray?.length == 0 && authorsArray?.length == 0){
                                 await sendNotification(this.read, this.modify, user, room, "*Invalid Search Query !*");
@@ -401,7 +403,7 @@ export class ExecuteViewSubmitHandler {
                                     return context
                                         .getInteractionResponder()
                                         .openModalViewResponse(unauthorizedMessageModal);
-                                }else{                               
+                                }else{
                                     let pullRequestComments = await getPullRequestComments(this.http,repository,accessToken.token,pullNumber);
                                     let pullRequestData = await getPullRequestData(this.http,repository,accessToken.token,pullNumber);
                                     if(pullRequestData?.serverError || pullRequestComments?.pullRequestData){
@@ -545,7 +547,7 @@ export class ExecuteViewSubmitHandler {
                                     .getInteractionResponder()
                                     .openModalViewResponse(issuesListModal);
                             }
-                        } 
+                        }
                     break;
                 }
                 case ModalsEnum.ADD_ISSUE_ASSIGNEE_VIEW: {
@@ -615,7 +617,7 @@ export class ExecuteViewSubmitHandler {
                                         }
                                 }
                             }
-                        } 
+                        }
                     break;
                 }
                 case ModalsEnum.ISSUE_LIST_VIEW:{
@@ -653,7 +655,72 @@ export class ExecuteViewSubmitHandler {
                     }
                     break;
                 }
-                
+                case ModalsEnum.SHARE_PROFILE_EXEC : {
+                    let {user, room} = context.getInteractionData();
+                    const block = this.modify.getCreator().getBlockBuilder();
+                    let accessToken = await getAccessTokenForUser(this.read, user ,this.app.oauth2Config) as IAuthData;
+                    const userProfile = await getBasicUserInfo(this.http, accessToken.token);
+
+                    const idRecord = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ProfileShareParam")
+
+                    const profileData = await this.read.getPersistenceReader().readByAssociation(idRecord);
+
+                    let profileShareParams: string[] = [];
+
+                    if (profileData.length == 0){
+                        profileShareParams = ['username', 'avatar', 'email', 'bio', 'followers', 'following' , 'contributionGraph'];
+                    }
+                    else {
+                        const dat = profileData[0] as {profileParams : string[]};
+                        profileShareParams = dat.profileParams;
+                    }
+
+                    if (profileShareParams.includes('avatar')){
+                        block.addImageBlock({
+                            imageUrl : userProfile.avatar,
+                            altText : "User Info"
+                        })
+                    }
+
+                    profileShareParams.map((value) => {
+                        if (value != 'contributionGraph' && value != 'avatar'){
+                            block.addSectionBlock({
+                                text : block.newPlainTextObject(value),
+                            })
+                            block.addContextBlock({
+                                elements : [
+                                    block.newPlainTextObject(userProfile[value], true),
+                                ]
+                            });
+                            block.addDividerBlock();
+                        }
+                    })
+
+                    if (profileShareParams.includes('contributionGraph')){
+                        block.addImageBlock({imageUrl : `https://activity-graph.herokuapp.com/graph?username=${userProfile.username}&bg_color=ffffff&color=708090&line=24292e&point=24292e`, altText: "Github Contribution Graph"})
+                    }
+
+
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify, room!, user, `${userProfile.name}'s Github Profile`, block)
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify, room, user, `${userProfile.name}'s Github Profile`, block)
+                        }
+                    }
+
+                    this.persistence.removeByAssociation(idRecord);
+
+                    break;
+                }
+
                 default:
                     break;
             }
