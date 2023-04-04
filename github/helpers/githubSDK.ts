@@ -6,6 +6,44 @@ const BaseHost = "https://github.com/";
 const BaseApiHost = "https://api.github.com/";
 const BaseRepoApiHost = "https://api.github.com/repos/";
 
+const ApiEndpoint = {
+    Repos: 'repos',
+    Pulls: 'pulls',
+    Files: 'files',
+    ContributorsOf: (repoId: String) => `${repoId}/contributors`,
+    IssuesOf: (repoId: String) => `${repoId}/issues`,
+    PullsOf: (repoId: String) => `${repoId}/pulls`
+};
+
+export const getRepoPublicUrl = (repoName: String) => {
+    return `${BaseHost}/${repoName}`;
+};
+
+export const getRepoContributersUrl = (repoId: String) => {
+    return `${BaseApiHost}/${ApiEndpoint.Repos}/${ApiEndpoint.ContributorsOf(repoId)}`;
+};
+
+export const getRepoIssuesUrl = (repoId: String) => {
+    return `${BaseApiHost}/${ApiEndpoint.Repos}/${ApiEndpoint.IssuesOf(repoId)}`;
+};
+
+export const getRepoPullsUrl = (repoId: String) => {
+    return `${BaseApiHost}/${ApiEndpoint.Repos}/${ApiEndpoint.PullsOf(repoId)}`;
+};
+
+export const getRepoUrl = (repoId: String) => {
+    return `${BaseApiHost}/${ApiEndpoint.Repos}/${repoId}`;
+};
+
+export const getSpecificPullUrl = (repoId: String, pullNo: String) => {
+    return `${BaseApiHost}/${ApiEndpoint.Repos}/${repoId}/${ApiEndpoint.Pulls}/${pullNo}`;
+};
+
+export const getSpecificPullFilesUrl = (repoId: String, pullNo: String) => {
+    return `${BaseApiHost}/${ApiEndpoint.Repos}/${repoId}/${ApiEndpoint.Pulls}/${pullNo}/${ApiEndpoint.Files}`;
+};
+
+
 async function postReqeust(
     http: IHttp,
     accessToken: String,

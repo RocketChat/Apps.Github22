@@ -15,6 +15,7 @@ import {
     UIKitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
+import { getSpecificPullFilesUrl, getSpecificPullUrl } from "../helpers/githubSDK";
 
 export async function pullDetailsModal({
     data,
@@ -53,13 +54,18 @@ export async function pullDetailsModal({
             roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
         }
 
+        let pullUrl = getSpecificPullUrl(data?.repository, data?.number)
+
         const pullRawData = await http.get(
-            `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}`
+            pullUrl
         );
+
         const pullData = pullRawData.data;
 
+        let pullFilesUrl = getSpecificPullFilesUrl(data?.repository, data?.number)
+
         const pullRequestFilesRaw = await http.get(
-            `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}/files`
+            pullFilesUrl
         );
 
         const pullRequestFiles = pullRequestFilesRaw.data;

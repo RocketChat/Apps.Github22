@@ -12,6 +12,7 @@ import {
     ISlashCommand,
     SlashCommandContext,
 } from "@rocket.chat/apps-engine/definition/slashcommands";
+import { getRepoIssuesUrl } from "../helpers/githubSDK";
 
 export async function issueListMessage({
     repository,
@@ -31,8 +32,10 @@ export async function issueListMessage({
     accessToken?: IAuthData;
 }) {
     let gitResponse:any;
+    let url = getRepoIssuesUrl(repository);
+
     if(accessToken?.token){
-        gitResponse = await http.get(`https://api.github.com/repos/${repository}/issues`, {
+        gitResponse = await http.get(url, {
             headers: {
                 Authorization: `token ${accessToken?.token}`,
                 "Content-Type": "application/json",
@@ -40,7 +43,7 @@ export async function issueListMessage({
         });
     } else {
         gitResponse = await http.get(
-            `https://api.github.com/repos/${repository}/issues`
+            url
         );
     }
     const resData = gitResponse.data;
