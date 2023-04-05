@@ -739,13 +739,8 @@ export class ExecuteBlockActionHandler {
                     if(splittedValues.length==2){
                         let repoName = splittedValues[0];
                         let issueNumber = splittedValues[1];
-                        if(accessToken){
-                            var issueComments = await getIssuesComments(this.http,repoName,accessToken.token,issueNumber);
-                            var issueData = await getIssueData(repoName,issueNumber,accessToken.token,this.http)    
-                        }else{
-                            var issueComments = await getIssuesComments(this.http,repoName,null,issueNumber);
-                            var issueData = await getIssueData(repoName,issueNumber,null,this.http)
-                        }
+                        let issueComments = await getIssuesComments(this.http,repoName,accessToken?.token,issueNumber);
+                        let issueData = await getIssueData(repoName,issueNumber,accessToken?.token,this.http);
                         if(issueData?.issue_compact === "Error Fetching Issue" || issueComments?.issueData){
                             if(issueData?.issue_compact === "Error Fetching Issue"){
                                 const unauthorizedMessageModal = await messageModal({

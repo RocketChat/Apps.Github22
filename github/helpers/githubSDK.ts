@@ -531,10 +531,11 @@ export async function getIssueData(
     http: IHttp
 ): Promise<IGitHubIssue> {
     try {
+        let response;
         if(access_token){
-            var response = await getRequest(http, access_token, BaseRepoApiHost + repoInfo + '/issues/' + issueNumber);
+            response = await getRequest(http, access_token, BaseRepoApiHost + repoInfo + '/issues/' + issueNumber);
         }else{
-            const result = await http.get(
+            response = await http.get(
                 `https://api.github.com/repos/${repoInfo}/issues/${issueNumber}`,
                 {
                     headers: {
@@ -544,11 +545,11 @@ export async function getIssueData(
             );
     
             // If it isn't a 2xx code, something wrong happened
-            if (!result.statusCode.toString().startsWith("2")) {
-                throw result;
+            if (!response.statusCode.toString().startsWith("2")) {
+                throw response;
             }
     
-            var response = JSON.parse(result.content || "{}");
+            response = JSON.parse(response.content || "{}");
         }
 
         const getAssignees = (assignees: any[]): string[] => assignees.map((val): string => {
