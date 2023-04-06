@@ -22,7 +22,7 @@ export async function shareProfileModal({
     uikitcontext?: UIKitInteractionContext
 }) : Promise<IUIKitModalViewParam> {
 
-    const viewId = "ProfileShareView";
+    const viewId = ModalsEnum.SHARE_PROFILE_VIEW;
     const block = modify.getCreator().getBlockBuilder();
 
     block.addActionsBlock({
@@ -90,25 +90,23 @@ export async function shareProfileModal({
                     text: 'Select Property to Share',
                   },
               }),
-              block.newButtonElement({
-                actionId : ModalsEnum.SHARE_PROFILE_EXEC,
-                text : {
-                    text : "Share to Chat",
-                    type : TextObjectType.PLAINTEXT
-                },
-                value : "shareChat"
-
-              })
         ]
     })
 
-    return  {
+    return {
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: "Share Profile"
+            text: "Share Profile",
         },
-        blocks: block.getBlocks()
-    }
+        blocks: block.getBlocks(),
+        submit: block.newButtonElement({
+            text: {
+                text: "Share to Chat",
+                type: TextObjectType.PLAINTEXT,
+            },
+            value: "shareChat",
+        }),
+    };
 
 }

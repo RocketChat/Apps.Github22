@@ -17,7 +17,7 @@ import { IGitHubSearchResultData } from '../definitions/searchResultData';
 import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
-import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues, getBasicUserInfo } from '../helpers/githubSDK';
 import { NewIssueModal } from '../modals/newIssueModal';
 import { issueTemplateSelectionModal } from '../modals/issueTemplateSelectionModal';
 import { githubIssuesListModal } from '../modals/githubIssuesListModal';
@@ -25,6 +25,8 @@ import { IGitHubIssue } from '../definitions/githubIssue';
 import { GithubRepoIssuesStorage } from '../persistance/githubIssues';
 import { IGitHubIssueData } from '../definitions/githubIssueData';
 import { githubIssuesShareModal } from '../modals/githubIssuesShareModal';
+import { IAuthData } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
+import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -547,6 +549,73 @@ export class ExecuteViewSubmitHandler {
                             }
                         } 
                     break;
+                }
+                 case ModalsEnum.SHARE_PROFILE_VIEW : {
+                    let {user, room} = context.getInteractionData();
+                    const block = this.modify.getCreator().getBlockBuilder();
+                    let accessToken = await getAccessTokenForUser(this.read, user ,this.app.oauth2Config) as IAuthData;
+                    const userProfile = await getBasicUserInfo(this.http, accessToken.token);
+
+                    const idRecord = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ProfileShareParam")
+
+                    const profileData = await this.read.getPersistenceReader().readByAssociation(idRecord);
+
+                    let profileShareParams: string[] = [];
+
+                    if (profileData.length == 0){
+                        profileShareParams = ['username', 'avatar', 'email', 'bio', 'followers', 'following' , 'contributionGraph'];
+                    }
+                    else {
+                        const dat = profileData[0] as {profileParams : string[]};
+                        profileShareParams = dat.profileParams;
+                    }
+
+                    if (profileShareParams.includes('avatar')){
+                        block.addImageBlock({
+                            imageUrl : userProfile.avatar,
+                            altText : "User Info"
+                        })
+                    }
+
+                    profileShareParams.map((value) => {
+                        if (value != 'contributionGraph' && value != 'avatar'){
+                            block.addSectionBlock({
+                                text : block.newPlainTextObject(value),
+                            })
+                            block.addContextBlock({
+                                elements : [
+                                    block.newPlainTextObject(userProfile[value], true),
+                                ]
+                            });
+                            block.addDividerBlock();
+                        }
+                    })
+
+                    if (profileShareParams.includes('contributionGraph')){
+                        block.addImageBlock({imageUrl : `https://activity-graph.herokuapp.com/graph?username=${userProfile.username}&bg_color=ffffff&color=708090&line=24292e&point=24292e`, altText: "Github Contribution Graph"})
+                    }
+
+
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify, room!, user, `${userProfile.name}'s Github Profile`, block)
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify, room, user, `${userProfile.name}'s Github Profile`, block)
+                        }
+
+                    }
+
+                    this.persistence.removeByAssociation(idRecord);
+
+                    break;
+
                 }
                 case ModalsEnum.ADD_ISSUE_ASSIGNEE_VIEW: {
                     const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
