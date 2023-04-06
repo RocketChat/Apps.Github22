@@ -21,7 +21,7 @@ export enum ModalsEnum {
     TRIGGER_REPOS_MODAL = 'trigger-repos-modal',
     TRIGGER_ACTIVITY_MODAL = 'trigger-activity-modal',
     TRIGGER_NOTIFICATIONS_MODAL = 'trigger-notifications-modal',
-    SHARE_PROFILE_EXEC = 'share-profile-exec',
+    SHARE_PROFILE_VIEW = 'share-profile-view',
     SHARE_PROFILE_PARAMS = 'share-profile-params',
     SHARE_PROFILE = 'share-profile',
     PULL_VIEW = 'pull-view',
