@@ -65,7 +65,7 @@ export async function pullDetailsModal({
 
         const pullRequestFiles = pullRequestFilesRaw.data;
 
-        if(pullData.message === 'Not Found'){
+        if(!pullRawData.statusCode.toString().startsWith("2")){
             const modal = await messageModal({
                 message:`🤖 Error Fetching Pull Request Data ⚠️`,
                 modify: modify,
