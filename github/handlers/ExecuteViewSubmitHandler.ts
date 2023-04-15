@@ -17,7 +17,7 @@ import { IGitHubSearchResultData } from '../definitions/searchResultData';
 import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
-import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues, addNewIssueComment, getIssuesComments, getIssueData } from '../helpers/githubSDK';
 import { NewIssueModal } from '../modals/newIssueModal';
 import { issueTemplateSelectionModal } from '../modals/issueTemplateSelectionModal';
 import { githubIssuesListModal } from '../modals/githubIssuesListModal';
@@ -25,6 +25,7 @@ import { IGitHubIssue } from '../definitions/githubIssue';
 import { GithubRepoIssuesStorage } from '../persistance/githubIssues';
 import { IGitHubIssueData } from '../definitions/githubIssueData';
 import { githubIssuesShareModal } from '../modals/githubIssuesShareModal';
+import { issueCommentsModal } from '../modals/issueCommentsModal';
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -448,6 +449,84 @@ export class ExecuteViewSubmitHandler {
                                     })
                                     await sendNotification(this.read,this.modify,user,room,`New Comment posted to ${repository} pull request #${pullNumber} by ${addCommentResponse?.user?.login} : ${addCommentResponse?.html_url}`);
                                     await this.modify.getUiController().updateModalView(addPRCommentModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                                }
+                            }
+                        }
+                        return context.getInteractionResponder().successResponse();
+                    }
+                    break;
+                }
+                case ModalsEnum.ADD_ISSUE_COMMENT_VIEW:{
+                    if (user.id) {
+                        const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+                        if (roomId) {
+                            let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            const repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION];
+                            const issueNumber = view.state?.[ModalsEnum.ISSUE_NUMBER_INPUT]?.[ModalsEnum.ISSUE_NUMBER_INPUT_ACTION];
+                            const newComment = view.state?.[ModalsEnum.ISSUE_COMMENT_INPUT]?.[ModalsEnum.ISSUE_COMMENT_INPUT_ACTION];
+                            let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
+                            if(accessToken?.token && repository?.length && newComment?.length && issueNumber?.length){
+                                let addCommentResponse = await addNewIssueComment(this.http,repository,accessToken.token,issueNumber,newComment);
+                                if(addCommentResponse?.serverError){
+                                    let errorMessage = addCommentResponse?.message;
+                                    const unauthorizedMessageModal = await messageModal({
+                                        message:`🤖 Unable to add comment : ⚠️ ${errorMessage}`,
+                                        modify: this.modify,
+                                        read: this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    return context
+                                        .getInteractionResponder()
+                                        .openModalViewResponse(unauthorizedMessageModal);
+                                }else{                               
+                                    let issueComments = await getIssuesComments(this.http,repository,accessToken?.token,issueNumber);
+                                    let issueData = await getIssueData(repository,issueNumber,accessToken.token,this.http);
+                                    if(issueData?.issue_compact === "Error Fetching Issue" || issueComments?.issueData){
+                                        if(issueData?.issue_compact === "Error Fetching Issue"){
+                                            const unauthorizedMessageModal = await messageModal({
+                                                message:`🤖 Error Fetching Issue Data ⚠️`,
+                                                modify: this.modify,
+                                                read: this.read,
+                                                persistence: this.persistence,
+                                                http: this.http,
+                                                uikitcontext: context
+                                            })
+                                            return context
+                                                .getInteractionResponder()
+                                                .openModalViewResponse(unauthorizedMessageModal);
+                                        }
+                                        if(issueComments?.serverError){
+                                            const unauthorizedMessageModal = await messageModal({
+                                                message:`🤖 Error Fetching Comments ⚠️`,
+                                                modify: this.modify,
+                                                read: this.read,
+                                                persistence: this.persistence,
+                                                http: this.http,
+                                                uikitcontext: context
+                                            })
+                                            return context
+                                                .getInteractionResponder()
+                                                .openModalViewResponse(unauthorizedMessageModal);
+                                        }
+                                    }
+                                    let data={
+                                        repo: repository,
+                                        issueNumber: issueNumber,
+                                        issueData: issueData,
+                                        issueComments: issueComments?.data
+                                    }
+                                    const addIssueCommentModal = await issueCommentsModal({
+                                        data:data,
+                                        modify:this.modify,
+                                        read:this.read,
+                                        persistence: this.persistence,
+                                        http: this.http,
+                                        uikitcontext: context
+                                    })
+                                    await sendNotification(this.read,this.modify,user,room,`New Comment posted to ${repository} issue #${issueNumber} by ${addCommentResponse?.user?.login} : ${addCommentResponse?.html_url}`);
+                                    await this.modify.getUiController().updateModalView(addIssueCommentModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                                 }
                             }
                         }

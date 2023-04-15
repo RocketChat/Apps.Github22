@@ -18,7 +18,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData } from "../helpers/githubSDK";
+import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData, getIssuesComments } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -48,6 +48,8 @@ import { IssueDisplayModal } from "../modals/IssueDisplayModal";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
+import { issueCommentsModal } from "../modals/issueCommentsModal";
+import { addIssueCommentsModal } from "../modals/addIssueCommentModal";
 
 export class ExecuteBlockActionHandler {
 
@@ -729,6 +731,101 @@ export class ExecuteBlockActionHandler {
                     return context.getInteractionResponder().openModalViewResponse(shareProfileMod);
                 }
 
+                case ModalsEnum.ISSUE_COMMENT_LIST_ACTION:{
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    if(splittedValues.length==2){
+                        let repoName = splittedValues[0];
+                        let issueNumber = splittedValues[1];
+                        let issueComments = await getIssuesComments(this.http,repoName,accessToken?.token,issueNumber);
+                        let issueData = await getIssueData(repoName,issueNumber,accessToken?.token,this.http);
+                        if(issueData?.issue_compact === "Error Fetching Issue" || issueComments?.issueData){
+                            if(issueData?.issue_compact === "Error Fetching Issue"){
+                                const unauthorizedMessageModal = await messageModal({
+                                    message:`🤖 Error Fetching Issue Data ⚠️`,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                    uikitcontext: context
+                                })
+                                return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(unauthorizedMessageModal);
+                            }
+                            if(issueComments?.serverError){
+                                const unauthorizedMessageModal = await messageModal({
+                                    message:`🤖 Error Fetching Comments ⚠️`,
+                                    modify: this.modify,
+                                    read: this.read,
+                                    persistence: this.persistence,
+                                    http: this.http,
+                                    uikitcontext: context
+                                })
+                                return context
+                                    .getInteractionResponder()
+                                    .openModalViewResponse(unauthorizedMessageModal);
+                            }
+                        }
+                        let data={
+                            repo: repoName,
+                            issueNumber: issueNumber,
+                            issueData: issueData,
+                            issueComments: issueComments?.data
+                        }
+                        const addIssueCommentModal = await issueCommentsModal({
+                            data:data,
+                            modify:this.modify,
+                            read:this.read,
+                            persistence: this.persistence,
+                            http: this.http,
+                            uikitcontext: context
+                        })
+                        return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(addIssueCommentModal);
+                    }
+                    break;
+                }
+
+                case ModalsEnum.COMMENT_ISSUE_ACTION:{
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    if(splittedValues.length==2 && accessToken?.token){
+                        let data={
+                            "repo" : splittedValues[0],
+                            "issueNumber": splittedValues[1]
+                        }
+                        const addIssueCommentModal = await addIssueCommentsModal({
+                            data:data,
+                            modify:this.modify,
+                            read:this.read,
+                            persistence: this.persistence,
+                            http: this.http,
+                            uikitcontext: context
+                        })
+                        return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(addIssueCommentModal);
+                    }else{
+                        const unauthorizedMessageModal = await messageModal({
+                            message:`🤖 Error in adding comments, make sure you are logged in`,
+                            modify: this.modify,
+                            read: this.read,
+                            persistence: this.persistence,
+                            http: this.http,
+                            uikitcontext: context
+                        })
+                        return context
+                            .getInteractionResponder()
+                            .openModalViewResponse(unauthorizedMessageModal);
+                    }
+                    break;
+                }
 
                 case ModalsEnum.PR_COMMENT_LIST_ACTION:{
                     let value: string = context.getInteractionData().value as string;
