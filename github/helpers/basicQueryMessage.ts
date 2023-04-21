@@ -11,6 +11,7 @@ import { pullRequestListMessage } from "../lib/pullReqeustListMessage";
 import { repoDataMessage } from "../lib/repoDataMessage";
 import { helperMessage } from "../lib/helperMessage";
 import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
+import { IUser } from "@rocket.chat/apps-engine/definition/users";
 
 export async function basicQueryMessage({
     query,
@@ -21,15 +22,17 @@ export async function basicQueryMessage({
     modify,
     http,
     accessToken,
+    user
 }: {
-    query: String,
-    repository: String,
+    query: String;
+    repository: String;
     room: IRoom;
     read: IRead;
     persistence: IPersistence;
     modify: IModify;
     http: IHttp;
-    accessToken?: IAuthData
+    accessToken?: IAuthData;
+    user?: IUser;
 }) {
 
     switch (query) {
@@ -50,6 +53,6 @@ export async function basicQueryMessage({
             break;
         }
         default:
-            await helperMessage({ room, read, persistence, modify, http });
+            await helperMessage({ room, read, persistence, modify, http, user });
     }
 }

@@ -153,6 +153,16 @@ export async function githubIssuesListModal({
                         }),
                     );
                 }
+                actionBlockElementsArray.push(
+                    block.newButtonElement({
+                        actionId: ModalsEnum.ISSUE_COMMENT_LIST_ACTION,
+                        text: {
+                            text: ModalsEnum.ISSUE_COMMENT_LIST_LABEL,
+                            type: TextObjectType.PLAINTEXT,
+                        },
+                        value: `${data?.repo} ${issue?.number}`,
+                    })
+                )
                 block.addActionsBlock({
                     elements: actionBlockElementsArray,
                 });

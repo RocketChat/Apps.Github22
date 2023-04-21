@@ -435,7 +435,7 @@ export async function mergePullRequest(
 export async function getBasicUserInfo(
     http: IHttp,
     access_token: String,
-){
+) {
     try {
         const response = await getRequest(
             http,
@@ -444,21 +444,21 @@ export async function getBasicUserInfo(
         );
         return {
             username: response.login,
-            name : response.name,
-            email : response.email,
+            name: response.name,
+            email: response.email,
             bio: response.bio,
-            followers : response.followers,
-            following : response.following,
-            avatar : response.avatar_url
+            followers: response.followers,
+            following: response.following,
+            avatar: response.avatar_url
         }
-    }catch(e){
+    } catch (e) {
         return {
-            name : "",
-            email : "",
+            name: "",
+            email: "",
             bio: "",
-            followers : "",
-            following : "",
-            avatar : ""
+            followers: "",
+            following: "",
+            avatar: ""
         };
     }
 }
@@ -466,13 +466,13 @@ export async function getBasicUserInfo(
 export async function getUserAssignedIssues(
     http: IHttp,
     username: String,
-    access_token : String,
-    filter : {
-        filter : String,
-        state : String,
-        sort : String
+    access_token: String,
+    filter: {
+        filter: String,
+        state: String,
+        sort: String
     },
-) : Promise<IGitHubIssue[]>{
+): Promise<IGitHubIssue[]> {
 
 
     let url;
@@ -496,76 +496,96 @@ export async function getUserAssignedIssues(
             url,
         );
 
-        const getAssignees = (assignees : any[]) : string[] => assignees.map((val): string => {
+        const getAssignees = (assignees: any[]): string[] => assignees.map((val): string => {
             return val.login as string;
         })
 
-        const modifiedResponse : Array<IGitHubIssue> = response.items.map((value) : IGitHubIssue => {
+        const modifiedResponse: Array<IGitHubIssue> = response.items.map((value): IGitHubIssue => {
             return {
-                issue_id : value.id as string,
-                issue_compact : value.body as string,
-                repo_url : value.repository_url as string,
-                user_login : value.user.login as string,
-                user_avatar : value.user.avatar_url as string,
-                number : value.number as number,
-                title : value.title as string,
-                body : value.body as string,
-                assignees : getAssignees(value.assignees),
-                state : value.state as string,
-                last_updated_at : value.updated_at as string,
-                comments : value.comments as number,
+                issue_id: value.id as string,
+                issue_compact: value.body as string,
+                repo_url: value.repository_url as string,
+                user_login: value.user.login as string,
+                user_avatar: value.user.avatar_url as string,
+                number: value.number as number,
+                title: value.title as string,
+                body: value.body as string,
+                assignees: getAssignees(value.assignees),
+                state: value.state as string,
+                last_updated_at: value.updated_at as string,
+                comments: value.comments as number,
             }
         })
 
         return modifiedResponse;
     }
-    catch(e){
+    catch (e) {
         return [];
     }
 }
 
 export async function getIssueData(
-    repoInfo:String,
-    issueNumber:String,
-    access_token:String,
-    http:IHttp
-) : Promise<IGitHubIssue> {
+    repoInfo: String,
+    issueNumber: String,
+    access_token: String | null,
+    http: IHttp
+): Promise<IGitHubIssue> {
     try {
-        const response = await getRequest(http, access_token, BaseRepoApiHost + repoInfo + '/issues/' + issueNumber);
-        const getAssignees = (assignees : any[]) : string[] => assignees.map((val): string => {
+        let response;
+        if(access_token){
+            response = await getRequest(http, access_token, BaseRepoApiHost + repoInfo + '/issues/' + issueNumber);
+        }else{
+            response = await http.get(
+                `https://api.github.com/repos/${repoInfo}/issues/${issueNumber}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+    
+            // If it isn't a 2xx code, something wrong happened
+            if (!response.statusCode.toString().startsWith("2")) {
+                throw response;
+            }
+    
+            response = JSON.parse(response.content || "{}");
+        }
+
+        const getAssignees = (assignees: any[]): string[] => assignees.map((val): string => {
             return val.login as string;
         })
 
         return {
-            issue_id : response.id as string,
-            issue_compact : response.body as string,
-            html_url : response.html_url as string,
-            repo_url : response.repository_url as string,
-            user_login : response.user.login as string,
-            user_avatar : response.user.avatar_url as string,
-            number : response.number as number,
-            title : response.title as string,
-            body : response.body as string,
-            assignees : getAssignees(response.assignees),
-            state : response.state as string,
-            last_updated_at : response.updated_at as string,
-            comments : response.comments as number,
-            reactions : {
-                total_count : response.reactions["total_count"],
-                plus_one : response.reactions["+1"],
-                minus_one : response.reactions["-1"],
-                laugh : response.reactions["laugh"],
-                hooray : response.reactions["hooray"],
-                confused : response.reactions["confused"],
-                heart : response.reactions["heart"],
-                rocket : response.reactions["rocket"],
-                eyes : response.reactions["eyes"]
+            issue_id: response.id as string,
+            issue_compact: response.body as string,
+            html_url: response.html_url as string,
+            repo_url: response.repository_url as string,
+            user_login: response.user.login as string,
+            user_avatar: response.user.avatar_url as string,
+            number: response.number as number,
+            title: response.title as string,
+            body: response.body as string,
+            assignees: getAssignees(response.assignees),
+            state: response.state as string,
+            last_updated_at: response.updated_at as string,
+            comments: response.comments as number,
+            reactions: {
+                total_count: response.reactions["total_count"],
+                plus_one: response.reactions["+1"],
+                minus_one: response.reactions["-1"],
+                laugh: response.reactions["laugh"],
+                hooray: response.reactions["hooray"],
+                confused: response.reactions["confused"],
+                heart: response.reactions["heart"],
+                rocket: response.reactions["rocket"],
+                eyes: response.reactions["eyes"]
             }
         }
-    }catch(e) {
+    } catch (e) {
         return {
-            issue_compact : "Error Fetching Issue",
-            issue_id : 0
+            issue_compact: "Error Fetching Issue",
+            issue_id: 0
         }
     }
 }
@@ -625,6 +645,75 @@ export async function getPullRequestComments(
         JSONResponse["data"] = JSON.parse(response.content || "[]");
         JSONResponse["serverError"] = false;
     }
+    return JSONResponse;
+}
+
+export async function getIssuesComments(
+    http: IHttp,
+    repoName: string,
+    access_token: String | null,
+    issueNumber: string | number
+) {
+    if(access_token){
+        var response = await http.get(
+            `https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
+            {
+                headers: {
+                    Authorization: `token ${access_token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }else{
+        var response = await http.get(
+            `https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }
+    // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse("{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse = JSON.parse(response.content || "{}");
+        JSONResponse["serverError"] = true;
+    } else {
+        JSONResponse["data"] = JSON.parse(response.content || "[]");
+        JSONResponse["serverError"] = false;
+    }
+    return JSONResponse;
+}
+
+export async function addNewIssueComment(
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    issueNumber: string | number,
+    newComment: string
+) {
+    let data = {
+        body: newComment,
+    };
+    const response = await http.post(
+        `https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
+        {
+            headers: {
+                Authorization: `token ${access_token}`,
+                "Content-Type": "application/json",
+            },
+            data,
+        }
+    );
+    // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    } else {
+        JSONResponse["serverError"] = false;
+    }
+
     return JSONResponse;
 }
 
