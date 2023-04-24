@@ -11,6 +11,7 @@ import { getInteractionRoomData, storeInteractionRoomData } from '../persistance
 import { Subscription } from '../persistance/subscriptions';
 import { ISubscription } from '../definitions/subscription';
 import { IRepositorySubscriptions } from '../definitions/repositorySubscriptions';
+import { getRepoPublicUrl } from '../helpers/githubSDK';
 
 export async function subsciptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.SUBSCRIPTION_VIEW;
@@ -19,7 +20,7 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
 
     const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
     const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
-   
+
     if (user?.id) {
         let roomId;
         if (room?.id) {
@@ -28,13 +29,13 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
         } else {
             roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
         }
-    
+
         let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader());
         let roomSubsciptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
 
         block.addDividerBlock();
-        
-    
+
+
         let repositoryData = new Map<string,IRepositorySubscriptions>;
         for (let subsciption of roomSubsciptions) {
 
@@ -42,7 +43,7 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
             let userId = subsciption.user;
             let event = subsciption.event;
             let user = await read.getUserReader().getById(userId);
-            
+
             if(repositoryData.has(repoName)){
                 let repoData = repositoryData.get(repoName) as IRepositorySubscriptions;
                 repoData.events.push(event);
@@ -66,6 +67,8 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
             let repoName = repository.repoName;
             let repoUser = repository.user;
             let events = repository.events;
+            let repo_url = getRepoPublicUrl(repoName)
+            
             block.addSectionBlock({
                 text: { text: `${index}) ${repoName}`, type: TextObjectType.PLAINTEXT},
                 accessory: block.newButtonElement({
@@ -75,7 +78,7 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
                         type: TextObjectType.PLAINTEXT
                     },
                     value: repository.webhookId,
-                    url:`https://github.com/${repoName}`
+                    url: repo_url
                 })
             });
             let eventList : Array<ITextObject>=[];
