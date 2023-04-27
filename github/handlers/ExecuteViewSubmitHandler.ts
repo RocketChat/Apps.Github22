@@ -8,7 +8,7 @@ import { Subscription } from '../persistance/subscriptions';
 import { GithubApp } from '../GithubApp';
 import { getWebhookUrl } from '../helpers/getWebhookURL';
 import { getAccessTokenForUser } from '../persistance/auth';
-import { subsciptionsModal } from '../modals/subscriptionsModal';
+import { subscriptionsModal } from '../modals/subscriptionsModal';
 import { messageModal } from '../modals/messageModal';
 import { pullRequestCommentsModal } from '../modals/pullRequestCommentsModal';
 import { githubSearchResultModal } from '../modals/githubSearchResultModal';
@@ -63,12 +63,12 @@ export class ExecuteViewSubmitHandler {
 
                                     let url = await getWebhookUrl(this.app);
 
-                                    let subsciptionStorage = new Subscription(this.persistence, this.read.getPersistenceReader());
+                                    let subscriptionStorage = new Subscription(this.persistence, this.read.getPersistenceReader());
                                     let subscribedEvents = new Map<string, boolean>;
                                     let hookId = "";
 
 
-                                    let subscriptions = await subsciptionStorage.getSubscriptionsByRepo(repository, user.id);
+                                    let subscriptions = await subscriptionStorage.getSubscriptionsByRepo(repository, user.id);
                                     if (subscriptions && subscriptions.length) {
                                         for (let subscription of subscriptions) {
                                             subscribedEvents.set(subscription.event, true);
@@ -101,7 +101,7 @@ export class ExecuteViewSubmitHandler {
                                     let createdEntry = false;
                                     //subscribe rooms to hook events
                                     for (let event of events) {
-                                        createdEntry = await subsciptionStorage.createSubscription(repository, event, response?.id, room, user);
+                                        createdEntry = await subscriptionStorage.createSubscription(repository, event, response?.id, room, user);
                                     }
                                     if (!createdEntry) {
                                         throw new Error("Error creating new subscription entry");
@@ -110,7 +110,7 @@ export class ExecuteViewSubmitHandler {
                                 }
 
                             }
-                            const modal = await subsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                            const modal = await subscriptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                             await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                             return context.getInteractionResponder().successResponse();
                         }

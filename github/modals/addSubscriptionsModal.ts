@@ -61,12 +61,12 @@ export async function AddSubscriptionModal({
             ).roomId;
         }
 
-        let subsciptionStorage = new Subscription(
+        let subscriptionStorage = new Subscription(
             persistence,
             read.getPersistenceReader()
         );
-        let roomSubsciptions: Array<ISubscription> =
-            await subsciptionStorage.getSubscriptions(roomId);
+        let roomSubscriptions: Array<ISubscription> =
+            await subscriptionStorage.getSubscriptions(roomId);
 
         // shows indentations in input blocks but not inn section block
         block.addInputBlock({

@@ -17,7 +17,7 @@ import {
     UIKitBlockInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
-import { deleteSubsciptionsModal } from "../modals/deleteSubscriptions";
+import { deleteSubscriptionsModal } from "../modals/deleteSubscriptions";
 import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData, getIssuesComments } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
@@ -25,7 +25,7 @@ import { GithubApp } from "../GithubApp";
 import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
 import { sendMessage, sendNotification } from "../lib/message";
-import { subsciptionsModal } from "../modals/subscriptionsModal";
+import { subscriptionsModal } from "../modals/subscriptionsModal";
 import { mergePullRequestModal } from "../modals/mergePullReqeustModal";
 import { messageModal } from "../modals/messageModal";
 import { getRepoData } from "../helpers/githubSDK";
@@ -382,7 +382,7 @@ export class ExecuteBlockActionHandler {
                         .openModalViewResponse(addSubscriptionModal);
                 }
                 case ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_MODAL: {
-                    const addSubscriptionModal = await deleteSubsciptionsModal({
+                    const addSubscriptionModal = await deleteSubscriptionsModal({
                         modify: this.modify,
                         read: this.read,
                         persistence: this.persistence,
@@ -415,15 +415,15 @@ export class ExecuteBlockActionHandler {
                         await subscriptionStorage.deleteSubscriptionsByRepoUser(repoName, roomId, user.id);
                         //check if any subscription events of the repo is left in any other room
                         let eventSubscriptions = new Map<string, boolean>;
-                        for (let subsciption of oldSubscriptions) {
-                            eventSubscriptions.set(subsciption.event, false);
+                        for (let subscription of oldSubscriptions) {
+                            eventSubscriptions.set(subscription.event, false);
                         }
                         let updatedsubscriptions = await subscriptionStorage.getSubscriptionsByRepo(repoName, user.id);
                         if (updatedsubscriptions.length == 0) {
                             await deleteSubscription(this.http, repoName, accessToken.token, hookId);
                         } else {
-                            for (let subsciption of updatedsubscriptions) {
-                                eventSubscriptions.set(subsciption.event, true);
+                            for (let subscription of updatedsubscriptions) {
+                                eventSubscriptions.set(subscription.event, true);
                             }
                             let updatedEvents: Array<string> = [];
                             let sameEvents = true;
@@ -441,12 +441,12 @@ export class ExecuteBlockActionHandler {
                         await sendNotification(this.read, this.modify, user, userRoom, `Unsubscribed to ${repoName} 🔕`);
                     }
 
-                    const modal = await deleteSubsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                    const modal = await deleteSubscriptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                     await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     break;
                 }
                 case ModalsEnum.SUBSCRIPTION_REFRESH_ACTION:{
-                    const modal = await subsciptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
+                    const modal = await subscriptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                     await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     break;
                 }
@@ -546,7 +546,7 @@ export class ExecuteBlockActionHandler {
                                     .getInteractionResponder()
                                     .openModalViewResponse(resultsModal);
                         }else{
-                            console.log("Inavlid Trigger ID !");
+                            console.log("invalid Trigger ID !");
                         }
                     }
                     if(user?.id){

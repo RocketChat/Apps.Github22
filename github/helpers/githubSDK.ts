@@ -6,7 +6,7 @@ const BaseHost = "https://github.com/";
 const BaseApiHost = "https://api.github.com/";
 const BaseRepoApiHost = "https://api.github.com/repos/";
 
-async function postReqeust(
+async function postRequest(
     http: IHttp,
     accessToken: String,
     url: string,
@@ -49,7 +49,7 @@ async function getRequest(
     return JSON.parse(response.content || "{}");
 }
 
-async function deleteReqeust(
+async function deleteRequest(
     http: IHttp,
     accessToken: String,
     url: string
@@ -70,7 +70,7 @@ async function deleteReqeust(
     return JSON.parse(response.content || "{}");
 }
 
-async function patchReqeust(
+async function patchRequest(
     http: IHttp,
     accessToken: String,
     url: string,
@@ -100,7 +100,7 @@ export async function createSubscription(
     access_token: string,
     events: Array<String>
 ) {
-    return postReqeust(
+    return postRequest(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks",
@@ -121,7 +121,7 @@ export async function deleteSubscription(
     access_token: string,
     hookId: string
 ) {
-    return deleteReqeust(
+    return deleteRequest(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks/" + hookId
@@ -135,7 +135,7 @@ export async function updateSubscription(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(
+    return patchRequest(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks/" + hookId,
@@ -153,7 +153,7 @@ export async function addSubscribedEvents(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(
+    return patchRequest(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks/" + hookId,
@@ -171,7 +171,7 @@ export async function removeSubscribedEvents(
     hookId: string,
     events: Array<String>
 ) {
-    return patchReqeust(
+    return patchRequest(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/hooks/" + hookId,
@@ -190,7 +190,7 @@ export async function createNewIssue(
     issueAssignees: Array<string>,
     access_token: string
 ) {
-    return postReqeust(
+    return postRequest(
         http,
         access_token,
         BaseRepoApiHost + repoName + "/issues",

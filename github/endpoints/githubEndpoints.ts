@@ -36,17 +36,17 @@ export class githubWebHooks extends ApiEndpoint {
             payload = request.content;
         }
 
-        let subsciptionStorage = new Subscription(
+        let subscriptionStorage = new Subscription(
             persis,
             read.getPersistenceReader()
         );
 
-        const subsciptions: Array<ISubscription> =
-            await subsciptionStorage.getSubscribedRooms(
+        const subscriptions: Array<ISubscription> =
+            await subscriptionStorage.getSubscribedRooms(
                 payload.repository.full_name,
                 event
             );
-        if (!subsciptions || subsciptions.length == 0) {
+        if (!subscriptions || subscriptions.length == 0) {
             return this.success();
         }
         const eventCaps = event.toUpperCase();
@@ -56,13 +56,13 @@ export class githubWebHooks extends ApiEndpoint {
             messageText = `*New Commits to* *[${payload.repository.full_name}](${payload.repository.html_url}) by ${payload.pusher.name}*`;
         } else if (event == "pull_request") {
             if(payload.action == "opened"){
-                messageText = `*[New Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+                messageText = `*[New Pull Request](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
             }else if(payload.action == "closed" && payload.pull_request.merged ){
-                messageText = `*[Merged Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+                messageText = `*[Merged Pull Request](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
             }else if(payload.action == "closed" && !payload.pull_request.merged){
-                messageText = `*[Closed Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+                messageText = `*[Closed Pull Request](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
             }else if(payload.action =="reopened"){
-                messageText = `*[ReOpened Pull Reqeust](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
+                messageText = `*[ReOpened Pull Request](${payload.pull_request.html_url})*  *|* *#${payload.pull_request.number} ${payload.pull_request.title}* by *[${payload.user.login}](${payload.user.html_url})* *|* *[${payload.repository.full_name}]*`;
             }else{
                 return this.success();
             }
@@ -85,8 +85,8 @@ export class githubWebHooks extends ApiEndpoint {
                 return this.success();
             }
         }
-        for (let subsciption of subsciptions) {
-            let roomId = subsciption.room;
+        for (let subscription of subscriptions) {
+            let roomId = subscription.room;
             if (!roomId) {
                 continue;
             }

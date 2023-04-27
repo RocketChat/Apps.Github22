@@ -38,7 +38,7 @@ export async function handleSearch(
                     context.getSender()
                 );
         } else {
-            console.log("Inavlid Trigger ID !");
+            console.log("invalid Trigger ID !");
         }
     } else {
         await sendNotification(
