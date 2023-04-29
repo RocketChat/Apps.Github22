@@ -12,7 +12,7 @@ import { Subscription } from '../persistance/subscriptions';
 import { ISubscription } from '../definitions/subscription';
 import { IRepositorySubscriptions } from '../definitions/repositorySubscriptions';
 
-export async function subsciptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
+export async function subscriptionsModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.SUBSCRIPTION_VIEW;
 
     const block = modify.getCreator().getBlockBuilder();
@@ -29,18 +29,18 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
             roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
         }
     
-        let subsciptionStorage = new Subscription(persistence,read.getPersistenceReader());
-        let roomSubsciptions: Array<ISubscription> = await subsciptionStorage.getSubscriptions(roomId);
+        let subscriptionStorage = new Subscription(persistence,read.getPersistenceReader());
+        let roomSubscriptions: Array<ISubscription> = await subscriptionStorage.getSubscriptions(roomId);
 
         block.addDividerBlock();
         
     
         let repositoryData = new Map<string,IRepositorySubscriptions>;
-        for (let subsciption of roomSubsciptions) {
+        for (let subscription of roomSubscriptions) {
 
-            let repoName = subsciption.repoName;
-            let userId = subsciption.user;
-            let event = subsciption.event;
+            let repoName = subscription.repoName;
+            let userId = subscription.user;
+            let event = subscription.event;
             let user = await read.getUserReader().getById(userId);
             
             if(repositoryData.has(repoName)){
@@ -52,7 +52,7 @@ export async function subsciptionsModal({ modify, read, persistence, http, slash
                 let events:Array<string> = [];
                 events.push(event);
                 let repoData:IRepositorySubscriptions={
-                    webhookId:subsciption.webhookId,
+                    webhookId:subscription.webhookId,
                     events:events,
                     user:user,
                     repoName:repoName

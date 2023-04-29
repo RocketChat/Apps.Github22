@@ -171,6 +171,7 @@ export class CommandUtility implements ExecutorProps {
                         persistence: this.persistence,
                         modify: this.modify,
                         http: this.http,
+                        user: this.sender
                     });
                     break;
                 }
@@ -218,6 +219,7 @@ export class CommandUtility implements ExecutorProps {
                     persistence: this.persistence,
                     modify: this.modify,
                     http: this.http,
+                    user: this.sender
                 });
                 break;
             }
@@ -259,7 +261,7 @@ export class CommandUtility implements ExecutorProps {
                 .getUiController()
                 .openModalView(modal, { triggerId }, this.context.getSender());
         } else {
-            console.log("Inavlid Trigger ID !");
+            console.log("invalid Trigger ID !");
         }
     }
 
@@ -272,6 +274,7 @@ export class CommandUtility implements ExecutorProps {
                     persistence: this.persistence,
                     modify: this.modify,
                     http: this.http,
+                    user: this.sender
                 });
                 break;
             }
@@ -294,6 +297,7 @@ export class CommandUtility implements ExecutorProps {
                     persistence: this.persistence,
                     modify: this.modify,
                     http: this.http,
+                    user: this.sender
                 });
                 break;
             }

@@ -41,7 +41,7 @@ export async function handleNewIssue(
                     context.getSender()
                 );
         } else {
-            console.log("Inavlid Trigger ID !");
+            console.log("invalid Trigger ID !");
         }
     } else {
         const user = context.getSender();
@@ -72,7 +72,7 @@ export async function handleIssues(
         const modal = await GitHubIssuesStarterModal({modify,read,persistence,http,slashcommandcontext:context});
         await modify.getUiController().openModalView(modal,{triggerId},context.getSender());
     }else{
-        console.log("Inavlid Trigger ID !");
+        console.log("invalid Trigger ID !");
     }
 
 }

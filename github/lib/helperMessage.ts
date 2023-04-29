@@ -5,6 +5,7 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
+import { IUser } from "@rocket.chat/apps-engine/definition/users";
 
 export async function helperMessage({
     room,
@@ -12,12 +13,14 @@ export async function helperMessage({
     persistence,
     modify,
     http,
+    user
 }: {
     room: IRoom;
     read: IRead;
     persistence: IPersistence;
     modify: IModify;
     http: IHttp;
+    user?: IUser;
 }) {
     let helperMessageString = `### Github App
     *The app can be accessed with any of the slash commands /gh or /github*
@@ -46,5 +49,6 @@ export async function helperMessage({
     if (room) {
         textSender.setRoom(room);
     }
-    await modify.getCreator().finish(textSender);
+
+    await modify.getNotifier().notifyUser(user as IUser, textSender.getMessage());
 }

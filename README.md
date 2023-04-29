@@ -46,7 +46,7 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
 
 <div align='center' width='100%'>
 <a href="https://www.middlewarehq.com/">
-<img src="https://open-source-assets.middlewarehq.com/svgs/RocketChat-Apps.Github22-contributor-metrics-dark-widget.svg?metrics=true"></img>
+<img src="https://open-source-assets.middlewarehq.com/svgs/RocketChat-Apps.Github22-contributor-metrics-dark-widget.svg?caching=false"></img>
 </a>
 </div>
 

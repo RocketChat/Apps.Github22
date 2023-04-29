@@ -9,7 +9,6 @@ import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { ModalsEnum } from "../enum/Modals";
 import { AppEnum } from "../enum/App";
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import {
     UIKitBlockInteractionContext,
@@ -22,7 +21,8 @@ import {
 import { Subscription } from "../persistance/subscriptions";
 import { ISubscription } from "../definitions/subscription";
 
-export async function AddSubscriptionModal({
+export async function addIssueCommentsModal({
+    data,
     modify,
     read,
     persistence,
@@ -30,6 +30,7 @@ export async function AddSubscriptionModal({
     slashcommandcontext,
     uikitcontext,
 }: {
+    data?:any
     modify: IModify;
     read: IRead;
     persistence: IPersistence;
@@ -37,7 +38,7 @@ export async function AddSubscriptionModal({
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
 }): Promise<IUIKitModalViewParam> {
-    const viewId = ModalsEnum.ADD_SUBSCRIPTION_VIEW;
+    const viewId = ModalsEnum.ADD_ISSUE_COMMENT_VIEW;
     const block = modify.getCreator().getBlockBuilder();
     const room =
         slashcommandcontext?.getRoom() ||
@@ -61,13 +62,14 @@ export async function AddSubscriptionModal({
             ).roomId;
         }
 
-        let subscriptionStorage = new Subscription(
-            persistence,
-            read.getPersistenceReader()
-        );
-        let roomSubscriptions: Array<ISubscription> =
-            await subscriptionStorage.getSubscriptions(roomId);
-
+        let repoName = "";
+        let issueNumber = "";
+        if(data?.repo?.length){
+            repoName = data?.repo;
+        }
+        if(data?.issueNumber?.length){
+            issueNumber = data?.issueNumber;
+        }
         // shows indentations in input blocks but not inn section block
         block.addInputBlock({
             blockId: ModalsEnum.REPO_NAME_INPUT,
@@ -81,67 +83,41 @@ export async function AddSubscriptionModal({
                     text: ModalsEnum.REPO_NAME_PLACEHOLDER,
                     type: TextObjectType.PLAINTEXT,
                 },
+                initialValue:repoName
             }),
         });
 
-        let newMultiStaticElemnt = block.newMultiStaticElement({
-            actionId: ModalsEnum.ADD_SUBSCRIPTION_EVENT_OPTIONS,
-            options: [
-                {
-                    value: "issues",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "New Issues",
-                        emoji: true,
-                    },
-                },
-                {
-                    value: "pull_request",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "New Pull Request",
-                        emoji: true,
-                    },
-                },
-                {
-                    value: "push",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "New Commits",
-                        emoji: true,
-                    },
-                },
-                {
-                    value: "deployment_status",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "Deployment",
-                        emoji: true,
-                    },
-                },
-                {
-                    value: "star",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "New Stars",
-                        emoji: true,
-                    },
-                },
-            ],
-            placeholder: {
+        block.addInputBlock({
+            blockId: ModalsEnum.ISSUE_NUMBER_INPUT,
+            label: {
+                text: ModalsEnum.ISSUE_NUMBER_LABEL,
                 type: TextObjectType.PLAINTEXT,
-                text: "Select Events",
             },
+            element: block.newPlainTextInputElement({
+                actionId: ModalsEnum.ISSUE_NUMBER_INPUT_ACTION,
+                placeholder: {
+                    text: ModalsEnum.ISSUE_NUMBER_INPUT_PLACEHOLDER,
+                    type: TextObjectType.PLAINTEXT,
+                },
+                initialValue:issueNumber
+            }),
         });
 
         block.addInputBlock({
+            blockId: ModalsEnum.ISSUE_COMMENT_INPUT,
             label: {
-                text: ModalsEnum.ADD_SUBSCRIPTION_EVENT_LABEL,
+                text: ModalsEnum.ISSUE_COMMENT_INPUT_LABEL,
                 type: TextObjectType.PLAINTEXT,
             },
-            element: newMultiStaticElemnt,
-            blockId: ModalsEnum.ADD_SUBSCRIPTION_EVENT_INPUT,
-        });
+            element: block.newPlainTextInputElement({
+                actionId: ModalsEnum.ISSUE_COMMENT_INPUT_ACTION,
+                placeholder: {
+                    text: ModalsEnum.ISSUE_COMMENT_INPUT_PLACEHOLDER,
+                    type: TextObjectType.PLAINTEXT,
+                },
+                multiline: true
+            }),
+        });        
     }
 
     block.addDividerBlock();
@@ -150,7 +126,7 @@ export async function AddSubscriptionModal({
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.ADD_SUBSCIPTIONS_TITLE,
+            text: ModalsEnum.ADD_ISSUE_COMMENT_VIEW_TITLE,
         },
         close: block.newButtonElement({
             text: {
@@ -162,7 +138,7 @@ export async function AddSubscriptionModal({
             actionId: ModalsEnum.ADD_SUBSCRIPTION_ACTION,
             text: {
                 type: TextObjectType.PLAINTEXT,
-                text: "Subscribe",
+                text: "Comment",
             },
         }),
         blocks: block.getBlocks(),
