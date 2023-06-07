@@ -28,7 +28,11 @@ import {
 } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { createOAuth2Client } from "@rocket.chat/apps-engine/definition/oauth2/OAuth2";
 import { createSectionBlock } from "./lib/blocks";
-import { sendDirectMessage, sendNotification } from "./lib/message";
+import {
+    sendDirectMessage,
+    sendDirectMessageOnInstall,
+    sendNotification,
+} from "./lib/message";
 import { OAuth2Client } from "@rocket.chat/apps-engine/server/oauth2/OAuth2Client";
 import { deleteOathToken } from "./processors/deleteOAthToken";
 import { ProcessorsEnum } from "./enum/Processors";
@@ -204,5 +208,8 @@ export class GithubApp extends App {
         http: IHttp,
         persistence: IPersistence,
         modify: IModify
-    ): Promise<void> {}
+    ): Promise<void> {
+        const user = context.user;
+        await sendDirectMessageOnInstall(read, modify, user, persistence);
+    }
 }

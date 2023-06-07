@@ -95,3 +95,55 @@ export function isUserHighHierarchy(user: IUser): boolean {
     const clearanceList = ['admin', 'owner', 'moderator'];
     return user.roles.some((role) => clearanceList.includes(role));
 }
+
+export async function sendDirectMessageOnInstall(
+    read: IRead,
+    modify: IModify,
+    user: IUser,
+    persistence: IPersistence
+) {
+    if (user.roles.includes("admin")) {
+        const message = `
+        Hello **${user.name}!** Thank you for installing the **GitHub Rocket.Chat App**. 
+        
+        Here's some important information to get you started:
+        
+        \xa0\xa0• **Quick and Easy Setup**: You can log in to GitHub with just one click using the built-in OAuth2 mechanism.
+        \xa0\xa0• **Stay Updated**: Subscribe to Repository Events to receive notifications about new issues, pull requests, and more.
+        \xa0\xa0• **Review and Merge Pull Requests**: You can conveniently review and merge pull requests directly from RocketChat Channels.
+        \xa0\xa0• **Create and Manage Issues**: Create new issues from RocketChat and easily search and share existing issues and pull requests using extensive filters.
+        \xa0\xa0• **Slash Commands**: Access the app using the slash commands \`/gh\` or \`/github\`.
+        
+        To assist you further, here are some helpful commands you can use:
+        
+        1. See Interactive Button interface to fetch repository data -> \`/github Username/RepositoryName\`
+        2. Get details of a Repository -> \`/github  Username/RepositoryName repo\`
+        3. Get Issues of a Repository -> \`/github  Username/RepositoryName issues\`
+        4. Get Contributors of a Repository -> \`/github  Username/RepositoryName contributors\`
+        5. Get Recent Pull Request of a Repository -> \`/github  Username/RepositoryName pulls\`
+        6. Review a Pull Request -> \`/github  Username/RepositoryName pulls pullNumber\`
+        7. Login to GitHub -> \`/github login\`
+        8. Logout from GitHub -> \`/github logout\`
+        9. View your GitHub Profile and Issues -> \`/github me\`
+        10. View/Add/Delete/Update Repository Subscriptions -> \`/github subscribe\`
+        11. Subscribe to all repository events -> \`/github Username/RepositoryName subscribe\`
+        12. Unsubscribe to all repository events -> \`/github Username/RepositoryName unsubscribe\`
+        13. Add New Issues to GitHub Repository -> \`/github issue\`
+        14. Search Issues and Pull Requests -> \`/github search\`
+        15. Assign and Share Issues -> \`/github issues\`
+        
+        To unlock the full potential of the GitHub App, you need to set up a **GitHub OAuth App**. Follow these steps:
+        
+        \xa0\xa0• Set up a GitHub OAuth2 App by following the instructions provided.
+        \xa0\xa0• Ensure the callback URL is set to your server's URL (Note: Remove any trailing '/' at the end of the hosted URL if authentication issues occur).
+        \xa0\xa0• Once the GitHub OAuth app is set up, access the GitHub Application Settings and enter the GitHub App OAuth Client Id and Client Secret.
+        
+        We hope it enhances your collaboration and workflow. We would love to hear your feedback on your experience with the app. 
+        Your feedback helps us improve and provide a better user experience. 
+        Please visit the link to [**provide your feedback**](https://github.com/RocketChat/Apps.Github22/issues)
+        
+        Happy collaborating with GitHub and RocketChat :rocket:
+        `;
+        await sendDirectMessage(read, modify, user, message, persistence);
+    }
+}
