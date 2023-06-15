@@ -23,7 +23,6 @@ export async function MainModal(
     const viewId = ModalsEnum.MAIN_MODAL_VIEW;
     const block = modify.getCreator().getBlockBuilder();
 
-    const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
     const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
 
     block.addContextBlock({
@@ -37,115 +36,92 @@ export async function MainModal(
     block.addDividerBlock();
 
 
-    // Github Search
     block.addSectionBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        text: block.newMarkdownTextObject("Github Search"),
+        text: block.newMarkdownTextObject(ModalsEnum.MAIN_MODAL_GITHUB_SEARCH_LABLE),
+        accessory: block.newButtonElement({
+            text: {
+                type: TextObjectType.PLAINTEXT,
+                text: ModalsEnum.MAIN_MODAL_OPEN_LABLE,
+            },
+            actionId: ModalsEnum.TRIGGER_SEARCH_MODAL,
+        }),
     })
+
     block.addContextBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
         elements: [
-            block.newMarkdownTextObject("Search Github and share your resources on the channel"),
+            block.newMarkdownTextObject(ModalsEnum.MAIN_MODAL_GITHUB_SEARCH_DESCRIPTION),
         ],
     });
 
-    block.addActionsBlock({
-        blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        elements: [
-            block.newButtonElement({
-                text: {
-                    type: TextObjectType.PLAINTEXT,
-                    text: "Open",
-                },
-                actionId: ModalsEnum.TRIGGER_SEARCH_MODAL,
-                value: "search",
-            }),
-        ],
-    });
 
     block.addDividerBlock();
 
-    // New Issues 
     block.addSectionBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        text: block.newMarkdownTextObject("New Issues"),
-    })
+        text: block.newMarkdownTextObject(ModalsEnum.MAIN_MODAL_NEW_ISSUE_LABLE),
+        accessory: block.newButtonElement({
+            text: {
+                type: TextObjectType.PLAINTEXT,
+                text: ModalsEnum.MAIN_MODAL_OPEN_LABLE,
+            },
+            actionId: ModalsEnum.TRIGGER_NEW_ISSUE_MODAL,
+        }),
+    });
+
     block.addContextBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
         elements: [
-            block.newMarkdownTextObject("Create new issues on Github"),
-        ],
-    });
-    block.addActionsBlock({
-        blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        elements: [
-            block.newButtonElement({
-                text: {
-                    type: TextObjectType.PLAINTEXT,
-                    text: "Open",
-                },
-                actionId: ModalsEnum.TRIGGER_NEW_ISSUE_MODAL,
-                value: "search",
-            }),
-        ],
-    });
-    block.addDividerBlock();
-
-
-    // Repository Subscriptions
-    block.addSectionBlock({
-        blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        text: block.newMarkdownTextObject("Repsoitory Subscriptions"),
-    })
-    block.addContextBlock({
-        blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        elements: [
-            block.newMarkdownTextObject("Subscribe to repositories Events"),
+            block.newMarkdownTextObject(ModalsEnum.MAIN_MODAL_NEW_ISSUE_DESCRIPTION),
         ],
     });
 
-    block.addActionsBlock({
-        blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        elements: [
-            block.newButtonElement({
-                text: {
-                    type: TextObjectType.PLAINTEXT,
-                    text: "Open",
-                },
-                actionId: ModalsEnum.TRIGGER_SUBSCRIPTIONS_MODAL,
-                value: "search",
-            }),
-        ],
-    });
 
     block.addDividerBlock();
 
 
-    //  Assign Issues
     block.addSectionBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        text: block.newMarkdownTextObject("Assign Issues"),
+        text: block.newMarkdownTextObject(ModalsEnum.MAIN_MODAL_REPOSITORY_SUBSCRIPTIONS_LABLE),
+        accessory: block.newButtonElement({
+            text: {
+                type: TextObjectType.PLAINTEXT,
+                text: ModalsEnum.MAIN_MODAL_OPEN_LABLE,
+            },
+            actionId: ModalsEnum.TRIGGER_SUBSCRIPTIONS_MODAL,
+        }),
     })
     block.addContextBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
         elements: [
-            block.newMarkdownTextObject("Assign Issues to your team members"),
+            block.newMarkdownTextObject(ModalsEnum.MAIN_MODAL_REPOSITORY_SUBSCRIPTIONS_DESCRIPTION),
         ],
     });
 
-    block.addActionsBlock({
+
+    block.addDividerBlock();
+
+
+    block.addSectionBlock({
+        blockId: ModalsEnum.MAIN_MODAL_VIEW,
+        text: block.newMarkdownTextObject(ModalsEnum.MAIN_MODAL_ASSIGN_ISSUES_LABLE),
+        accessory: block.newButtonElement({
+            text: {
+                type: TextObjectType.PLAINTEXT,
+                text: ModalsEnum.MAIN_MODAL_OPEN_LABLE,
+            },
+            actionId: ModalsEnum.TRIGGER_ASSIGN_ISSUES_MODAL,
+        }),
+    })
+
+    block.addContextBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
         elements: [
-            block.newButtonElement({
-                text: {
-                    type: TextObjectType.PLAINTEXT,
-                    text: "Open",
-                },
-                actionId: ModalsEnum.TRIGGER_ASSIGN_ISSUES_MODAL,
-                value: "assign",
-            }),
+            block.newMarkdownTextObject(ModalsEnum.MAIN_MODAL_ASSIGN_ISSUES_DESCRIPTION),
         ],
     });
+
 
     block.addDividerBlock();
 
