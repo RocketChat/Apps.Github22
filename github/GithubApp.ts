@@ -105,13 +105,12 @@ export class GithubApp extends App implements IPreMessageSentExtend {
         }
         if (interactionData && interactionData.roomId) {
             let roomId = interactionData.roomId as string;
-            let room = await read.getRoomReader().getById(roomId) as IRoom;
+            let room = (await read.getRoomReader().getById(roomId)) as IRoom;
             await clearInteractionRoomData(persistence, user.id);
             await sendNotification(read, modify, user, room, text);
         } else {
             await sendDirectMessage(read, modify, user, text, persistence);
         }
-
     }
     public oauth2ClientInstance: IOAuth2Client;
     public oauth2Config: IOAuth2ClientOptions = {
