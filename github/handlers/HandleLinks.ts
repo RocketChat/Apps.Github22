@@ -7,6 +7,8 @@ import {
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { IMessageExtender } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit";
+import { IModify } from "@rocket.chat/apps-engine/definition/accessors/IModify";
+import { ButtonElement } from "@rocket.chat/ui-kit";
 
 async function checkLines(content, url) {
     const regex: RegExp = /(?:L(\d+)+-L(\d+)|L(\d+))/;
@@ -54,4 +56,24 @@ export async function handleCodeLink(
         type: TextObjectType.MARKDOWN,
     };
     extend.addAttachment(attachment);
+}
+
+export async function handlePRLink(
+    message: IMessage,
+    read: IRead,
+    http: IHttp,
+    user: IUser,
+    room: IRoom,
+    extend: IMessageExtender
+) {
+
+    
+
+    let attachment: IMessageAttachment = {
+        actions: [
+            
+        ]
+    };
+    extend.addAttachment(attachment);
+
 }
