@@ -13,7 +13,7 @@ import { CommandUtility } from "../lib/commandUtility";
 
 
 export class GithubCommand implements ISlashCommand {
-    public constructor(private readonly app: GithubApp) { }
+    public constructor(private readonly app: GithubApp) {}
     public command = "github";
     public i18nDescription = "cmd_description";
     public providesPreview = false;
@@ -31,7 +31,7 @@ export class GithubCommand implements ISlashCommand {
         const sender = context.getSender();
         const room = context.getRoom();
 
-        if (!Array.isArray(command)) {
+        if(!Array.isArray(command)){
             return;
         }
 
@@ -50,6 +50,4 @@ export class GithubCommand implements ISlashCommand {
         );
 
         commandUtility.resolveCommand();
-    }
-}
-
+    }}
