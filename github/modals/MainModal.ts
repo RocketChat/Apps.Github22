@@ -55,7 +55,6 @@ export async function MainModal(
         ],
     });
 
-
     block.addDividerBlock();
 
     block.addSectionBlock({
