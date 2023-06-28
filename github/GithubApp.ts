@@ -92,10 +92,7 @@ export class GithubApp extends App implements IPreMessageSentExtend {
             },
         };
         let text = `GitHub Authentication Succesfull 🚀`;
-        let interactionData = await getInteractionRoomData(
-            read.getPersistenceReader(),
-            user.id
-        );
+        let interactionData = await getInteractionRoomData(read.getPersistenceReader(),user.id) ;
 
         if (token) {
             // await registerAuthorizedUser(read, persistence, user);
@@ -103,14 +100,15 @@ export class GithubApp extends App implements IPreMessageSentExtend {
         } else {
             text = `Authentication Failure 😔`;
         }
-        if (interactionData && interactionData.roomId) {
+        if(interactionData && interactionData.roomId){
             let roomId = interactionData.roomId as string;
-            let room = (await read.getRoomReader().getById(roomId)) as IRoom;
-            await clearInteractionRoomData(persistence, user.id);
-            await sendNotification(read, modify, user, room, text);
-        } else {
+            let room = await read.getRoomReader().getById(roomId) as IRoom;
+            await clearInteractionRoomData(persistence,user.id);
+            await sendNotification(read,modify,user,room,text);
+        }else{
             await sendDirectMessage(read, modify, user, text, persistence);
         }
+
     }
     public oauth2ClientInstance: IOAuth2Client;
     public oauth2Config: IOAuth2ClientOptions = {
