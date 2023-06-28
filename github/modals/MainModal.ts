@@ -25,16 +25,16 @@ export async function MainModal(
 
     const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
 
-    block.addContextBlock({
-        blockId: ModalsEnum.MAIN_MODAL_VIEW,
-        elements: [
-            block.newMarkdownTextObject(`Hey 👋 Welcome ${user?.username}`),
-        ],
-
-    });
+    block.addContextBlock(
+        {
+             blockId: ModalsEnum.MAIN_MODAL_VIEW,
+             elements: [
+                 block.newMarkdownTextObject(`Hey 👋 Welcome ${user?.username}`),
+             ],
+         }
+     );
 
     block.addDividerBlock();
-
 
     block.addSectionBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
@@ -77,9 +77,7 @@ export async function MainModal(
         ],
     });
 
-
     block.addDividerBlock();
-
 
     block.addSectionBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
@@ -92,6 +90,7 @@ export async function MainModal(
             actionId: ModalsEnum.TRIGGER_SUBSCRIPTIONS_MODAL,
         }),
     })
+
     block.addContextBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
         elements: [
@@ -99,9 +98,7 @@ export async function MainModal(
         ],
     });
 
-
     block.addDividerBlock();
-
 
     block.addSectionBlock({
         blockId: ModalsEnum.MAIN_MODAL_VIEW,
@@ -122,7 +119,6 @@ export async function MainModal(
         ],
     });
 
-
     block.addDividerBlock();
 
     return {
@@ -138,6 +134,5 @@ export async function MainModal(
             }
         }),
         blocks: block.getBlocks(),
-
     };
 }
