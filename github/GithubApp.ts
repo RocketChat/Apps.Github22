@@ -42,8 +42,8 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
 import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
-import { handleCodeLink } from "./handlers/HandleLinks";
-import { isGithubLink, hasCodeLink } from "./helpers/checkLinks";
+import { handleGitHubCodeSegmentLink } from "./handlers/HandleLinks";
+import { isGithubLink, hasGitHubCodeSegmentLink } from "./helpers/checkLinks";
 
 export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -69,12 +69,11 @@ export class GithubApp extends App implements IPreMessageSentExtend {
         persistence: IPersistence
     ): Promise<IMessage> {
 
-        if (await hasCodeLink(message)) {
-            await handleCodeLink(message, read, http, message.sender, message.room, extend);
+        if (await hasGitHubCodeSegmentLink(message)) {
+            await handleGitHubCodeSegmentLink(message, read, http, message.sender, message.room, extend);
         }
         return extend.getMessage();
     }
-
 
     public async authorizationCallback(
         token: IAuthData,
@@ -93,7 +92,10 @@ export class GithubApp extends App implements IPreMessageSentExtend {
             },
         };
         let text = `GitHub Authentication Succesfull 🚀`;
-        let interactionData = await getInteractionRoomData(read.getPersistenceReader(), user.id);
+        let interactionData = await getInteractionRoomData(
+            read.getPersistenceReader(),
+            user.id
+        );
 
         if (token) {
             // await registerAuthorizedUser(read, persistence, user);

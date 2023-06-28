@@ -1,6 +1,6 @@
 import { IMessage } from "@rocket.chat/apps-engine/definition/messages";
 
-export async function hasCodeLink(message: IMessage): Promise<Boolean> {
+export async function hasGitHubCodeSegmentLink(message: IMessage): Promise<Boolean> {
     let lineNo: RegExp =
         /https?:\/\/github\.com\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\/blob\/[A-Za-z0-9_-]+\/.+/;
 

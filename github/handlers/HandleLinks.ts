@@ -31,7 +31,7 @@ async function checkLines(content, url) {
     }
 }
 
-export async function handleCodeLink(
+export async function handleGitHubCodeSegmentLink(
     message: IMessage,
     read: IRead,
     http: IHttp,
