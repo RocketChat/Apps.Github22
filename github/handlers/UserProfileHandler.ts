@@ -3,8 +3,10 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { UIKitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { GithubApp } from "../GithubApp";
+import { createSectionBlock } from "../lib/blocks";
 import { sendNotification } from "../lib/message";
 import { userProfileModal } from "../modals/UserProfileModal";
+import { getGithubOauthBlock } from "../oath2/authentication";
 import { getAccessTokenForUser } from "../persistance/auth";
 
 export async function handleUserProfileRequest(
@@ -40,12 +42,16 @@ export async function handleUserProfileRequest(
             );
         }
     }else {
+        const user = context.getSender();
+        const message = `Login to get your user info!`;
+        const block = await getGithubOauthBlock(app, user, modify, message);
         await sendNotification(
             read,
             modify,
-            context.getSender(),
+            user,
             room,
-            "Login is Mandatory for getting User Info ! `/github login`"
+            message,
+            block
         )
     }
 
