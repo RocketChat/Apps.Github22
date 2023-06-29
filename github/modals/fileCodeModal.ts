@@ -50,7 +50,7 @@ export async function fileCodeModal({
         const pullRawData = await http.get(data.value);
         const pullData = pullRawData.content;
         block.addSectionBlock({
-            text: { text: `${pullData}`, type: TextObjectType.MARKDOWN },
+            text: { text: `\`\`\`\n${pullData}\n\`\`\``, type: TextObjectType.MARKDOWN },
         });
 
         // shows indentations in input blocks but not inn section block
