@@ -46,7 +46,7 @@ export async function handleMainModal(
             modify,
             context.getSender(),
             room,
-            "Login to go in the Mail Modal ! `/github login`"
+            "Login to go in the Main Modal ! `/github login`"
         );
     }
 }
