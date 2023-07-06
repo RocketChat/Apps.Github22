@@ -47,7 +47,7 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
 import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
-import { handleGitHubCodeSegmentLink } from "./handlers/HandleLinks";
+import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink } from "./helpers/checkLinks";
 
 export class GithubApp extends App implements IPreMessageSentExtend {

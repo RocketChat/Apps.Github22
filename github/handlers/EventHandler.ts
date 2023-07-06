@@ -21,7 +21,7 @@ import { HandleInvalidRepoName } from "./HandleInvalidRepoName";
 
 export async function SubscribeAllEvents(
     read: IRead,
-    context: SlashCommandContext,
+    context: SlashCommandContext,    
     app: GithubApp,
     command: string[],
     persistence: IPersistence,
