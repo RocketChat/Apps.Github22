@@ -1046,7 +1046,20 @@ export class ExecuteBlockActionHandler {
                             }
                     }
                     break;
+                } 
+                
+                case ModalsEnum.GITHUB_LOGIN_ACTION :{
+                    const {user, room} = context.getInteractionData();
+                    if(room){
+                        await storeInteractionRoomData(
+                            this.persistence,
+                            user.id,
+                            room.id
+                        );
+                    }
+                    break;
                 }
+
                 case ModalsEnum.TRIGGER_ASSIGN_ISSUES_MODAL: {
                     const assignIssuesModal = await GitHubIssuesStarterModal({
                         modify: this.modify,
@@ -1057,6 +1070,7 @@ export class ExecuteBlockActionHandler {
                     })
                     return context.getInteractionResponder().openModalViewResponse(assignIssuesModal);
                 }
+
                 case ModalsEnum.TRIGGER_SUBSCRIPTIONS_MODAL: {
                     const opensubscriptionsModal = await subscriptionsModal({
                         modify: this.modify,
@@ -1079,6 +1093,7 @@ export class ExecuteBlockActionHandler {
                     });
                     return context.getInteractionResponder().openModalViewResponse(newIssueModal);
                 }
+                
                 case ModalsEnum.TRIGGER_SEARCH_MODAL: {
                     const searchModal = await githubSearchModal({
                         modify: this.modify,

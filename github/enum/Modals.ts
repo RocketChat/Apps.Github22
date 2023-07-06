@@ -196,6 +196,7 @@ export enum ModalsEnum {
     MULTI_SHARE_GITHUB_ISSUES_INPUT = "multishare-github-issues-input",
     MULTI_SHARE_GITHUB_ISSUES_INPUT_LABEL = "Issues",
     MULTI_SHARE_GITHUB_ISSUES_INPUT_ACTION = "multishare-github-issues-input-action",
+    GITHUB_LOGIN_ACTION = "github-login-action",
     MAIN_MODAL_VIEW = "main-modal-view",
     MAIN_MODAL_OPEN_LABLE = "Open",
     MAIN_MODAL_TITLE = "GitHub",
