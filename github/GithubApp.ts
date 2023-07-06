@@ -42,8 +42,8 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
 import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
-import { handleCodeLink } from "./handlers/HandleLinks";
-import { isGithubLink, hasCodeLink } from "./helpers/checkLinks";
+import { handleCodeLink, handlePRLink } from "./handlers/HandleLinks";
+import { isGithubLink, hasCodeLink, hasGithubPRLink } from "./helpers/checkLinks";
 
 export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -71,6 +71,10 @@ export class GithubApp extends App implements IPreMessageSentExtend {
 
         if (await hasCodeLink(message)) {
             await handleCodeLink(message, read, http, message.sender, message.room, extend);
+        }
+
+        if ( await hasGithubPRLink(message)) {
+            await handlePRLink(message, read, http, message.sender, message.room, extend);
         }
         return extend.getMessage();
     }
