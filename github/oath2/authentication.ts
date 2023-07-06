@@ -8,7 +8,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GithubApp } from "../GithubApp";
 import { IButton, createSectionBlock } from "../lib/blocks";
 import { sendNotification } from "../lib/message";
-import { storeInteractionRoomData } from "../persistance/roomInteraction";
+import { ModalsEnum } from "../enum/Modals";
 
 export async function authorize(
     app: GithubApp,
@@ -25,9 +25,9 @@ export async function authorize(
     const button: IButton = {
         text: "GitHub Login",
         url: url.toString(),
+        actionId: ModalsEnum.GITHUB_LOGIN_ACTION
     };
     const message = `Login to GitHub`;
     const block = await createSectionBlock(modify, message, button);
-    await storeInteractionRoomData(persistence,user.id,room.id);
     await sendNotification(read, modify, user, room, message, block);
 }

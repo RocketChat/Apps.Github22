@@ -1,5 +1,6 @@
 import {
     IAppAccessors,
+    IAppInstallationContext,
     IConfigurationExtend,
     IHttp,
     ILogger,
@@ -28,7 +29,11 @@ import {
 } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { createOAuth2Client } from "@rocket.chat/apps-engine/definition/oauth2/OAuth2";
 import { createSectionBlock } from "./lib/blocks";
-import { sendDirectMessage, sendNotification } from "./lib/message";
+import {
+    sendDirectMessage,
+    sendDirectMessageOnInstall,
+    sendNotification,
+} from "./lib/message";
 import { OAuth2Client } from "@rocket.chat/apps-engine/server/oauth2/OAuth2Client";
 import { deleteOathToken } from "./processors/deleteOAthToken";
 import { ProcessorsEnum } from "./enum/Processors";
@@ -92,7 +97,10 @@ export class GithubApp extends App implements IPreMessageSentExtend {
             },
         };
         let text = `GitHub Authentication Succesfull 🚀`;
-        let interactionData = await getInteractionRoomData(read.getPersistenceReader(),user.id) ;
+        let interactionData = await getInteractionRoomData(
+            read.getPersistenceReader(),
+            user.id
+        );
 
         if (token) {
             // await registerAuthorizedUser(read, persistence, user);
@@ -100,15 +108,14 @@ export class GithubApp extends App implements IPreMessageSentExtend {
         } else {
             text = `Authentication Failure 😔`;
         }
-        if(interactionData && interactionData.roomId){
+        if (interactionData && interactionData.roomId) {
             let roomId = interactionData.roomId as string;
-            let room = await read.getRoomReader().getById(roomId) as IRoom;
-            await clearInteractionRoomData(persistence,user.id);
-            await sendNotification(read,modify,user,room,text);
-        }else{
+            let room = (await read.getRoomReader().getById(roomId)) as IRoom;
+            await clearInteractionRoomData(persistence, user.id);
+            await sendNotification(read, modify, user, room, text);
+        } else {
             await sendDirectMessage(read, modify, user, text, persistence);
         }
-
     }
     public oauth2ClientInstance: IOAuth2Client;
     public oauth2Config: IOAuth2ClientOptions = {
@@ -223,5 +230,15 @@ export class GithubApp extends App implements IPreMessageSentExtend {
             security: ApiSecurity.UNSECURE,
             endpoints: [new githubWebHooks(this)],
         });
+    }
+    public async onInstall(
+        context: IAppInstallationContext,
+        read: IRead,
+        http: IHttp,
+        persistence: IPersistence,
+        modify: IModify
+    ): Promise<void> {
+        const user = context.user;
+        await sendDirectMessageOnInstall(read, modify, user, persistence);
     }
 }

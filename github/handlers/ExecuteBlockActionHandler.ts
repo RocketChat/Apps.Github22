@@ -1044,6 +1044,18 @@ export class ExecuteBlockActionHandler {
                     }
                     break;
                 }
+
+                case ModalsEnum.GITHUB_LOGIN_ACTION :{
+                    const {user, room} = context.getInteractionData();
+                    if(room){
+                        await storeInteractionRoomData(
+                            this.persistence,
+                            user.id,
+                            room.id
+                        );
+                    }
+                    break;
+                }
             }
         } catch (error) {
             console.log(error);
