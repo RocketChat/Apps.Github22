@@ -50,6 +50,9 @@ import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
 import { issueCommentsModal } from "../modals/issueCommentsModal";
 import { addIssueCommentsModal } from "../modals/addIssueCommentModal";
+import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
+import { githubSearchModal } from "../modals/githubSearchModal";
+import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
 
 export class ExecuteBlockActionHandler {
 
@@ -1043,6 +1046,64 @@ export class ExecuteBlockActionHandler {
                             }
                     }
                     break;
+                } 
+                
+                case ModalsEnum.GITHUB_LOGIN_ACTION :{
+                    const {user, room} = context.getInteractionData();
+                    if(room){
+                        await storeInteractionRoomData(
+                            this.persistence,
+                            user.id,
+                            room.id
+                        );
+                    }
+                    break;
+                }
+
+                case ModalsEnum.TRIGGER_ASSIGN_ISSUES_MODAL: {
+                    const assignIssuesModal = await GitHubIssuesStarterModal({
+                        modify: this.modify,
+                        read: this.read,
+                        persistence: this.persistence,
+                        http: this.http,
+                        uikitcontext: context
+                    })
+                    return context.getInteractionResponder().openModalViewResponse(assignIssuesModal);
+                }
+
+                case ModalsEnum.TRIGGER_SUBSCRIPTIONS_MODAL: {
+                    const opensubscriptionsModal = await subscriptionsModal({
+                        modify: this.modify,
+                        read: this.read,
+                        persistence: this.persistence,
+                        http: this.http,
+                        uikitcontext: context
+                    });
+
+                    return context.getInteractionResponder().openModalViewResponse(opensubscriptionsModal);
+                }
+
+                case ModalsEnum.TRIGGER_NEW_ISSUE_MODAL: {
+                    const newIssueModal = await NewIssueStarterModal({
+                        modify: this.modify,
+                        read: this.read,
+                        persistence: this.persistence,
+                        http: this.http,
+                        uikitcontext: context
+                    });
+                    return context.getInteractionResponder().openModalViewResponse(newIssueModal);
+                }
+                
+                case ModalsEnum.TRIGGER_SEARCH_MODAL: {
+                    const searchModal = await githubSearchModal({
+                        modify: this.modify,
+                        read: this.read,
+                        persistence: this.persistence,
+                        http: this.http,
+                        uikitcontext: context
+                    });
+
+                    return context.getInteractionResponder().openModalViewResponse(searchModal);
                 }
 
                 case ModalsEnum.GITHUB_LOGIN_ACTION :{

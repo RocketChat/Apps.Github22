@@ -24,6 +24,8 @@ import { handleSearch } from "../handlers/SearchHandler";
 import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
 import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
+import { handleMainModal } from "../handlers/MainModalHandler";
+
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -152,7 +154,7 @@ export class CommandUtility implements ExecutorProps {
                     );
                     break;
                 }
-                case SubcommandEnum.ISSUES :{
+                case SubcommandEnum.ISSUES: {
                     handleIssues(
                         this.read,
                         this.context,
@@ -268,14 +270,15 @@ export class CommandUtility implements ExecutorProps {
     public async resolveCommand() {
         switch (this.command.length) {
             case 0: {
-                await helperMessage({
-                    room: this.room,
-                    read: this.read,
-                    persistence: this.persistence,
-                    modify: this.modify,
-                    http: this.http,
-                    user: this.sender
-                });
+                handleMainModal(
+                    this.read,
+                    this.context,
+                    this.app,
+                    this.persistence,
+                    this.http,
+                    this.room,
+                    this.modify
+                );
                 break;
             }
             case 1: {
