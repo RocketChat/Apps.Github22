@@ -11,7 +11,7 @@ async function extractCodeSnippetFromURL(content: string, url: string): Promise<
     const lineRangeMatch: RegExpMatchArray | null = url.match(lineRangeRegex);
 
     if (lineRangeMatch) {
-    return extractCodeSnippetByLineRange(content, lineRangeMatch);
+        return extractCodeSnippetByLineRange(content, lineRangeMatch);
     }
 
     return "";
@@ -38,8 +38,8 @@ async function fetchGitHubContent(http: IHttp, modifiedUrl: string): Promise<str
 
 function buildCodeSnippetAttachment(codeSnippet: string, url: string): IMessageAttachment {
     const attachment: IMessageAttachment = {
-      text: `\`\`\`\n${codeSnippet}\n\`\`\` \n[Show more...](${url})`,
-      type: TextObjectType.MARKDOWN,
+        text: `\`\`\`\n${codeSnippet}\n\`\`\` \n[Show more...](${url})`,
+        type: TextObjectType.MARKDOWN,
     };
     return attachment;
 }
@@ -63,7 +63,7 @@ export async function handleGitHubCodeSegmentLink(
     const codeSnippet = await extractCodeSnippetFromURL(content, modifiedUrl);
 
     if (codeSnippet) {
-    const attachment: IMessageAttachment = buildCodeSnippetAttachment(codeSnippet, url!);
-    extend.addAttachment(attachment);
+        const attachment: IMessageAttachment = buildCodeSnippetAttachment(codeSnippet, url!);
+        extend.addAttachment(attachment);
     }
 }
