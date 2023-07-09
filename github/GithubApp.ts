@@ -4,6 +4,7 @@ import {
     IConfigurationExtend,
     IHttp,
     ILogger,
+    IMessageExtender,
     IModify,
     IPersistence,
     IRead,
@@ -45,10 +46,38 @@ import { IJobContext } from "@rocket.chat/apps-engine/definition/scheduler";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
+import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
+import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
+import { isGithubLink, hasGitHubCodeSegmentLink } from "./helpers/checkLinks";
 
-export class GithubApp extends App {
+export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
+    }
+
+    public async checkPreMessageSentExtend(
+        message: IMessage,
+        read: IRead,
+        http: IHttp
+    ): Promise<boolean> {
+        if (await isGithubLink(message)) {
+            return true;
+        }
+        return false;
+    }
+
+    public async executePreMessageSentExtend(
+        message: IMessage,
+        extend: IMessageExtender,
+        read: IRead,
+        http: IHttp,
+        persistence: IPersistence
+    ): Promise<IMessage> {
+
+        if (await hasGitHubCodeSegmentLink(message)) {
+            await handleGitHubCodeSegmentLink(message, read, http, message.sender, message.room, extend);
+        }
+        return extend.getMessage();
     }
 
     public async authorizationCallback(
