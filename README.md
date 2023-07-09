@@ -24,7 +24,8 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
 <h2 align='center'>💡 Usage 💡</h2>
 <ul>
     <li> See Helper Message / Command List -> /github help </li>
-    <li> The app can be accessed with any of the slash commands /gh or /github </li>
+    <li> The app can be accessed with any of the slash commands /gh or /github </li>  
+    <li> Open Main Modal for quick access to different features -> /github </li>
     <li> Login to GitHub -> /github login </li>
     <li> Logout from GitHub -> /github logout </li>
     <li> View your GitHub Profile and Issues -> /github me </li>
