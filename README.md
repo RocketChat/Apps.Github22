@@ -21,27 +21,43 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
   <li>Search Issues and Pull Request using extensive filters and share them on Rocket.Chat</li>
 </ul>
 
-<h2 align='center'>💡 Usage 💡</h2>
+<h2 align="center">💡 Usage 💡</h2>
+
+<p style="font-size: 1em;"><em>Open Main Modal for Quick Access to Different Features</em></p>
+
+<p>To open the main modal and access various features, use the command: <code>/github</code>.</p>
+
+
+### Main Modal Features:
+
+- Quick access to GitHub search
+- Create new issues
+- Manage repository subscriptions
+- Assign issues to users
+
+<p style="font-size: 1rem" >The app can be accessed with any of the following slash commands: <code>/gh</code> or <code>/github</code>.</p>
+
+### Command List
+
 <ul>
-    <li> See Helper Message / Command List -> /github help </li>
-    <li> The app can be accessed with any of the slash commands /gh or /github </li>  
-    <li> Open Main Modal for quick access to different features -> /github </li>
-    <li> Login to GitHub -> /github login </li>
-    <li> Logout from GitHub -> /github logout </li>
-    <li> View your GitHub Profile and Issues -> /github me </li>
-    <li> View/Add/Delete/Update Repository Subscriptions -> /github subscribe </li>
-    <li> Subscribe to all repository events -> /github Username/RepositoryName subscribe </li>
-    <li> Unsubscribe to all repository events -> /github Username/RepositoryName unsubscribe </li>
-    <li> Add New Issues to GitHub Repository -> /github issue </li>
-    <li> Search Issues and Pull Request -> /github search </li>
-    <li> Assign and Share GitHub issues -> /github issues </li>
-    <li> Review a Pull Request -> /github  Username/RepositoryName pulls pullNumber </li>
-    <li> See Interactive Button interface to fetch repository data -> /github Username/RepositoryName </li>
-    <li> Get details of a Repository -> /github  Username/RepositoryName repo </li>
-    <li> Get Issues of a Repository -> /github  Username/RepositoryName issues </li>
-    <li> Get Contributors of a Repository -> /github  Username/RepositoryName contributors </li>
-    <li> Get Recent Pull Request of a Repository -> /github  Username/RepositoryName pulls </li>
+    <li><strong>See Helper Message / Command List →</strong> <code>/github help</code></li>
+    <li><strong>Login to GitHub →</strong> <code>/github login</code></li>
+    <li><strong>Logout from GitHub →</strong> <code>/github logout</code></li>
+    <li><strong>View your GitHub Profile and Issues →</strong> <code>/github me</code></li>
+    <li><strong>View/Add/Delete/Update Repository Subscriptions →</strong> <code>/github subscribe</code></li>
+    <li><strong>Subscribe to all repository events →</strong> <code>/github Username/RepositoryName subscribe</code></li>
+    <li><strong>Unsubscribe to all repository events →</strong> <code>/github Username/RepositoryName unsubscribe</code></li>
+    <li><strong>Add New Issues to GitHub Repository →</strong> <code>/github issue</code></li>
+    <li><strong>Search Issues and Pull Request →</strong> <code>/github search</code></li>
+    <li><strong>Assign and Share GitHub issues →</strong> <code>/github issues</code></li>
+    <li><strong>Review a Pull Request →</strong> <code>/github Username/RepositoryName pulls pullNumber</code></li>
+    <li><strong>See Interactive Button interface to fetch repository data →</strong> <code>/github Username/RepositoryName</code></li>
+    <li><strong>Get details of a Repository →</strong> <code>/github Username/RepositoryName repo</code></li>
+    <li><strong>Get Issues of a Repository →</strong> <code>/github Username/RepositoryName issues</code></li>
+    <li><strong>Get Contributors of a Repository →</strong> <code>/github Username/RepositoryName contributors</code></li>
+    <li><strong>Get Recent Pull Request of a Repository →</strong> <code>/github Username/RepositoryName pulls</code></li>
 </ul>
+
 
 <h2 align='center'>🚀 Contributing 🚀</h2>
 
@@ -150,4 +166,3 @@ Once the GitHub OAuth app is setup, open the GitHub Application Settings and ent
 The users can login to GitHub by entering the slash command `/github login` and then clicking on the `Login` button.
 
 Users are logged out after a week but the users can also logout at any time by entering `/github logout`.
-
