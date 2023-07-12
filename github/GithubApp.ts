@@ -48,6 +48,7 @@ import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/
 import { GHCommand } from "./commands/GhCommand";
 import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
+import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 
 export class GithubApp extends App implements IPreMessageSentExtend {
@@ -76,6 +77,9 @@ export class GithubApp extends App implements IPreMessageSentExtend {
 
         if (await hasGitHubCodeSegmentLink(message)) {
             await handleGitHubCodeSegmentLink(message, read, http, message.sender, message.room, extend);
+        }
+        if (await hasGithubPRLink(message)){
+            await handleGithubPRLink(message,read,http,message.sender,message.room,extend);
         }
         return extend.getMessage();
     }
