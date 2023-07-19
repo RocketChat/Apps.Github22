@@ -1,14 +1,7 @@
-import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { IHttp, IRead } from "@rocket.chat/apps-engine/definition/accessors";
-import {
-    IMessage,
-    IMessageAction,
-    IMessageAttachment,
-    MessageActionButtonsAlignment,
-    MessageActionType,
-} from "@rocket.chat/apps-engine/definition/messages";
+import { IMessage, IMessageAttachment, MessageActionButtonsAlignment, MessageActionType } from "@rocket.chat/apps-engine/definition/messages";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IMessageExtender } from "@rocket.chat/apps-engine/definition/accessors";
+import { IMessageExtender, IHttp, IRead } from "@rocket.chat/apps-engine/definition/accessors";
+import { IUser } from "@rocket.chat/apps-engine/definition/users";
 
 export async function handleGithubPRLink(
     message: IMessage,
@@ -18,31 +11,42 @@ export async function handleGithubPRLink(
     room: IRoom,
     extend: IMessageExtender
 ) {
-    const regex: RegExp = /\bhttps?:\/\/github\.com\/\S+\/pull\/\d+\b/;
-    let text = message.text!;
+    const url = extractGithubPRLink(message.text!);
+    if (url) {
+        const prDetails = extractPRDetails(url);
+        if (prDetails) {
+            const attachment = createAttachment(prDetails.username, prDetails.repositoryName, prDetails.pullNumber);
+            extend.addAttachment(attachment);
+        }
+    }
+}
 
-    const match: RegExpMatchArray | null = text.match(regex);
-    const result: string | undefined = match?.[0];
-    const url = result;
+function extractGithubPRLink(text: string): string | undefined {
+    const regex = /\bhttps?:\/\/github\.com\/\S+\/pull\/\d+\b/;
+    const match = text.match(regex);
+    return match?.[0];
+}
 
+function extractPRDetails(url: string): { username: string, repositoryName: string, pullNumber: string } | undefined {
+    const regex = /(?:https?:\/\/github\.com\/)(\S+)\/(\S+)\/pull\/(\d+)/;
+    const match = url.match(regex);
+    if (match) {
+        const [, username, repositoryName, pullNumber] = match;
+        return { username, repositoryName, pullNumber };
+    }
+    return undefined;
+}
 
-    const regex2: RegExp = /(?:https?:\/\/github\.com\/)(\S+)\/(\S+)\/pull\/(\d+)/;
-    const match2: RegExpMatchArray | undefined | null = url?.match(regex2);
-    const username = match2?.[1];
-    const repositoryName = match2?.[2];
-    const pullNumber = match2?.[3];
-
-    let attachment: IMessageAttachment = {
+function createAttachment(username: string, repositoryName: string, pullNumber: string): IMessageAttachment {
+    return {
         actionButtonsAlignment: MessageActionButtonsAlignment.HORIZONTAL,
         actions: [
             {
                 type: MessageActionType.BUTTON,
-                text: "More Actions",
+                text: "Manage PR",
                 msg: `/github ${username}/${repositoryName} pulls ${pullNumber}`,
                 msg_in_chat_window: true,
             }
         ],
     };
-
-    extend.addAttachment(attachment);
 }
