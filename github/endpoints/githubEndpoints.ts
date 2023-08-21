@@ -51,7 +51,7 @@ export class githubWebHooks extends ApiEndpoint {
         }
         const eventCaps = event.toUpperCase();
         let messageText = "newEvent !";
-        console.log(payload)
+
         if (event == "push") {
             messageText = `*New Commits to* *[${payload.repository.full_name}](${payload.repository.html_url}) by ${payload.pusher.name}*`;
         } else if (event == "pull_request") {
