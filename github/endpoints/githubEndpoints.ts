@@ -106,6 +106,3 @@ export class githubWebHooks extends ApiEndpoint {
         return this.success();
     }
 }
-
-
-
