@@ -25,6 +25,7 @@ import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
 import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
 import { handleMainModal } from "../handlers/MainModalHandler";
+import { PullMessage } from "./pullRequestMessage";
 
 
 export class CommandUtility implements ExecutorProps {
@@ -233,6 +234,9 @@ export class CommandUtility implements ExecutorProps {
             repository: this.command[0],
             query: this.command[1],
             number: this.command[2],
+            room: this.room,
+            sender: this.sender,
+            arguments: this.command,
         };
 
         const isValidRepo = await HandleInvalidRepoName(
@@ -250,20 +254,32 @@ export class CommandUtility implements ExecutorProps {
         }
 
         const triggerId = this.context.getTriggerId();
-        if (triggerId) {
-            const modal = await pullDetailsModal({
-                data,
-                modify: this.modify,
-                read: this.read,
-                persistence: this.persistence,
-                http: this.http,
-                slashcommandcontext: this.context,
-            });
-            await this.modify
+
+        if(data.query == 'pulls'){
+            if (triggerId) {
+                const modal = await pullDetailsModal({
+                    data,
+                    modify: this.modify,
+                    read: this.read,
+                    persistence: this.persistence,
+                    http: this.http,
+                    slashcommandcontext: this.context,
+                });
+                await this.modify
                 .getUiController()
                 .openModalView(modal, { triggerId }, this.context.getSender());
-        } else {
-            console.log("invalid Trigger ID !");
+            } else {
+                console.log("invalid Trigger ID !");
+            }
+        }
+        if(data.query == 'pull'){
+            await PullMessage({
+                data,
+                read: this.read,
+                persistence: this.persistence,
+                modify: this.modify,
+                http: this.http,
+            });
         }
     }
 
