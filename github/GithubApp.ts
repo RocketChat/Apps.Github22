@@ -49,6 +49,8 @@ import { GHCommand } from "./commands/GhCommand";
 import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink } from "./helpers/checkLinks";
+import { getBasicUserInfo } from "./helpers/githubSDK";
+import { IGithubUser, create, getAllUsers } from "./persistance/auth";
 
 export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -104,6 +106,19 @@ export class GithubApp extends App implements IPreMessageSentExtend {
 
         if (token) {
             // await registerAuthorizedUser(read, persistence, user);
+            let access_token = token.token
+            let githubinfo = await getBasicUserInfo(http,access_token)
+            let rc_username= user.username;
+            let github_username = githubinfo.username;
+            let User:IGithubUser = {
+                rc_username,
+                github_username
+            }
+            console.log(User);
+            await create(read,persistence,User)
+            let users = await getAllUsers(read)
+            console.log(users)
+
             await modify.getScheduler().scheduleOnce(deleteTokenTask);
         } else {
             text = `Authentication Failure 😔`;

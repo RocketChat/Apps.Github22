@@ -12,12 +12,62 @@ import {
     IAuthData,
     IOAuth2ClientOptions,
 } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
-import { IUser } from "@rocket.chat/apps-engine/definition/users";
+import { IUser} from "@rocket.chat/apps-engine/definition/users";
 import { URL } from "url";
 
-// const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'users');
+export interface IGithubUser {
+    rc_username: string;
+    github_username: string;
+}
 
-// export async function create(read: IRead, persistence: IPersistence, user: IUser): Promise<void> {
+
+const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'users');
+
+export async function create(read: IRead, persistence: IPersistence, user: IGithubUser): Promise<void> {
+    const users:IGithubUser[] = await getAllUsers(read);
+    console.log(users,"users in create")
+    if (!users) {
+        console.log("!users")
+        await persistence.createWithAssociation(user, assoc);
+        return;
+    }
+
+    if (!isUserPresent(users, user)) {
+        console.log("!isuerpresents")
+        users.push(user);
+        await persistence.updateByAssociation(assoc, users,true);
+    }else{
+        console.log(`error: user exist`)
+    }
+}
+
+// export async function remove(read: IRead, persistence: IPersistence, user: IGithubUser): Promise<void> {
+//     const users = await getAllUsers(read);
+
+//     if (!users || !isUserPresent(users, user)) {
+//         // @NOTE do nothing
+//         return;
+//     }
+
+//     const idx = users.findIndex((u: IGithubUser) => u.rc_username === user.rc_username);
+//     users.splice(idx, 1);
+//     await persistence.updateByAssociation(assoc, users);
+// }
+
+export async function getAllUsers(read: IRead): Promise<IGithubUser[]> {
+    console.log('get all users ')
+    const data = await read.getPersistenceReader().readByAssociation(assoc);
+    console.log('get all user',data)
+    return (data.length ? data[0] as IGithubUser[] : []);
+}
+
+function isUserPresent(users: IGithubUser[], targetUser: IGithubUser): boolean {
+    console.log('isuserpresent')
+    console.log( users.some((user) => user.rc_username=== targetUser.rc_username))
+    return users.some((user) => user.rc_username=== targetUser.rc_username);
+}
+
+// export async function create(read: IRead, persistence: IPersistence, user: IGithubUser): Promise<void> {
 //     const users = await getAllUsers(read);
 
 //     if (!users) {
@@ -31,7 +81,7 @@ import { URL } from "url";
 //     }
 // }
 
-// export async function remove(read: IRead, persistence: IPersistence, user: IUser): Promise<void> {
+// export async function remove(read: IRead, persistence: IPersistence, user: IGithubUser): Promise<void> {
 //     const users = await getAllUsers(read);
 
 //     if (!users || !isUserPresent(users, user)) {
@@ -39,17 +89,17 @@ import { URL } from "url";
 //         return;
 //     }
 
-//     const idx = users.findIndex((u: IUser) => u.id === user.id);
+//     const idx = users.findIndex((u: IGithubUser) => u.id === user.id);
 //     users.splice(idx, 1);
 //     await persistence.updateByAssociation(assoc, users);
 // }
 
-// export async function getAllUsers(read: IRead): Promise<IUser[]> {
+// export async function getAllUsers(read: IRead): Promise<IGithubUser[]> {
 //     const data = await read.getPersistenceReader().readByAssociation(assoc);
-//     return (data.length ? data[0] as IUser[] : []);
+//     return (data.length ? data[0] as IGithubUser[] : []);
 // }
 
-// function isUserPresent(users: IUser[], targetUser: IUser): boolean {
+// function isUserPresent(users: IGithubUser[], targetUser: IUser): boolean {
 //     return users.some((user) => user.id === targetUser.id);
 // }
 
