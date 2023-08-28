@@ -109,16 +109,14 @@ export class GithubApp extends App implements IPreMessageSentExtend {
             let access_token = token.token
             let githubinfo = await getBasicUserInfo(http,access_token)
             let rc_username= user.username;
+            let rc_userid = user.id;
             let github_username = githubinfo.username;
             let User:IGithubUser = {
                 rc_username,
-                github_username
+                rc_userid,
+                github_username,
             }
-            console.log(User);
             await create(read,persistence,User)
-            let users = await getAllUsers(read)
-            console.log(users)
-
             await modify.getScheduler().scheduleOnce(deleteTokenTask);
         } else {
             text = `Authentication Failure 😔`;
