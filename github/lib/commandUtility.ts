@@ -25,7 +25,6 @@ import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
 import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
 import { handleMainModal } from "../handlers/MainModalHandler";
-import { PullMessage } from "./pullRequestMessage";
 
 
 export class CommandUtility implements ExecutorProps {
@@ -234,9 +233,6 @@ export class CommandUtility implements ExecutorProps {
             repository: this.command[0],
             query: this.command[1],
             number: this.command[2],
-            room: this.room,
-            sender: this.sender,
-            arguments: this.command,
         };
 
         const isValidRepo = await HandleInvalidRepoName(
@@ -271,15 +267,6 @@ export class CommandUtility implements ExecutorProps {
             } else {
                 console.log("invalid Trigger ID !");
             }
-        }
-        if(data.query == 'pull'){
-            await PullMessage({
-                data,
-                read: this.read,
-                persistence: this.persistence,
-                modify: this.modify,
-                http: this.http,
-            });
         }
     }
 
