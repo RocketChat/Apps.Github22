@@ -44,7 +44,6 @@ import {
     ApiVisibility,
 } from "@rocket.chat/apps-engine/definition/api";
 import { githubWebHooks } from "./endpoints/githubEndpoints";
-import { IJobContext } from "@rocket.chat/apps-engine/definition/scheduler";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
@@ -52,8 +51,6 @@ import { IPreMessageSentExtend, IMessage,IPreMessageSentModify } from "@rocket.c
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
-import { Block } from "@rocket.chat/ui-kit";
-import { getButton, getSectionBlock } from "./helpers/BlockBuilder";
 
 export class GithubApp extends App implements IPreMessageSentExtend,IPreMessageSentModify {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -101,7 +98,8 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPreMessageS
     public async executePreMessageSentModify(
         message: IMessage,
         builder: IMessageBuilder,
-        read: IRead,http: IHttp,
+        read: IRead,
+        http: IHttp,
         persistence: IPersistence
         ): Promise<IMessage>{
         console.log('executed')
