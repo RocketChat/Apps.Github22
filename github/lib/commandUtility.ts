@@ -250,25 +250,23 @@ export class CommandUtility implements ExecutorProps {
         }
 
         const triggerId = this.context.getTriggerId();
-
-        if(data.query == 'pulls'){
-            if (triggerId) {
-                const modal = await pullDetailsModal({
-                    data,
-                    modify: this.modify,
-                    read: this.read,
-                    persistence: this.persistence,
-                    http: this.http,
-                    slashcommandcontext: this.context,
-                });
-                await this.modify
+        if (triggerId) {
+            const modal = await pullDetailsModal({
+                data,
+                modify: this.modify,
+                read: this.read,
+                persistence: this.persistence,
+                http: this.http,
+                slashcommandcontext: this.context,
+            });
+            await this.modify
                 .getUiController()
                 .openModalView(modal, { triggerId }, this.context.getSender());
-            } else {
-                console.log("invalid Trigger ID !");
-            }
+        } else {
+            console.log("invalid Trigger ID !");
         }
     }
+
 
     public async resolveCommand() {
         switch (this.command.length) {
