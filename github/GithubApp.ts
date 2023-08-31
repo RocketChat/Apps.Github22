@@ -34,6 +34,7 @@ import { createSectionBlock } from "./lib/blocks";
 import {
     sendDirectMessage,
     sendDirectMessageOnInstall,
+    sendMessage,
     sendNotification,
 } from "./lib/message";
 import { OAuth2Client } from "@rocket.chat/apps-engine/server/oauth2/OAuth2Client";
@@ -47,14 +48,29 @@ import { githubWebHooks } from "./endpoints/githubEndpoints";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
-import { IPreMessageSentExtend, IMessage,IPreMessageSentModify } from "@rocket.chat/apps-engine/definition/messages";
+import { IPreMessageSentExtend, IMessage,IPreMessageSentModify, IPostMessageSent } from "@rocket.chat/apps-engine/definition/messages";
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
 
-export class GithubApp extends App implements IPreMessageSentExtend,IPreMessageSentModify {
+export class GithubApp extends App implements IPreMessageSentExtend,IPostMessageSent{
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
+    }
+
+    async checkPostMessageSent?(message: IMessage, read: IRead, http: IHttp): Promise<boolean> {
+        console.log('test')
+      if (await hasGithubPRLink(message)){
+        return true
+      }
+      return false; 
+    }
+    
+    async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
+        console.log('executed')
+        
+        await handleGithubPRLink(message,read,http,persistence,modify)
+        
     }
 
     public async checkPreMessageSentExtend(
@@ -83,28 +99,29 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPreMessageS
         return extend.getMessage();
     }
 
-    public async checkPreMessageSentModify(
-        message: IMessage,
-        read: IRead,
-        http: IHttp
-    ): Promise<boolean> {
-        console.log('test')
-      if (await hasGithubPRLink(message)){
-        return true
-      }
-      return false; 
-    }
+    // public async checkPreMessageSentModify(
+    //     message: IMessage,
+    //     read: IRead,
+    //     http: IHttp
+    // ): Promise<boolean> {
+    //     console.log('test')
+    //   if (await hasGithubPRLink(message)){
+    //     return true
+    //   }
+    //   return false; 
+    // }
 
-    public async executePreMessageSentModify(
-        message: IMessage,
-        builder: IMessageBuilder,
-        read: IRead,
-        http: IHttp,
-        persistence: IPersistence
-        ): Promise<IMessage>{
-        console.log('executed')
-       return await handleGithubPRLink(message,read,builder,persistence)
-    }
+    // public async executePreMessageSentModify(
+    //     message: IMessage,
+    //     builder: IMessageBuilder,
+    //     read: IRead,
+    //     http: IHttp,
+    //     persistence: IPersistence
+    //     ): Promise<IMessage>{
+    //     console.log('executed')
+        
+    //    return await handleGithubPRLink(message,read,builder,persistence)
+    // }
     
     public async authorizationCallback(
         token: IAuthData,

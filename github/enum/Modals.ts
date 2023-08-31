@@ -34,6 +34,7 @@ export enum ModalsEnum {
     PULL_VIEW_LABEL = 'Pull Request',
     MERGE_PULL_REQUEST_ACTION = 'merge-pull-request',
     MERGE_PULL_REQUEST_LABEL = 'Merge',
+    APPROVE_PULL_REQUEST_ACTION = 'approve-pull-request',
     COMMENT_PR_ACTION = 'comment-pull-request',
     COMMENT_PR_LABEL = 'Add Comment',
     COMMENT_ISSUE_ACTION = 'comment-issue',
