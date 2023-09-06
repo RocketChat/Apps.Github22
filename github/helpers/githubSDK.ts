@@ -436,26 +436,22 @@ export async function mergePullRequest(
 export async function approvePullRequest(    
     http: IHttp,
     repoName: string,
-    access_token: IAuthData,
+    access_token: string,
     pullRequestNumber: string | number,
     ){
-
-    console.log("approve PR funciotn runned", repoName,pullRequestNumber)
-    // let data = {};
-    let data = {
-        "event":"APPROVE"
-    };
-
-    const response = await http.put(
+    const response = await http.post(
         `https://api.github.com/repos/${repoName}/pulls/${pullRequestNumber}/reviews`,
         {
             headers: {
                 Authorization: `token ${access_token}`,
                 "Content-Type": "application/json",
             },
-            data,
+            data:{
+                'event':"APPROVE"
+            }
         }
     );
+
     // If it isn't a 2xx code, something wrong happened
     let JSONResponse = JSON.parse(response.content || "{}");
 
@@ -466,7 +462,6 @@ export async function approvePullRequest(
     }
 
     return JSONResponse;
-
 }
 export async function getBasicUserInfo(
     http: IHttp,
