@@ -42,13 +42,14 @@ import {
     ApiVisibility,
 } from "@rocket.chat/apps-engine/definition/api";
 import { githubWebHooks } from "./endpoints/githubEndpoints";
-import { IJobContext } from "@rocket.chat/apps-engine/definition/scheduler";
+import { IJobContext, StartupType } from "@rocket.chat/apps-engine/definition/scheduler";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
 import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink } from "./helpers/checkLinks";
+import { Reminder } from "./handlers/HandleReminder";
 
 export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -224,6 +225,18 @@ export class GithubApp extends App implements IPreMessageSentExtend {
                     }
                 },
             },
+            {
+                id:ProcessorsEnum.CORN_JOB,
+                processor:async(jobData,read,modify,http,persis) =>{
+                    await Reminder(jobData,read,modify,http,persis,this)
+                },
+                startupSetting:{
+                    type:StartupType.RECURRING,
+                    interval:'30 seconds'
+
+                }
+
+            }
         ]);
         configuration.api.provideApi({
             visibility: ApiVisibility.PUBLIC,
