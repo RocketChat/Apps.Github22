@@ -25,7 +25,7 @@ import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
 import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
 import { handleMainModal } from "../handlers/MainModalHandler";
-
+import { createReminder } from "../handlers/CreateReminder";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -210,6 +210,21 @@ export class CommandUtility implements ExecutorProps {
                     this.room,
                     this.modify
                 );
+                break;
+            }
+            case 'remind':{
+                await createReminder(
+                    repository, 
+                    this.room,
+                    this.read,
+                    this.context,
+                    this.app,
+                    this.command,
+                    this.persistence,
+                    this.modify,
+                    this.http,
+                    this.sender
+                )
                 break;
             }
             default: {
