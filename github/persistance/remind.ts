@@ -10,7 +10,9 @@ import { IAuthData } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 
 
-export interface NewIUser extends IUser {
+export interface NewIUser {
+    userid:string,
+    username:string,
     repos: string[];
 }
 
@@ -42,7 +44,8 @@ export async function persistreminder(
         await persistence.createWithAssociation(
             [
                 {
-                    ...user,
+                    userid:user.id,
+                    username:user.username,
                     repos:[repo]
                 }
             ],
@@ -53,20 +56,22 @@ export async function persistreminder(
 
     if (
         !isUserPresent(users, {
-            ...user,
+            userid:user.id,
+            username:user.username,
             repos: [repo]
         })
     ) {
         console.log('!iuserPrest ')
         users.push({
-            ...user,
+            userid:user.id,
+            username:user.name,
             repos: [repo]
         });
         await persistence.updateByAssociation(assoc, users);
     } else {
         // console.log('error: user was already present in db');
         console.log('user present')
-        const idx = users.findIndex((u:NewIUser)=>u.id === user.id)
+        const idx = users.findIndex((u:NewIUser)=>u.userid === user.id)
 
         if(!users[idx].repos.includes(repo)){
             users[idx].repos.push(repo);
@@ -93,7 +98,7 @@ export async function remove(
         return;
     }
 
-    const idx = users.findIndex((u: NewIUser) => u.id === user.id);
+    const idx = users.findIndex((u: NewIUser) => u.userid === user.userid);
     users.splice(idx, 1);
     await persistence.updateByAssociation(assoc, users);
 }
@@ -115,5 +120,5 @@ export async function getAllUsers(read: IRead): Promise<NewIUser[]> {
  */
 
 function isUserPresent(users: NewIUser[], targetUser: NewIUser): boolean {
-    return users.some((user) => user.id === targetUser.id);
+    return users.some((user) => user.userid === targetUser.userid);
 }
