@@ -114,22 +114,8 @@ export async function Reminder(jobData: any,read: IRead,modify: IModify,http: IH
     
           console.log('pr details',pullRequestsWaitingForReview);
 
-          //   const room:IRoom|undefined = await getDirect(read,modify,appUser,User.username)
-          // // send Text to the user 
-          // pullRequestsWaitingForReview.forEach(async (pull)=>{
-          //   if(room){
-          //     await sendNotification(read,modify,User,room,`[ #${pull.number} ](${pull.url})  *${pull.title}*`)
-          //   }
- 
-          // })
 
-          // const numberofPR = pullRequestsWaitingForReview.length;
-
-          // if(room){
-          //   sendNotification(read,modify,User,room,`🚀 It's time to move those pull requests forward! You've got ${numberofPR} waiting for your review. Give them the green light 💚`,)
-          // }
-
-          // await NotifyUser(pullRequestsWaitingForReview,modify,read,User,User.username)
+          await NotifyUser(pullRequestsWaitingForReview,modify,read,User,User.username)
 
         }
         )
@@ -151,36 +137,36 @@ export async function Reminder(jobData: any,read: IRead,modify: IModify,http: IH
 }
 
 
-// async function NotifyUser (PullRequests:PRDetail[],modify:IModify,read:IRead,appUser:IUser,username:string){
+async function NotifyUser (PullRequests:PRDetail[],modify:IModify,read:IRead,User:IUser,username:string){
 
-//   const Pulls = PullRequests.length;
-//   const room = await getDirect(read,modify,appUser,username)
+  const Pulls = PullRequests.length;
+  const appUser = await read.getUserReader().getAppUser() as IUser;
+  const room = await getDirect(read,modify,appUser,username)
 
-//     const textSender = await modify
-//         .getCreator()
-//         .startMessage()
-//         .setText(`🚀 It's time to move those pull requests forward! *You've got ${Pulls}* waiting for your review. Give them the green light 💚`)
-//         .setText()
+    const textSender = await modify
+        .getCreator()
+        .startMessage()
+        .setText(`🚀 It's time to move those pull requests forward! *You've got ${Pulls}* waiting for your review. Give them the green light 💚`)
 
-//     if (room) {
-//         textSender.setRoom(room);
-//     }
+    if (room) {
+        textSender.setRoom(room);
+    }
 
-//     await modify.getCreator().finish(textSender);
+    await modify.getCreator().finish(textSender);
 
-//     PullRequests.forEach(async (pull, ind) => {
-//         if (ind < 10) {
-//             const url = pull.url;
-//             const textSender = await modify
-//                 .getCreator()
-//                 .startMessage()
-//                 .setText(`[ #${pull.number} ](${url})  *${pull.title}*`);
+    PullRequests.forEach(async (pull, ind) => {
+        if (ind < 10) {
+            const url = pull.url;
+            const textSender = await modify
+                .getCreator()
+                .startMessage()
+                .setText(`[ #${pull.number} ](${url})  *${pull.title}*`);
 
-//             if (room) {
-//                 textSender.setRoom(room);
-//             }
-//             await modify.getCreator().finish(textSender);
-//         }
-//     });
+            if (room) {
+                textSender.setRoom(room);
+            }
+            await modify.getCreator().finish(textSender);
+        }
+    });
 
-// }
+}
