@@ -34,7 +34,6 @@ import {
     sendDirectMessageOnInstall,
     sendNotification,
 } from "./lib/message";
-import { OAuth2Client } from "@rocket.chat/apps-engine/server/oauth2/OAuth2Client";
 import { deleteOathToken } from "./processors/deleteOAthToken";
 import { ProcessorsEnum } from "./enum/Processors";
 import {
@@ -49,7 +48,7 @@ import { GHCommand } from "./commands/GhCommand";
 import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink } from "./helpers/checkLinks";
-import { Reminder } from "./handlers/HandleReminder";
+import { SendReminder } from "./handlers/HandleReminder";
 
 export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -226,13 +225,13 @@ export class GithubApp extends App implements IPreMessageSentExtend {
                 },
             },
             {
-                id:ProcessorsEnum.CORN_JOB,
+                id:ProcessorsEnum.PR_REMINDER,
                 processor:async(jobData,read,modify,http,persis) =>{
-                    await Reminder(jobData,read,modify,http,persis,this)
+                    await SendReminder(jobData,read,modify,http,persis,this)
                 },
                 startupSetting:{
                     type:StartupType.RECURRING,
-                    interval:'30 seconds'
+                    interval:'1 days'
 
                 }
 

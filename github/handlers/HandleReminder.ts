@@ -9,7 +9,7 @@ import { IPRdetail } from "../definitions/PRdetails";
 import { IReminder } from "../definitions/Reminder";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 
-export async function Reminder(jobData: any, read: IRead, modify: IModify, http: IHttp, persis: IPersistence, app: GithubApp) {
+export async function SendReminder(jobData: any, read: IRead, modify: IModify, http: IHttp, persis: IPersistence, app: GithubApp) {
 
   const reminders: IReminder[] = await getAllReminders(read);
 
