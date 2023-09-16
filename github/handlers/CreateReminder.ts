@@ -4,30 +4,23 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { GithubApp } from "../GithubApp";
 import { HandleInvalidRepoName } from "./HandleInvalidRepoName";
-import { IAuthData, IOAuth2ClientOptions } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
-import { getAccessTokenForUser } from "../persistance/auth";
-import { persistreminder } from "../persistance/remind";
+import { CreateReminder } from "../persistance/remind";
+import { sendNotification } from "../lib/message";
 
 export async function createReminder(
     repository: string,
     room: IRoom,
     read: IRead,
-    context:SlashCommandContext,
-    app:GithubApp,
-    command:string[],
+    context: SlashCommandContext,
+    app: GithubApp,
+    command: string[],
     persistence: IPersistence,
     modify: IModify,
     http: IHttp,
     user: IUser
 ) {
-    
-    const repoName = repository;
 
-    const accessToken = (await getAccessTokenForUser(
-        read,
-        user,
-        app.oauth2Config
-    )) as IAuthData;
+    const repoName = repository;
 
     const isValidRepo = await HandleInvalidRepoName(
         repoName,
@@ -39,16 +32,11 @@ export async function createReminder(
         room
     )
 
-    if(!isValidRepo){
-        console.log('invalid')
+    if (!isValidRepo) {
         return;
-    }else{
-    console.log('remidner adding ')
-    persistreminder(read,persistence,user,repoName);
+    } else {
+        CreateReminder(read, persistence, user, repoName);
     }
-
-
-    console.log(repoName,isValidRepo,accessToken)
-
-    // nested array of user's and repo     
+    
+    sendNotification(read, modify, user, room, `Pull Request Reminder Set for ${repoName} 👍`)
 }

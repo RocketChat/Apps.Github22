@@ -212,7 +212,7 @@ export class CommandUtility implements ExecutorProps {
                 );
                 break;
             }
-            case 'remind':{
+            case SubcommandEnum.REMIND:{
                 await createReminder(
                     repository, 
                     this.room,

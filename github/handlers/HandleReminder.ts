@@ -3,170 +3,137 @@ import { getDirect, sendDirectMessage, sendNotification } from "../lib/message";
 import { IRead, IModify, IPersistence, IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
-import { NewIUser, getAllUsers } from "../persistance/remind";
-import { getBasicUserInfo,  } from "../helpers/githubSDK";
+import { getAllReminders } from "../persistance/remind";
+import { getBasicUserInfo, } from "../helpers/githubSDK";
+import { IPRdetail } from "../definitions/PRdetails";
+import { IReminder } from "../definitions/Reminder";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 
-interface PRDetail{
-   title: string; number:string; url: string; id: string; createdAt: Date; author: { avatar: string; username: string; }; 
-}
+export async function Reminder(jobData: any, read: IRead, modify: IModify, http: IHttp, persis: IPersistence, app: GithubApp) {
 
-export async function Reminder(jobData: any,read: IRead,modify: IModify,http: IHttp,persis: IPersistence,app:GithubApp){
-                    
-    // const user:IUser= await read.getUserReader().getByUsername('vipin.chaudhary')
-    
-    const appUser = await read.getUserReader().getAppUser() as IUser;
+  const reminders: IReminder[] = await getAllReminders(read);
 
-    // const targetRoom = await getDirect(read, modify, appUser, user.username) as IRoom;
-    const block = modify.getCreator().getBlockBuilder()
-
-    // const access_token = await getAccessTokenForUser(read,user,app.oauth2Config);
-
-
-    block.addSectionBlock({
-        text:block.newPlainTextObject(
-            `Testing 🔔 Don't let those pull requests get forgotten! You've got waiting for your review. Let's get to work 💻`
-        )
-    })
-
-    // const msg = modify.getCreator().startMessage().setSender(appUser).setRoom(targetRoom).setText('Reminder ').setBlocks(block);
-
-    // await modify.getCreator().finish(msg);
-
-    // blocks.addActionsBlock({
-    //     blockId:"reminder",
-    //     elements:[
-    //         blocks.newButtonElement({
-    //             actionId:"this is action",
-    //             text:blocks.newPlainTextObject('Review'),
-    //             value:"repo",
-    //             style:ButtonStyle.PRIMARY
-    //         })
-    //     ]
-    // })
-
-    // sendDirectMessage(read,modify,user,'test',persis,block)
-
-   const users:NewIUser[] = await getAllUsers(read);
-
-   async function processUsers(users: NewIUser[], read: IRead, app: GithubApp) {
-    await Promise.all(users.map(async (user) => {
+  async function processReminder(reminders: IReminder[], read: IRead, app: GithubApp) {
+    await Promise.all(reminders.map(async (user) => {
       try {
         let User = await read.getUserReader().getById(user.userid);
-        let accessToken  = await getAccessTokenForUser(read, User, app.oauth2Config);
+        let accessToken = await getAccessTokenForUser(read, User, app.oauth2Config);
         let githubusername = '';
-  
+
+        const appUser = await read.getUserReader().getAppUser() as IUser;
+        const room = await getDirect(read, modify, appUser, User.username) as IRoom;
+
         if (accessToken) {
-          // Assuming getBasicUserInfo returns a Promise
           const basicUserInfo = await getBasicUserInfo(http, accessToken?.token);
           githubusername = basicUserInfo.username;
+        } else {
+          await sendNotification(read,modify,User,room,"Login to Get Notified about Pull Request Pending Review! `/github login`",)
+          return;
         }
-  
-        console.log(`User: ${user.username}, Access Token: ${accessToken}, GitHub Username: ${githubusername}`);
-  
-        // Fetch repositories in parallel
+
         await Promise.all(user.repos.map(async (repo) => {
-          console.log(repo);
-  
-        let pullRequestsWaitingForReview: PRDetail[] =[];
 
-          let gitResponse:any;
+          let pullRequestsWaitingForReview: IPRdetail[] = [];
 
-          if(accessToken?.token){
-            gitResponse = await http.get(`https://api.github.com/repos/${repo}/pulls`, {
+          let getResponse: any;
+
+          if (accessToken?.token) {
+            getResponse = await http.get(`https://api.github.com/repos/${repo}/pulls`, {
               headers: {
-                  Authorization: `token ${accessToken?.token}`,
-                  "Content-Type": "application/json",
+                Authorization: `token ${accessToken?.token}`,
+                "Content-Type": "application/json",
               },
-          });
-      } else {
-          gitResponse = await http.get(
-              `https://api.github.com/repos/${repo}/pulls`
-          );
+            });
           }
 
-          let resData:any[] = gitResponse.data;
+          let resData: any[] = getResponse.data;
 
-          resData.forEach((pr)=>{
-            // console.log('---pr detail ',pr.url,pr.requested_reviewers)requested_reviewers
-            // console.log(pr)
+          resData.forEach((pr) => {
 
-            // console.log(pr.requested_reviewers.login)
             const reviewers = pr.requested_reviewers;
 
-            reviewers.forEach(reviewer=>{
-              if(reviewer.login === githubusername){
+            reviewers.forEach(reviewer => {
+              if (reviewer.login === githubusername) {
                 pullRequestsWaitingForReview.push({
                   title: pr.title,
-                  number:pr.number,
+                  number: pr.number,
                   url: pr.html_url,
                   id: pr.id,
                   createdAt: pr.created_at,
                   author: {
                     avatar: pr.user.avatar_url,
                     username: pr.user.login
-                  }
+                  },
+                  repo: pr.base.repo.full_name
                 })
               }
             })
           }
           )
-    
-          console.log('pr details',pullRequestsWaitingForReview);
-
-
-          await NotifyUser(pullRequestsWaitingForReview,modify,read,User,User.username)
-
+          await NotifyUser(pullRequestsWaitingForReview, modify, read, User, User.username)
         }
         )
-        
         );
-  
+
       } catch (error) {
         console.error(`Error processing user ${user.username}:`, error);
       }
     }));
   }
-  
-  
-  // Call the function with your array of users
-  processUsers(users, read, app);
-  
-
-    console.log(`---[${ Date() }] this is a task for test ---------------------------`, )
+  processReminder(reminders, read, app);
 }
 
 
-async function NotifyUser (PullRequests:PRDetail[],modify:IModify,read:IRead,User:IUser,username:string){
+async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IModify, read: IRead, User: IUser, username: string) {
 
-  const Pulls = PullRequests.length;
-  const appUser = await read.getUserReader().getAppUser() as IUser;
-  const room = await getDirect(read,modify,appUser,username)
+  const currentDate = new Date();
 
-    const textSender = await modify
-        .getCreator()
-        .startMessage()
-        .setText(`🚀 It's time to move those pull requests forward! *You've got ${Pulls}* waiting for your review. Give them the green light 💚`)
-
-    if (room) {
-        textSender.setRoom(room);
+  for (const key in pullRequestsWaitingForReview) {
+    if (pullRequestsWaitingForReview.hasOwnProperty(key)) {
+      const pr = pullRequestsWaitingForReview[key];
+      const createdAtDate = new Date(pr.createdAt);
+      const timeDifference = currentDate.getTime() - createdAtDate.getTime();
+      const daysOld = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+      pr.ageInDays = daysOld;
     }
+  }
 
-    await modify.getCreator().finish(textSender);
+  pullRequestsWaitingForReview.sort((a, b) => (a.ageInDays || 0) - (b.ageInDays || 0));
 
-    PullRequests.forEach(async (pull, ind) => {
-        if (ind < 10) {
-            const url = pull.url;
-            const textSender = await modify
-                .getCreator()
-                .startMessage()
-                .setText(`[ #${pull.number} ](${url})  *${pull.title}*`);
+  const Pulls = pullRequestsWaitingForReview.length;
+  const appUser = await read.getUserReader().getAppUser() as IUser;
+  const room = await getDirect(read, modify, appUser, username)
 
-            if (room) {
-                textSender.setRoom(room);
-            }
-            await modify.getCreator().finish(textSender);
-        }
-    });
+  const textSender = await modify
+    .getCreator()
+    .startMessage()
+    .setText(`🚀 It's time to move those pull requests forward! *You've got ${Pulls}* waiting for your review. Give them the green light 💚`)
 
+  if (room) {
+    textSender.setRoom(room);
+  }
+
+  await modify.getCreator().finish(textSender);
+
+  const modifyCreator = modify.getCreator();
+
+  for (const [ind, pull] of pullRequestsWaitingForReview.entries()) {
+
+    let markdownText = `${pull.repo} #${pull.number}\n`;
+
+    if (pull.ageInDays) {
+      if (pull.ageInDays > 0) {
+        markdownText += `*${pull.ageInDays} days old*\n`;
+      }
+    }
+    markdownText += `**[${pull.title}](${pull.url})**`;
+
+    if (ind < 10) {
+      const textSender = await modifyCreator.startMessage().setText(markdownText);
+      if (room) {
+        textSender.setRoom(room);
+      }
+      await modifyCreator.finish(textSender);
+    }
+  }
 }

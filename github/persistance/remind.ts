@@ -6,41 +6,23 @@ import {
     RocketChatAssociationModel,
     RocketChatAssociationRecord
 } from '@rocket.chat/apps-engine/definition/metadata';
-import { IAuthData } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-
-
-export interface NewIUser {
-    userid:string,
-    username:string,
-    repos: string[];
-}
+import { IReminder } from '../definitions/Reminder';
 
 const assoc = new RocketChatAssociationRecord(
     RocketChatAssociationModel.MISC,
     'reminder'
 );
 
-/**
- * Returns all users from the database
- * @param read - accessor to the environment
- * @param persistence
- * @param user - user to be added
- * @param repo - repo to be added for reminder
- */
-export async function persistreminder(
+export async function CreateReminder(
     read: IRead,
     persistence: IPersistence,
     user: IUser,
-    // figmaData: IFigmaUserData
     repo:string,
 ): Promise<void> {
-    const users = await getAllUsers(read);
+    const reminders = await getAllReminders(read);
 
-    console.log(users);
-
-    if (users.length === 0) {
-        console.log('!users')
+    if (reminders.length === 0) {
         await persistence.createWithAssociation(
             [
                 {
@@ -53,72 +35,53 @@ export async function persistreminder(
         );
         return;
     }
-
     if (
-        !isUserPresent(users, {
+        !isReminderExist(reminders, {
             userid:user.id,
             username:user.username,
             repos: [repo]
         })
     ) {
-        console.log('!iuserPrest ')
-        users.push({
+        reminders.push({
             userid:user.id,
             username:user.name,
             repos: [repo]
         });
-        await persistence.updateByAssociation(assoc, users);
+        await persistence.updateByAssociation(assoc, reminders);
     } else {
-        // console.log('error: user was already present in db');
-        console.log('user present')
-        const idx = users.findIndex((u:NewIUser)=>u.userid === user.id)
+        const idx = reminders.findIndex((u:IReminder)=>u.userid === user.id)
 
-        if(!users[idx].repos.includes(repo)){
-            users[idx].repos.push(repo);
+        if(!reminders[idx].repos.includes(repo)){
+            reminders[idx].repos.push(repo);
         }
 
-        await persistence.updateByAssociation(assoc,users)
+        await persistence.updateByAssociation(assoc,reminders)
     }
 }
 
-/**
- * Returns all users from the database
- * @param read - accessor to the environment
- * @param persistence - persistance to the environment
- * @param user - user to be removed
- */
-export async function remove(
+export async function RemoveReminder(
     read: IRead,
     persistence: IPersistence,
-    user: NewIUser
+    user: IReminder
 ): Promise<void> {
-    const users = await getAllUsers(read);
+    const reminders = await getAllReminders(read);
 
-    if (!users || !isUserPresent(users, user)) {
+    if (!reminders || !isReminderExist(reminders, user)) {
         return;
     }
 
-    const idx = users.findIndex((u: NewIUser) => u.userid === user.userid);
-    users.splice(idx, 1);
-    await persistence.updateByAssociation(assoc, users);
+    const idx = reminders.findIndex((u: IReminder) => u.userid === user.userid);
+    reminders.splice(idx, 1);
+    await persistence.updateByAssociation(assoc, reminders);
 }
 
-
-/**
- * Returns all users from the database
- * @param read - accessor to the environment
- */
-export async function getAllUsers(read: IRead): Promise<NewIUser[]> {
+export async function getAllReminders(read: IRead): Promise<IReminder[]> {
     const data = await read.getPersistenceReader().readByAssociation(assoc);
-    return data.length ? (data[0] as NewIUser[]) : [];
+    return data.length ? (data[0] as IReminder[]) : [];
 }
 
-/**
- * Returns true if the provided value is present in the array.
- * @param users - The array to search in.
- * @param  targetUser - The value to search for.
- */
-
-function isUserPresent(users: NewIUser[], targetUser: NewIUser): boolean {
-    return users.some((user) => user.userid === targetUser.userid);
+function isReminderExist(reminders: IReminder[], targetUser: IReminder): boolean {
+    return reminders.some((user) => user.userid === targetUser.userid);
 }
+
+
