@@ -225,14 +225,13 @@ export class GithubApp extends App implements IPreMessageSentExtend {
                 },
             },
             {
-                id:ProcessorsEnum.CORN_JOB,
+                id:ProcessorsEnum.PR_REMINDER,
                 processor:async(jobData,read,modify,http,persis) =>{
-                    console.log('test')
                     await SendReminder(jobData,read,modify,http,persis,this)
                 },
                 startupSetting:{
                     type:StartupType.RECURRING,
-                    interval:'30 seconds'
+                    interval:'1 days'
                     
                 }
 

@@ -30,8 +30,8 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
           return;
         }
 
+        let pullRequestsWaitingForReview: IPRdetail[] = [];
         await Promise.all(user.repos.map(async (repo) => {
-          let pullRequestsWaitingForReview: IPRdetail[] = [];
           let getResponse: any;
 
           if (accessToken?.token) {
@@ -64,24 +64,26 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
               });
             }
           });
-
-          // Wait for all PR promises to resolve
           await Promise.all(prPromises);
 
-          // Call NotifyUser after all PRs have been processed
-          await NotifyUser(pullRequestsWaitingForReview, modify, read, User, User.username);
-        }));
+        }
+
+        ));
+        await NotifyUser(pullRequestsWaitingForReview, modify, read, User, User.username);
+        pullRequestsWaitingForReview = [];
+
       } catch (error) {
         console.error(`Error processing user ${user.username}:`, error);
       }
-    }));
+    }
+
+    ));
   }
   processReminder(reminders, read, app);
 }
 
 async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IModify, read: IRead, User: IUser, username: string) {
   const currentDate = new Date();
-
   for (const key in pullRequestsWaitingForReview) {
     if (pullRequestsWaitingForReview.hasOwnProperty(key)) {
       const pr = pullRequestsWaitingForReview[key];
@@ -103,9 +105,9 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
     .startMessage();
 
   if (Pulls > 0) {
-    textSender.setText(`🚀 It's time to move those pull requests forward! You've got ${Pulls} waiting for your review. Give them the green light 💚`);
+    textSender.setText(`🚀 You've got ${Pulls} pull requests waiting for your review. Give them the green light 💚`);
   } else {
-    textSender.setText(`📅 It appears that there are no pull requests for you to review today🚀`);
+    textSender.setText(`📅 It appears that there are no pull requests for you to review today. Enjoy your PR-free day! 🚀`);
   }
 
   if (room) {
