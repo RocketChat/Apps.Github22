@@ -1,5 +1,5 @@
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getDirect, sendDirectMessage, sendNotification } from "../lib/message";
+import { getDirect, isUserHighHierarchy, sendDirectMessage, sendNotification } from "../lib/message";
 import { IRead, IModify, IPersistence, IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -10,7 +10,6 @@ import { IReminder } from "../definitions/Reminder";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 
 export async function SendReminder(jobData: any, read: IRead, modify: IModify, http: IHttp, persis: IPersistence, app: GithubApp) {
-
   const reminders: IReminder[] = await getAllReminders(read);
 
   async function processReminder(reminders: IReminder[], read: IRead, app: GithubApp) {
@@ -27,7 +26,7 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
           const basicUserInfo = await getBasicUserInfo(http, accessToken?.token);
           githubusername = basicUserInfo.username;
         } else {
-          await sendNotification(read,modify,User,room,"Login to Get Notified about Pull Request Pending Review! `/github login`",)
+          await sendNotification(read, modify, User, room, "Login to Get Notified about Pull Request Pending Review! `/github login`",)
           return;
         }
 
@@ -48,26 +47,29 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
 
           let resData: any[] = getResponse.data;
 
-          resData.forEach((pr) => {
+          resData.forEach(async (pr) => {
 
-            const reviewers = pr.requested_reviewers;
 
-            reviewers.forEach(reviewer => {
-              if (reviewer.login === githubusername) {
-                pullRequestsWaitingForReview.push({
-                  title: pr.title,
-                  number: pr.number,
-                  url: pr.html_url,
-                  id: pr.id,
-                  createdAt: pr.created_at,
-                  author: {
-                    avatar: pr.user.avatar_url,
-                    username: pr.user.login
-                  },
-                  repo: pr.base.repo.full_name
-                })
-              }
-            })
+            const IsUserinTeam: boolean = await CheckIsUserInTeam(githubusername, accessToken?.token, http, pr)
+            const IsUserReviewRequested: boolean = await CheckIsReviewRequested(githubusername, pr);
+
+            console.log(IsUserReviewRequested, IsUserinTeam)
+            if (IsUserinTeam || IsUserReviewRequested) {
+              console.log('pushed')
+              pullRequestsWaitingForReview.push({
+                title: pr.title,
+                number: pr.number,
+                url: pr.html_url,
+                id: pr.id,
+                createdAt: pr.created_at,
+                author: {
+                  avatar: pr.user.avatar_url,
+                  username: pr.user.login
+                },
+                repo: pr.base.repo.full_name
+              })
+            }
+
           }
           )
           await NotifyUser(pullRequestsWaitingForReview, modify, read, User, User.username)
@@ -85,7 +87,7 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
 
 
 async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IModify, read: IRead, User: IUser, username: string) {
-
+  console.log(pullRequestsWaitingForReview,'PRs')
   const currentDate = new Date();
 
   for (const key in pullRequestsWaitingForReview) {
@@ -107,7 +109,12 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
   const textSender = await modify
     .getCreator()
     .startMessage()
-    .setText(`🚀 It's time to move those pull requests forward! *You've got ${Pulls}* waiting for your review. Give them the green light 💚`)
+
+  if (Pulls > 0) {
+    textSender.setText(`🚀 It's time to move those pull requests forward! You've got ${Pulls} waiting for your review. Give them the green light 💚`);
+  } else {
+    textSender.setText(`🌟 Great job! You've reviewed all your pull requests. If you have any more tasks, feel free to tackle them with the same enthusiasm! 🚀`);
+  }
 
   if (room) {
     textSender.setRoom(room);
@@ -136,4 +143,48 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
       await modifyCreator.finish(textSender);
     }
   }
+}
+
+async function CheckIsReviewRequested(githubusername: string, pr: any): Promise<boolean> {
+  const reviewers = pr.requested_reviewers;
+
+  for (const reviewer of reviewers) {
+    if (reviewer.login === githubusername) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+async function CheckIsUserInTeam(githubusername: string, access_token: string | undefined, http: IHttp, pr: any): Promise<boolean> {
+  if (pr.requested_teams.length === 0) {
+    return false;
+  }
+
+  const teams = pr.requested_teams;
+
+  for (const team of teams) {
+    const response = await http.get(`https://api.github.com/teams/${team.id}/members/${githubusername}`, {
+      headers: {
+        Authorization: `token ${access_token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(response.statusCode);
+
+    // If it isn't a 2xx code, something wrong happened
+    if (!response.statusCode.toString().startsWith("2")) {
+      //  console.log(response)
+      return false;
+    }
+
+    if (response.statusCode === 204) {
+      console.log('REturned true')
+      return true;
+    }
+  }
+
+  return false;
 }
