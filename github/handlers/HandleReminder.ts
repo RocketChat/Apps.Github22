@@ -1,10 +1,10 @@
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { getDirect, isUserHighHierarchy, sendDirectMessage, sendNotification } from "../lib/message";
+import { getDirect, sendNotification } from "../lib/message";
 import { IRead, IModify, IPersistence, IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
 import { getAllReminders } from "../persistance/remind";
-import { getBasicUserInfo, } from "../helpers/githubSDK";
+import { getBasicUserInfo } from "../helpers/githubSDK";
 import { IPRdetail } from "../definitions/PRdetails";
 import { IReminder } from "../definitions/Reminder";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
@@ -26,14 +26,12 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
           const basicUserInfo = await getBasicUserInfo(http, accessToken?.token);
           githubusername = basicUserInfo.username;
         } else {
-          await sendNotification(read, modify, User, room, "Login to Get Notified about Pull Request Pending Review! `/github login`",)
+          await sendNotification(read, modify, User, room, "Login to Get Notified about Pull Request Pending Review! `/github login`");
           return;
         }
 
         await Promise.all(user.repos.map(async (repo) => {
-
           let pullRequestsWaitingForReview: IPRdetail[] = [];
-
           let getResponse: any;
 
           if (accessToken?.token) {
@@ -47,15 +45,11 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
 
           let resData: any[] = getResponse.data;
 
-          resData.forEach(async (pr) => {
-
-
-            const IsUserinTeam: boolean = await CheckIsUserInTeam(githubusername, accessToken?.token, http, pr)
+          const prPromises = resData.map(async (pr) => {
+            const IsUserinTeam: boolean = await CheckIsUserInTeam(githubusername, accessToken?.token, http, pr);
             const IsUserReviewRequested: boolean = await CheckIsReviewRequested(githubusername, pr);
 
-            console.log(IsUserReviewRequested, IsUserinTeam)
             if (IsUserinTeam || IsUserReviewRequested) {
-              console.log('pushed')
               pullRequestsWaitingForReview.push({
                 title: pr.title,
                 number: pr.number,
@@ -64,19 +58,19 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
                 createdAt: pr.created_at,
                 author: {
                   avatar: pr.user.avatar_url,
-                  username: pr.user.login
+                  username: pr.user.login,
                 },
-                repo: pr.base.repo.full_name
-              })
+                repo: pr.base.repo.full_name,
+              });
             }
+          });
 
-          }
-          )
-          await NotifyUser(pullRequestsWaitingForReview, modify, read, User, User.username)
-        }
-        )
-        );
+          // Wait for all PR promises to resolve
+          await Promise.all(prPromises);
 
+          // Call NotifyUser after all PRs have been processed
+          await NotifyUser(pullRequestsWaitingForReview, modify, read, User, User.username);
+        }));
       } catch (error) {
         console.error(`Error processing user ${user.username}:`, error);
       }
@@ -85,9 +79,7 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
   processReminder(reminders, read, app);
 }
 
-
 async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IModify, read: IRead, User: IUser, username: string) {
-  console.log(pullRequestsWaitingForReview,'PRs')
   const currentDate = new Date();
 
   for (const key in pullRequestsWaitingForReview) {
@@ -104,16 +96,16 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
 
   const Pulls = pullRequestsWaitingForReview.length;
   const appUser = await read.getUserReader().getAppUser() as IUser;
-  const room = await getDirect(read, modify, appUser, username)
+  const room = await getDirect(read, modify, appUser, username);
 
   const textSender = await modify
     .getCreator()
-    .startMessage()
+    .startMessage();
 
   if (Pulls > 0) {
     textSender.setText(`🚀 It's time to move those pull requests forward! You've got ${Pulls} waiting for your review. Give them the green light 💚`);
   } else {
-    textSender.setText(`🌟 Great job! You've reviewed all your pull requests. If you have any more tasks, feel free to tackle them with the same enthusiasm! 🚀`);
+    textSender.setText(`📅 It appears that there are no pull requests for you to review today🚀`);
   }
 
   if (room) {
@@ -156,7 +148,6 @@ async function CheckIsReviewRequested(githubusername: string, pr: any): Promise<
   return false;
 }
 
-
 async function CheckIsUserInTeam(githubusername: string, access_token: string | undefined, http: IHttp, pr: any): Promise<boolean> {
   if (pr.requested_teams.length === 0) {
     return false;
@@ -172,16 +163,11 @@ async function CheckIsUserInTeam(githubusername: string, access_token: string | 
       },
     });
 
-    console.log(response.statusCode);
-
-    // If it isn't a 2xx code, something wrong happened
     if (!response.statusCode.toString().startsWith("2")) {
-      //  console.log(response)
       return false;
     }
 
     if (response.statusCode === 204) {
-      console.log('REturned true')
       return true;
     }
   }
