@@ -48,7 +48,7 @@ import { GHCommand } from "./commands/GhCommand";
 import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink } from "./helpers/checkLinks";
-import { SendReminder } from "./handlers/HandleReminder";
+import { SendReminder } from "./handlers/SendReminder";
 
 export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -231,7 +231,7 @@ export class GithubApp extends App implements IPreMessageSentExtend {
                 },
                 startupSetting:{
                     type:StartupType.RECURRING,
-                    interval:'1 days'
+                    interval:'30 seconds'
                     
                 }
 

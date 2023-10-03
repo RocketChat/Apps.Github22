@@ -8,6 +8,8 @@ import { getBasicUserInfo } from "../helpers/githubSDK";
 import { IPRdetail } from "../definitions/PRdetails";
 import { IReminder } from "../definitions/Reminder";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
+import { ButtonStyle } from "@rocket.chat/ui-kit";
+import { ModalsEnum } from "../enum/Modals";
 
 export async function SendReminder(jobData: any, read: IRead, modify: IModify, http: IHttp, persis: IPersistence, app: GithubApp) {
   const reminders: IReminder[] = await getAllReminders(read);
@@ -66,9 +68,7 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
           });
           await Promise.all(prPromises);
 
-        }
-
-        ));
+        }));
         await NotifyUser(pullRequestsWaitingForReview, modify, read, User, User.username);
         pullRequestsWaitingForReview = [];
 
@@ -84,6 +84,27 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
 
 async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IModify, read: IRead, User: IUser, username: string) {
   const currentDate = new Date();
+
+  const reminders: IReminder[] = await getAllReminders(read);
+
+  pullRequestsWaitingForReview = pullRequestsWaitingForReview.filter((pr) => {
+    const reminder = reminders.find((r) => r.username === User.username);
+
+    if (reminder) {
+      const unsubscribedRepo = reminder.unsubscribedPR.find((unsub) => unsub.repo === pr.repo);
+
+      if (unsubscribedRepo) {
+        const prNum = parseInt(pr.number);
+
+        if (unsubscribedRepo.prnum.includes(prNum)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
+
   for (const key in pullRequestsWaitingForReview) {
     if (pullRequestsWaitingForReview.hasOwnProperty(key)) {
       const pr = pullRequestsWaitingForReview[key];
@@ -98,7 +119,7 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
 
   const Pulls = pullRequestsWaitingForReview.length;
   const appUser = await read.getUserReader().getAppUser() as IUser;
-  const room = await getDirect(read, modify, appUser, username);
+  const room = await getDirect(read, modify, appUser, username) as IRoom;
 
   const textSender = await modify
     .getCreator()
@@ -119,7 +140,6 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
   const modifyCreator = modify.getCreator();
 
   for (const [ind, pull] of pullRequestsWaitingForReview.entries()) {
-
     let markdownText = `${pull.repo} #${pull.number}\n`;
 
     if (pull.ageInDays) {
@@ -129,8 +149,28 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
     }
     markdownText += `**[${pull.title}](${pull.url})**`;
 
+    const block = modify.getCreator().getBlockBuilder();
+
+    block.addSectionBlock({
+      text: block.newMarkdownTextObject(
+        markdownText
+      )
+    })
+
+    block.addActionsBlock({
+      blockId: "githubdata",
+      elements: [
+        block.newButtonElement({
+          actionId: ModalsEnum.UNSUBSCRIBE_REMINDER_ACTION,
+          text: block.newPlainTextObject("Unsubscribe"),
+          value: `${pull.repo}|${pull.number}`,
+          style: ButtonStyle.DANGER,
+        })
+      ],
+    });
+
     if (ind < 10) {
-      const textSender = await modifyCreator.startMessage().setText(markdownText);
+      const textSender = await modifyCreator.startMessage().setBlocks(block);
       if (room) {
         textSender.setRoom(room);
       }

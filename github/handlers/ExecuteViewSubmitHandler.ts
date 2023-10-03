@@ -26,6 +26,7 @@ import { GithubRepoIssuesStorage } from '../persistance/githubIssues';
 import { IGitHubIssueData } from '../definitions/githubIssueData';
 import { githubIssuesShareModal } from '../modals/githubIssuesShareModal';
 import { issueCommentsModal } from '../modals/issueCommentsModal';
+import { createReminder } from './CreateReminder';
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -729,6 +730,18 @@ export class ExecuteViewSubmitHandler {
                             let searchResult: string|undefined = view.state?.[ ModalsEnum.MULTI_SHARE_GITHUB_ISSUES_INPUT]?.[ModalsEnum.MULTI_SHARE_GITHUB_ISSUES_INPUT_ACTION];
                             await sendMessage(this.modify,room,user,searchResult as string);
                         }
+                    }
+                    break;
+                }
+                case ModalsEnum.NEW_REMINDER_VIEW: {
+                    const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
+
+                    if(roomId){
+                        let room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
+
+                        await createReminder(repository,room,this.read,this.app,this.persistence,this.modify,this.http,user)
+                        
                     }
                     break;
                 }

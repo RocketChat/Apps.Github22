@@ -18,7 +18,7 @@ export async function CreateReminder(
     read: IRead,
     persistence: IPersistence,
     user: IUser,
-    repo:string,
+    repo: string,
 ): Promise<void> {
     const reminders = await getAllReminders(read);
 
@@ -26,9 +26,10 @@ export async function CreateReminder(
         await persistence.createWithAssociation(
             [
                 {
-                    userid:user.id,
-                    username:user.username,
-                    repos:[repo]
+                    userid: user.id,
+                    username: user.username,
+                    repos: [repo],
+                    unsubscribedPR: [],
                 }
             ],
             assoc
@@ -37,27 +38,54 @@ export async function CreateReminder(
     }
     if (
         !isReminderExist(reminders, {
-            userid:user.id,
-            username:user.username,
-            repos: [repo]
+            userid: user.id,
+            username: user.username,
+            repos: [repo],
+            unsubscribedPR: []
         })
     ) {
         reminders.push({
-            userid:user.id,
-            username:user.name,
-            repos: [repo]
+            userid: user.id,
+            username: user.name,
+            repos: [repo],
+            unsubscribedPR: []
         });
         await persistence.updateByAssociation(assoc, reminders);
     } else {
-        const idx = reminders.findIndex((u:IReminder)=>u.userid === user.id)
+        const idx = reminders.findIndex((u: IReminder) => u.userid === user.id)
 
-        if(!reminders[idx].repos.includes(repo)){
+        if (!reminders[idx].repos.includes(repo)) {
             reminders[idx].repos.push(repo);
         }
 
-        await persistence.updateByAssociation(assoc,reminders)
+        await persistence.updateByAssociation(assoc, reminders)
     }
 }
+
+export async function unsubscribedPR(read: IRead, persistence: IPersistence, repo: string, Prnum: number, user: IUser): Promise<void> {
+    const reminders = await getAllReminders(read);
+    const repository = repo.trim();
+    const PullRequestNumber = Prnum;
+    const index = reminders.findIndex((reminder: IReminder) => reminder.userid === user.id);
+    const reminder = reminders[index] as IReminder
+    const unsubscribPR = reminder.unsubscribedPR.find((value) => value.repo === repository);
+
+    if (unsubscribPR) {
+        const idx = reminder.unsubscribedPR.findIndex((value) => value.repo === repository);
+        const unsubscribPRnums = reminder.unsubscribedPR[idx].prnum;
+        if (!unsubscribPRnums.includes(PullRequestNumber)) {
+            unsubscribPRnums.push(PullRequestNumber);
+        }
+    } else {
+        reminder.unsubscribedPR.push({
+            repo: repository,
+            prnum: [PullRequestNumber]
+        })
+    }
+    
+    await persistence.updateByAssociation(assoc, reminders)
+}
+
 
 export async function RemoveReminder(
     read: IRead,
