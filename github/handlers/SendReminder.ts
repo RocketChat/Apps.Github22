@@ -94,12 +94,10 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
   const currentDate = new Date();
 
   const reminders: IReminder[] = await getAllReminders(read);
-
-  pullRequestsWaitingForReview = pullRequestsWaitingForReview.filter((pr) => {
-    const reminder = reminders.find((r) => r.username === User.username);
-
-    if (reminder) {
-      const unsubscribedRepo = reminder.unsubscribedPR.find((unsub) => unsub.repo === pr.repo);
+  const userReminders = reminders.find((r) => r.userid === User.id);
+  if (userReminders) {
+    pullRequestsWaitingForReview = pullRequestsWaitingForReview.filter((pr) => {
+      const unsubscribedRepo = userReminders.unsubscribedPR.find((unsub) => unsub.repo === pr.repo);
 
       if (unsubscribedRepo) {
         const prNum = parseInt(pr.number);
@@ -108,30 +106,27 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
           return false;
         }
       }
-    }
 
-    return true;
-  });
+      return true;
+    });
+  }
 
-  for (const key in pullRequestsWaitingForReview) {
-    if (pullRequestsWaitingForReview.hasOwnProperty(key)) {
-      const pr = pullRequestsWaitingForReview[key];
-      const createdAtDate = new Date(pr.createdAt);
-      const timeDifference = currentDate.getTime() - createdAtDate.getTime();
-      const daysOld = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-      pr.ageInDays = daysOld;
-    }
+
+  for (const pr of pullRequestsWaitingForReview) {
+    const createdAtDate = new Date(pr.createdAt);
+    const timeDifference = currentDate.getTime() - createdAtDate.getTime();
+    const daysOld = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    pr.ageInDays = daysOld;
   }
 
   pullRequestsWaitingForReview.sort((a, b) => (a.ageInDays || 0) - (b.ageInDays || 0));
 
   const Pulls = pullRequestsWaitingForReview.length;
+
   const appUser = await read.getUserReader().getAppUser() as IUser;
   const room = await getDirect(read, modify, appUser, username) as IRoom;
 
-  const textSender = await modify
-    .getCreator()
-    .startMessage();
+  const textSender = modify.getCreator().startMessage();
 
   if (Pulls > 0) {
     textSender.setText(`🚀 You've got ${Pulls} pull requests waiting for your review. Give them the green light 💚`);
@@ -150,20 +145,17 @@ async function NotifyUser(pullRequestsWaitingForReview: IPRdetail[], modify: IMo
   for (const [ind, pull] of pullRequestsWaitingForReview.entries()) {
     let markdownText = `${pull.repo} #${pull.number}\n`;
 
-    if (pull.ageInDays) {
-      if (pull.ageInDays > 0) {
-        markdownText += `*${pull.ageInDays} days old*\n`;
-      }
+    if (pull.ageInDays && pull.ageInDays > 0) {
+      markdownText += `*${pull.ageInDays} days old*\n`;
     }
+
     markdownText += `**[${pull.title}](${pull.url})**`;
 
-    const block = modify.getCreator().getBlockBuilder();
+    const block = modifyCreator.getBlockBuilder();
 
     block.addSectionBlock({
-      text: block.newMarkdownTextObject(
-        markdownText
-      )
-    })
+      text: block.newMarkdownTextObject(markdownText)
+    });
 
     block.addActionsBlock({
       blockId: "githubdata",
