@@ -26,7 +26,7 @@ import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
 import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
 import { handleMainModal } from "../handlers/MainModalHandler";
 import { createReminder } from "../handlers/CreateReminder";
-import { handleReminder } from "../handlers/HandleRemider";
+import { ManageReminders, handleReminder } from "../handlers/HandleRemider";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -195,8 +195,19 @@ export class CommandUtility implements ExecutorProps {
 
     private async handleReminderCommand(query: string) {
         switch (query) {
-            case 'create':
+            case SubcommandEnum.CREATE:
                 await handleReminder(
+                    this.read,
+                    this.context,
+                    this.app,
+                    this.persistence,
+                    this.http,
+                    this.room,
+                    this.modify
+                );
+                break;
+            case SubcommandEnum.LIST:
+                await ManageReminders(
                     this.read,
                     this.context,
                     this.app,

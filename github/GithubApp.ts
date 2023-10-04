@@ -2,6 +2,7 @@ import {
     IAppAccessors,
     IAppInstallationContext,
     IConfigurationExtend,
+    IConfigurationModify,
     IHttp,
     ILogger,
     IMessageExtender,
@@ -49,7 +50,8 @@ import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/defini
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink } from "./helpers/checkLinks";
 import { SendReminder } from "./handlers/SendReminder";
-
+import { AppSettings, settings } from "./settings/settings";
+import { ISetting } from "@rocket.chat/apps-engine/definition/settings";
 export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
@@ -193,11 +195,18 @@ export class GithubApp extends App implements IPreMessageSentExtend {
     ): Promise<void> {
         const gitHubCommand: GithubCommand = new GithubCommand(this);
         const ghCommand: GHCommand = new GHCommand(this);
+        const intervalPromise: Promise<string> = this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCORNjobString);
+        const interval: string = await intervalPromise; 
         await Promise.all([
             configuration.slashCommands.provideSlashCommand(gitHubCommand),
             configuration.slashCommands.provideSlashCommand(ghCommand),
             this.getOauth2ClientInstance().setup(configuration),
         ]);
+        await Promise.all(
+            settings.map((setting) =>
+                configuration.settings.provideSetting(setting)
+            )
+        );
         configuration.scheduler.registerProcessors([
             {
                 id: ProcessorsEnum.REMOVE_GITHUB_LOGIN,
@@ -231,8 +240,7 @@ export class GithubApp extends App implements IPreMessageSentExtend {
                 },
                 startupSetting:{
                     type:StartupType.RECURRING,
-                    interval:'30 seconds'
-                    
+                    interval:interval,
                 }
 
             }
@@ -252,5 +260,14 @@ export class GithubApp extends App implements IPreMessageSentExtend {
     ): Promise<void> {
         const user = context.user;
         await sendDirectMessageOnInstall(read, modify, user, persistence);
+    }
+    public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
+        const intervalPromise: Promise<string> = this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCORNjobString);
+        const interval: string = await intervalPromise; 
+        configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
+        configurationModify.scheduler.scheduleRecurring({
+            id:ProcessorsEnum.PR_REMINDER,
+            interval:interval,
+        })
     }
 }

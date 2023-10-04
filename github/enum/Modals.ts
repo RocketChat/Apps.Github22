@@ -213,5 +213,6 @@ export enum ModalsEnum {
     MAIN_MODAL_ASSIGN_ISSUES_LABLE = "Assign Issues",
     MAIN_MODAL_ASSIGN_ISSUES_DESCRIPTION = "Assign issues to your team members",
     NEW_REMINDER_VIEW = "new-reminder-view",
-    UNSUBSCRIBE_REMINDER_ACTION = "unsubscribe-reminder-action"
+    UNSUBSCRIBE_REMINDER_ACTION = "unsubscribe-reminder-action",
+    REMINDER_LIST_MODAL_VIEW= "reminder-list-view"
 }

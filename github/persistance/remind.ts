@@ -112,4 +112,8 @@ function isReminderExist(reminders: IReminder[], targetUser: IReminder): boolean
     return reminders.some((user) => user.userid === targetUser.userid);
 }
 
-
+export async function getUserReminder(read:IRead,User:IUser):Promise<IReminder>{
+    const reminders = await getAllReminders(read);
+    const index = reminders.findIndex((reminder)=>reminder.userid === User.id);
+    return reminders[index];
+}

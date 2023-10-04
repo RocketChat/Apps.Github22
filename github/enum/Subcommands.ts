@@ -9,5 +9,7 @@ export enum SubcommandEnum {
     NEW_ISSUE = 'issue',
     ISSUES = 'issues',
     PROFILE = 'me',
-    REMIND = 'remind'
+    REMIND = 'remind',
+    CREATE= 'create',
+    LIST ='list',
 }

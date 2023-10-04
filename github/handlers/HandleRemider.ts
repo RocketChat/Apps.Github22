@@ -7,6 +7,7 @@ import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
 import { NewReminderStarterModal } from "../modals/newreminderModal";
+import { reminderModal } from "../modals/remindersModal";
 
 export async function handleReminder(
     read: IRead,
@@ -53,3 +54,43 @@ export async function handleReminder(
     }
 }
 
+export async function ManageReminders(
+    read:IRead,
+    context:SlashCommandContext,
+    app:GithubApp,
+    persistence:IPersistence,
+    http:IHttp,
+    room:IRoom,
+    modify:IModify
+){
+    let accessToken = await getAccessTokenForUser(
+        read,
+        context.getSender(),
+        app.oauth2Config
+    );
+    if (accessToken && accessToken.token) {
+        const triggerId = context.getTriggerId();
+        if (triggerId) {
+            const modal = await reminderModal({
+                modify: modify,
+                read: read,
+                persistence: persistence,
+                http: http,
+                slashcommandcontext: context,
+            });
+            await modify
+                .getUiController()
+                .openModalView(modal, { triggerId }, context.getSender());
+        } else {
+            console.log("Invalid Trigger ID !");
+        }
+    } else {
+        await sendNotification(
+            read,
+            modify,
+            context.getSender(),
+            room,
+            "Login to see to pull request reminders! `/github login`"
+        );
+    }
+}

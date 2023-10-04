@@ -10,9 +10,17 @@ import { IReminder } from "../definitions/Reminder";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { ButtonStyle } from "@rocket.chat/ui-kit";
 import { ModalsEnum } from "../enum/Modals";
+import { AppSettings } from "../settings/settings";
 
 export async function SendReminder(jobData: any, read: IRead, modify: IModify, http: IHttp, persis: IPersistence, app: GithubApp) {
   const reminders: IReminder[] = await getAllReminders(read);
+  console.log('reminder run..')
+
+  const intervalPromise: Promise<string> = app.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCORNjobString);
+
+  const interval: string = await intervalPromise; // Await the promise to get the string valuw
+
+  console.log(interval)
 
   async function processReminder(reminders: IReminder[], read: IRead, app: GithubApp) {
     await Promise.all(reminders.map(async (user) => {
