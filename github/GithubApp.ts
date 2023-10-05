@@ -29,7 +29,6 @@ import {
     IOAuth2ClientOptions,
 } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { createOAuth2Client } from "@rocket.chat/apps-engine/definition/oauth2/OAuth2";
-import { createSectionBlock } from "./lib/blocks";
 import {
     sendDirectMessage,
     sendDirectMessageOnInstall,
@@ -195,8 +194,7 @@ export class GithubApp extends App implements IPreMessageSentExtend {
     ): Promise<void> {
         const gitHubCommand: GithubCommand = new GithubCommand(this);
         const ghCommand: GHCommand = new GHCommand(this);
-        const intervalPromise: Promise<string> = this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCORNjobString);
-        const interval: string = await intervalPromise; 
+
         await Promise.all([
             configuration.slashCommands.provideSlashCommand(gitHubCommand),
             configuration.slashCommands.provideSlashCommand(ghCommand),
@@ -240,7 +238,7 @@ export class GithubApp extends App implements IPreMessageSentExtend {
                 },
                 startupSetting:{
                     type:StartupType.RECURRING,
-                    interval:interval,
+                    interval:"0 9 * * *"
                 }
 
             }
@@ -261,11 +259,11 @@ export class GithubApp extends App implements IPreMessageSentExtend {
         const user = context.user;
         await sendDirectMessageOnInstall(read, modify, user, persistence);
     }
+
     public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
-        const intervalPromise: Promise<string> = this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCORNjobString);
-        const interval: string = await intervalPromise; 
-        configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
-        configurationModify.scheduler.scheduleRecurring({
+        const interval:string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCORNjobString);
+        await configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
+        await configurationModify.scheduler.scheduleRecurring({
             id:ProcessorsEnum.PR_REMINDER,
             interval:interval,
         })
