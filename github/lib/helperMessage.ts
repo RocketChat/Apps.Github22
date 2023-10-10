@@ -1,28 +1,28 @@
 import {
-    IHttp,
-    IModify,
-    IPersistence,
-    IRead,
-} from "@rocket.chat/apps-engine/definition/accessors";
-import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUser } from "@rocket.chat/apps-engine/definition/users";
+	IHttp,
+	IModify,
+	IPersistence,
+	IRead,
+} from '@rocket.chat/apps-engine/definition/accessors';
+import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
+import { IUser } from '@rocket.chat/apps-engine/definition/users';
 
 export async function helperMessage({
-    room,
-    read,
-    persistence,
-    modify,
-    http,
-    user
+	room,
+	read,
+	persistence,
+	modify,
+	http,
+	user,
 }: {
-    room: IRoom;
-    read: IRead;
-    persistence: IPersistence;
-    modify: IModify;
-    http: IHttp;
-    user?: IUser;
+	room: IRoom;
+	read: IRead;
+	persistence: IPersistence;
+	modify: IModify;
+	http: IHttp;
+	user?: IUser;
 }) {
-    let helperMessageString = `### Github App
+	let helperMessageString = `### Github App
     *The app can be accessed with any of the slash commands /gh or /github*
     1. See Interactive Button interface to fetch repository data -> \`/github Username/RepositoryName\`
     2. Get details of a Repository -> \`/github  Username/RepositoryName repo\`
@@ -41,14 +41,16 @@ export async function helperMessage({
     15. Assign and Share Issues -> \`/github issues\`
     `;
 
-    const textSender = await modify
-        .getCreator()
-        .startMessage()
-        .setText(`${helperMessageString}`);
+	const textSender = await modify
+		.getCreator()
+		.startMessage()
+		.setText(`${helperMessageString}`);
 
-    if (room) {
-        textSender.setRoom(room);
-    }
+	if (room) {
+		textSender.setRoom(room);
+	}
 
-    await modify.getNotifier().notifyUser(user as IUser, textSender.getMessage());
+	await modify
+		.getNotifier()
+		.notifyUser(user as IUser, textSender.getMessage());
 }

@@ -1,17 +1,23 @@
 {
-"compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "declaration": false,
-    "noImplicitAny": false,
-    "removeComments": true,
-    "strictNullChecks": true,
-    "noImplicitReturns": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    },
-"include": [
-    "**/*.ts"
-    ]
+	"compilerOptions":{
+		 "target":"es2018",
+		 "module":"commonjs",
+		 "moduleResolution":"node",
+		 "declaration":false,
+		 "noImplicitAny":false,
+		 "removeComments":true,
+		 "strictNullChecks":true,
+		 "noImplicitReturns":true,
+		 "emitDecoratorMetadata":true,
+		 "experimentalDecorators":true,
+		 "strict":true,
+		 "strictPropertyInitialization":false,
+		 "allowJs":false,
+		 "noUnusedLocals":true,
+		 "noUnusedParameters":true,
+		 "noFallthroughCasesInSwitch":false
+	},
+	"include":[
+		"**/*.ts"
+	]
 }

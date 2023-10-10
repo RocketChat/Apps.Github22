@@ -1,81 +1,81 @@
 import {
-    IHttp,
-    IMessageBuilder,
-    IModify,
-    IModifyCreator,
-    IPersistence,
-    IRead,
-} from "@rocket.chat/apps-engine/definition/accessors";
-import { ButtonStyle } from "@rocket.chat/apps-engine/definition/uikit";
+	IHttp,
+	IMessageBuilder,
+	IModify,
+	IModifyCreator,
+	IPersistence,
+	IRead,
+} from '@rocket.chat/apps-engine/definition/accessors';
+import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function initiatorMessage({
-    data,
-    read,
-    persistence,
-    modify,
-    http,
+	data,
+	read,
+	persistence,
+	modify,
+	http,
 }: {
-    data;
-    read: IRead;
-    persistence: IPersistence;
-    modify: IModify;
-    http: IHttp;
+	data;
+	read: IRead;
+	persistence: IPersistence;
+	modify: IModify;
+	http: IHttp;
 }) {
-    const greetBuilder = await modify
-        .getCreator()
-        .startMessage()
-        .setRoom(data.room)
-        .setText(`Hey ${data.sender.username} !`);
-        
-    if (data.room.type !== "l") {
-        await modify
-            .getNotifier()
-            .notifyUser(data.sender, greetBuilder.getMessage());
-    } else {
-        await modify.getCreator().finish(greetBuilder);
-    }
+	const greetBuilder = await modify
+		.getCreator()
+		.startMessage()
+		.setRoom(data.room)
+		.setText(`Hey ${data.sender.username} !`);
 
-    const builder = await modify.getCreator().startMessage().setRoom(data.room);
+	if (data.room.type !== 'l') {
+		await modify
+			.getNotifier()
+			.notifyUser(data.sender, greetBuilder.getMessage());
+	} else {
+		await modify.getCreator().finish(greetBuilder);
+	}
 
-    const block = modify.getCreator().getBlockBuilder();
+	const builder = await modify.getCreator().startMessage().setRoom(data.room);
 
-    block.addSectionBlock({
-        text: block.newPlainTextObject(
-            `Choose Action for ${data.arguments[0]} 👇 ?`
-        ),
-    });
+	const block = modify.getCreator().getBlockBuilder();
 
-    block.addActionsBlock({
-        blockId: "githubdata",
-        elements: [
-            block.newButtonElement({
-                actionId: "githubDataSelect",
-                text: block.newPlainTextObject("Overview"),
-                value: `${data.arguments[0]}/repo`,
-                style: ButtonStyle.PRIMARY,
-            }),
-            block.newButtonElement({
-                actionId: "githubDataSelect",
-                text: block.newPlainTextObject("Issues"),
-                value: `${data.arguments[0]}/issues`,
-                style: ButtonStyle.DANGER,
-            }),
-            block.newButtonElement({
-                actionId: "githubDataSelect",
-                text: block.newPlainTextObject("Contributors"),
-                value: `${data.arguments[0]}/contributors`,
-                style: ButtonStyle.PRIMARY,
-            }),
-            block.newButtonElement({
-                actionId: "githubDataSelect",
-                text: block.newPlainTextObject("Pull Requests"),
-                value: `${data.arguments[0]}/pulls`,
-                style: ButtonStyle.PRIMARY,
-            }),
-        ],
-    });
+	block.addSectionBlock({
+		text: block.newPlainTextObject(
+			`Choose Action for ${data.arguments[0]} 👇 ?`,
+		),
+	});
 
-    builder.setBlocks(block);
+	block.addActionsBlock({
+		blockId: 'githubdata',
+		elements: [
+			block.newButtonElement({
+				actionId: 'githubDataSelect',
+				text: block.newPlainTextObject('Overview'),
+				value: `${data.arguments[0]}/repo`,
+				style: ButtonStyle.PRIMARY,
+			}),
+			block.newButtonElement({
+				actionId: 'githubDataSelect',
+				text: block.newPlainTextObject('Issues'),
+				value: `${data.arguments[0]}/issues`,
+				style: ButtonStyle.DANGER,
+			}),
+			block.newButtonElement({
+				actionId: 'githubDataSelect',
+				text: block.newPlainTextObject('Contributors'),
+				value: `${data.arguments[0]}/contributors`,
+				style: ButtonStyle.PRIMARY,
+			}),
+			block.newButtonElement({
+				actionId: 'githubDataSelect',
+				text: block.newPlainTextObject('Pull Requests'),
+				value: `${data.arguments[0]}/pulls`,
+				style: ButtonStyle.PRIMARY,
+			}),
+		],
+	});
 
-    await modify.getNotifier().notifyUser(data.sender, builder.getMessage());
+	builder.setBlocks(block);
+
+	await modify.getNotifier().notifyUser(data.sender, builder.getMessage());
 }

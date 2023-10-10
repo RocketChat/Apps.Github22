@@ -1,19 +1,19 @@
 import {
-    IHttp,
-    IHttpRequest,
-    IPersistence,
-    IRead,
-} from "@rocket.chat/apps-engine/definition/accessors";
+	IHttp,
+	IHttpRequest,
+	IPersistence,
+	IRead,
+} from '@rocket.chat/apps-engine/definition/accessors';
 import {
-    RocketChatAssociationModel,
-    RocketChatAssociationRecord,
-} from "@rocket.chat/apps-engine/definition/metadata";
+	RocketChatAssociationModel,
+	RocketChatAssociationRecord,
+} from '@rocket.chat/apps-engine/definition/metadata';
 import {
-    IAuthData,
-    IOAuth2ClientOptions,
-} from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
-import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { URL } from "url";
+	IAuthData,
+	IOAuth2ClientOptions,
+} from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
+import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { URL } from 'url';
 
 // const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'users');
 
@@ -61,68 +61,68 @@ import { URL } from "url";
  */
 
 export async function getAccessTokenForUser(
-    read: IRead,
-    user: IUser,
-    config: IOAuth2ClientOptions
+	read: IRead,
+	user: IUser,
+	config: IOAuth2ClientOptions,
 ): Promise<IAuthData | undefined> {
-    const associations = [
-        new RocketChatAssociationRecord(
-            RocketChatAssociationModel.USER,
-            user.id
-        ),
-        new RocketChatAssociationRecord(
-            RocketChatAssociationModel.MISC,
-            `${config.alias}-oauth-connection`
-        ),
-    ];
+	const associations = [
+		new RocketChatAssociationRecord(
+			RocketChatAssociationModel.USER,
+			user.id,
+		),
+		new RocketChatAssociationRecord(
+			RocketChatAssociationModel.MISC,
+			`${config.alias}-oauth-connection`,
+		),
+	];
 
-    const [result] = (await read
-        .getPersistenceReader()
-        .readByAssociations(associations)) as unknown as Array<
-        IAuthData | undefined
-    >;
-    return result;
+	const [result] = (await read
+		.getPersistenceReader()
+		.readByAssociations(associations)) as unknown as Array<
+		IAuthData | undefined
+	>;
+	return result;
 }
 
 export async function removeToken({
-    userId,
-    persis,
-    config,
+	userId,
+	persis,
+	config,
 }: {
-    userId: string;
-    persis: IPersistence;
-    config: IOAuth2ClientOptions;
+	userId: string;
+	persis: IPersistence;
+	config: IOAuth2ClientOptions;
 }): Promise<IAuthData> {
-    const [result] = (await persis.removeByAssociations([
-        new RocketChatAssociationRecord(
-            RocketChatAssociationModel.USER,
-            userId
-        ),
-        new RocketChatAssociationRecord(
-            RocketChatAssociationModel.MISC,
-            `${config.alias}-oauth-connection`
-        ),
-    ])) as unknown as Array<IAuthData>;
+	const [result] = (await persis.removeByAssociations([
+		new RocketChatAssociationRecord(
+			RocketChatAssociationModel.USER,
+			userId,
+		),
+		new RocketChatAssociationRecord(
+			RocketChatAssociationModel.MISC,
+			`${config.alias}-oauth-connection`,
+		),
+	])) as unknown as Array<IAuthData>;
 
-    return result;
+	return result;
 }
 
 export async function revokeUserAccessToken(
-    read: IRead,
-    user: IUser,
-    persis: IPersistence,
-    http: IHttp,
-    config: IOAuth2ClientOptions
+	read: IRead,
+	user: IUser,
+	persis: IPersistence,
+	http: IHttp,
+	config: IOAuth2ClientOptions,
 ): Promise<boolean> {
-    try {
-        const tokenInfo = await getAccessTokenForUser(read, user, config);
-        if (!tokenInfo?.token) {
-            throw new Error("No access token available for this user.");
-        }
-        await removeToken({ userId: user.id, persis, config });
-        return true;
-    } catch (error) {
-        console.log("revokeTokenError : ", error);
-        return false;
-    }
+	try {
+		const tokenInfo = await getAccessTokenForUser(read, user, config);
+		if (!tokenInfo?.token) {
+			throw new Error('No access token available for this user.');
+		}
+		await removeToken({ userId: user.id, persis, config });
+		return true;
+	} catch (error) {
+		console.log('revokeTokenError : ', error);
+		return false;
+	}
 }
