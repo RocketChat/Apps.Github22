@@ -33,7 +33,7 @@ export async function createReminder(
     if (!isValidRepo) {
         return;
     } else {
-        CreateReminder(read, persistence, user, repoName);
+        await CreateReminder(read, persistence, user, repoName);
     }
     
     sendNotification(read, modify, user, room, `Pull Request Reminder Set for [${repoName}](https://github.com/${repoName}) 👍`)
