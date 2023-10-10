@@ -4,24 +4,15 @@ import {
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
-import {
-	AccessoryElements,
-	TextObjectType,
-} from '@rocket.chat/apps-engine/definition/uikit/blocks';
+import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
-import { AppEnum } from '../enum/App';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	storeInteractionRoomData,
 	getInteractionRoomData,
 } from '../persistance/roomInteraction';
-import { IGitHubSearchResult } from '../definitions/searchResult';
 import { IGitHubSearchResultData } from '../definitions/searchResultData';
 
 export async function githubSearchResultModal({
@@ -29,7 +20,6 @@ export async function githubSearchResultModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
@@ -75,12 +65,12 @@ export async function githubSearchResultModal({
 		});
 
 		block.addDividerBlock();
-		let searchItems = data?.search_results;
+		const searchItems = data?.search_results;
 		let index = 1;
 
 		if (searchItems && Array.isArray(searchItems)) {
-			for (let item of searchItems) {
-				let title = item.title;
+			for (const item of searchItems) {
+				const title = item.title;
 
 				block.addSectionBlock({
 					text: {
@@ -90,13 +80,13 @@ export async function githubSearchResultModal({
 				});
 
 				//context block should only have labels section if labels exist on a resource
-				let contextBlockElementsArray = [
+				const contextBlockElementsArray = [
 					block.newPlainTextObject(`User : ${item.user_login} | `),
 					block.newPlainTextObject(`Status: ${item.state} | `),
 				];
 				if (item?.labels && Array.isArray(item.labels)) {
 					let labelString = '';
-					for (let label of item.labels) {
+					for (const label of item.labels) {
 						labelString += `${label.name} `;
 					}
 					if (labelString.length) {
@@ -109,7 +99,7 @@ export async function githubSearchResultModal({
 					elements: contextBlockElementsArray,
 				});
 				//button click actions can only detected `value:string` hence search results object must be parsed to string and stored in `value` and then reparsed to javascript object in `blockActionHandler`
-				let actionBlockElementsArray = [
+				const actionBlockElementsArray = [
 					block.newButtonElement({
 						actionId: ModalsEnum.OPEN_GITHUB_RESULT_ACTION,
 						text: {
@@ -159,17 +149,17 @@ export async function githubSearchResultModal({
 				}
 				//if resource is PR we need to show a code changes option and for that we need to destructure the url to find the repository and PR details
 				if (item.pull_request) {
-					let url = item.pull_request_url as string;
+					const url = item.pull_request_url as string;
 					if (url) {
-						let urlParams = url.split('/');
+						const urlParams = url.split('/');
 						if (urlParams.length >= 4) {
-							let pullNumber = urlParams[urlParams.length - 1]
+							const pullNumber = urlParams[urlParams.length - 1]
 								?.toString()
 								?.trim();
-							let repoName = urlParams[urlParams.length - 3]
+							const repoName = urlParams[urlParams.length - 3]
 								?.toString()
 								?.trim();
-							let ownerName = urlParams[urlParams.length - 4]
+							const ownerName = urlParams[urlParams.length - 4]
 								?.toString()
 								?.trim();
 							actionBlockElementsArray.push(
@@ -190,7 +180,7 @@ export async function githubSearchResultModal({
 					elements: actionBlockElementsArray,
 				});
 
-				index++;
+				index = index + 1;
 				block.addDividerBlock();
 			}
 		}

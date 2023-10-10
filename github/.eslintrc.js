@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 module.exports = {
     root: true,
     parser: '@typescript-eslint/parser',
@@ -10,7 +11,6 @@ module.exports = {
     ],
     rules: {
         "no-case-declarations": "off",
-        "@typescript-eslint/no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }],
-        '@typescript-eslint/no-floating-promises': ['error'],
+        "@typescript-eslint/no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }]
     },
 };

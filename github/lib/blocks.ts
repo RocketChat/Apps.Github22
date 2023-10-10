@@ -1,8 +1,5 @@
 import { IModify } from '@rocket.chat/apps-engine/definition/accessors';
-import {
-	AccessoryElements,
-	BlockBuilder,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { BlockBuilder } from '@rocket.chat/apps-engine/definition/uikit';
 
 export interface IButton {
 	text: string;

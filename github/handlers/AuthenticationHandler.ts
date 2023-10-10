@@ -1,5 +1,4 @@
 import {
-	IHttp,
 	IModify,
 	IPersistence,
 	IRead,
@@ -21,9 +20,8 @@ export async function handleLogin(
 	modify: IModify,
 	context: SlashCommandContext,
 	room: IRoom,
-	persistence: IPersistence,
 ) {
-	await authorize(app, read, modify, context.getSender(), room, persistence);
+	await authorize(app, read, modify, context.getSender(), room);
 }
 
 export async function handleLogout(
@@ -34,9 +32,8 @@ export async function handleLogout(
 	room: IRoom,
 	persistence: IPersistence,
 	sender: IUser,
-	http: IHttp,
 ) {
-	let accessToken = await getAccessTokenForUser(
+	const accessToken = await getAccessTokenForUser(
 		read,
 		context.getSender(),
 		app.oauth2Config,
@@ -46,7 +43,6 @@ export async function handleLogout(
 			read,
 			sender,
 			persistence,
-			http,
 			app.oauth2Config,
 		);
 		await sendNotification(

@@ -1,3 +1,5 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable no-useless-escape */
 import {
 	BlockBuilder,
 	TextObjectType,
@@ -49,8 +51,9 @@ export async function BodyMarkdownRenderer({
 		},
 	];
 
-	let matches: { beginningIndex: number; match: string; type: string }[] = [];
-	var match;
+	const matches: { beginningIndex: number; match: string; type: string }[] =
+		[];
+	let match;
 
 	imagePatterns.forEach((patObj) => {
 		while ((match = patObj.pattern.exec(body)) != null) {
@@ -72,7 +75,7 @@ export async function BodyMarkdownRenderer({
 	} else {
 		matches.sort((a, b) => a.beginningIndex - b.beginningIndex);
 		matches.map((value, index) => {
-			let start =
+			const start =
 				index == 0
 					? 0
 					: matches[index - 1].beginningIndex +

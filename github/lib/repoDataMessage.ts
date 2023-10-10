@@ -10,13 +10,11 @@ import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 export async function repoDataMessage({
 	repository,
 	room,
-	read,
-	persistence,
 	modify,
 	http,
 	accessToken,
 }: {
-	repository: String;
+	repository: string;
 	room: IRoom;
 	read: IRead;
 	persistence: IPersistence;
@@ -24,6 +22,7 @@ export async function repoDataMessage({
 	http: IHttp;
 	accessToken?: IAuthData;
 }) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gitResponse: any;
 	if (accessToken?.token) {
 		gitResponse = await http.get(

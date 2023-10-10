@@ -1,8 +1,6 @@
 import {
 	IHttp,
-	IMessageBuilder,
 	IModify,
-	IModifyCreator,
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
@@ -10,10 +8,7 @@ import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function initiatorMessage({
 	data,
-	read,
-	persistence,
 	modify,
-	http,
 }: {
 	data;
 	read: IRead;

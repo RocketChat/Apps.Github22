@@ -6,9 +6,7 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 
 import { sendDirectMessage } from '../lib/message';
-import { IJobContext } from '@rocket.chat/apps-engine/definition/scheduler';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import {
 	getAccessTokenForUser,
 	revokeUserAccessToken,
@@ -20,7 +18,6 @@ export async function deleteOathToken({
 	config,
 	read,
 	modify,
-	http,
 	persis,
 }: {
 	user: IUser;
@@ -33,7 +30,7 @@ export async function deleteOathToken({
 	try {
 		let token = await getAccessTokenForUser(read, user, config);
 		if (token?.token) {
-			await revokeUserAccessToken(read, user, persis, http, config);
+			await revokeUserAccessToken(read, user, persis, config);
 		}
 		token = await getAccessTokenForUser(read, user, config);
 		await sendDirectMessage(

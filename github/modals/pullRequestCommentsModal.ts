@@ -6,14 +6,10 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
 import { AppEnum } from '../enum/App';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	storeInteractionRoomData,
 	getInteractionRoomData,
@@ -25,7 +21,6 @@ export async function pullRequestCommentsModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
@@ -61,8 +56,8 @@ export async function pullRequestCommentsModal({
 				)
 			).roomId;
 		}
-		let pullData = data?.pullData;
-		let pullRequestComments = data?.pullRequestComments;
+		const pullData = data?.pullData;
+		const pullRequestComments = data?.pullRequestComments;
 
 		block.addSectionBlock({
 			text: {
@@ -124,11 +119,10 @@ export async function pullRequestCommentsModal({
 
 		let index = 1;
 
-		for (let comment of pullRequestComments) {
-			let username = comment?.user?.login;
-			let avatarUrl = comment?.user?.avatar_url;
-			let commentBody = comment?.body;
-			let userProfileUrl = comment?.user?.html_url;
+		for (const comment of pullRequestComments) {
+			const username = comment?.user?.login;
+			const commentBody = comment?.body;
+			const userProfileUrl = comment?.user?.html_url;
 
 			block.addSectionBlock({
 				text: {
@@ -150,8 +144,8 @@ export async function pullRequestCommentsModal({
 					type: TextObjectType.MARKDOWN,
 				},
 			});
-			let date = parseDate(comment?.created_at);
-			let time = parseTime(comment?.created_at);
+			const date = parseDate(comment?.created_at);
+			const time = parseTime(comment?.created_at);
 			block.addContextBlock({
 				elements: [
 					block.newPlainTextObject(
@@ -160,7 +154,7 @@ export async function pullRequestCommentsModal({
 				],
 			});
 			block.addDividerBlock();
-			index++;
+			index = index + 1;
 		}
 	}
 

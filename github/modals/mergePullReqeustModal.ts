@@ -19,10 +19,10 @@ export async function mergePullRequestModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	data?: any;
 	modify: IModify;
 	read: IRead;
@@ -127,7 +127,7 @@ export async function mergePullRequestModal({
 			}),
 		});
 
-		let newMultiStaticElemnt = block.newStaticSelectElement({
+		const newMultiStaticElemnt = block.newStaticSelectElement({
 			actionId: ModalsEnum.PULL_REQUEST_MERGE_METHOD_OPTION,
 			options: [
 				{

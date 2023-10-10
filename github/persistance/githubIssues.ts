@@ -67,7 +67,7 @@ export class GithubRepoIssuesStorage {
 					`${user.id}`,
 				),
 			];
-			let searchResults: Array<IGitHubIssueData> =
+			const searchResults: Array<IGitHubIssueData> =
 				(await this.persistenceRead.readByAssociations(
 					associations,
 				)) as Array<IGitHubIssueData>;

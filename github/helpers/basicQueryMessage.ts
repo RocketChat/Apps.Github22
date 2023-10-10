@@ -24,8 +24,8 @@ export async function basicQueryMessage({
 	accessToken,
 	user,
 }: {
-	query: String;
-	repository: String;
+	query: string;
+	repository: string;
 	room: IRoom;
 	read: IRead;
 	persistence: IPersistence;

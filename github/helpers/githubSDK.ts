@@ -1,17 +1,14 @@
-import {
-	IHttp,
-	HttpStatusCode,
-} from '@rocket.chat/apps-engine/definition/accessors';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { IHttp } from '@rocket.chat/apps-engine/definition/accessors';
 import { IGitHubIssue } from '../definitions/githubIssue';
 import { ModalsEnum } from '../enum/Modals';
 
-const BaseHost = 'https://github.com/';
 const BaseApiHost = 'https://api.github.com/';
 const BaseRepoApiHost = 'https://api.github.com/repos/';
 
 async function postRequest(
 	http: IHttp,
-	accessToken: String,
+	accessToken: string,
 	url: string,
 	data: any,
 ): Promise<any> {
@@ -34,7 +31,7 @@ async function postRequest(
 
 async function getRequest(
 	http: IHttp,
-	accessToken: String,
+	accessToken: string,
 	url: string,
 ): Promise<any> {
 	const response = await http.get(url, {
@@ -54,7 +51,7 @@ async function getRequest(
 
 async function deleteRequest(
 	http: IHttp,
-	accessToken: String,
+	accessToken: string,
 	url: string,
 ): Promise<any> {
 	const response = await http.del(url, {
@@ -75,7 +72,7 @@ async function deleteRequest(
 
 async function patchRequest(
 	http: IHttp,
-	accessToken: String,
+	accessToken: string,
 	url: string,
 	data: any,
 ): Promise<any> {
@@ -101,7 +98,7 @@ export async function createSubscription(
 	repoName: string,
 	webhookUrl: string,
 	access_token: string,
-	events: Array<String>,
+	events: Array<string>,
 ) {
 	return postRequest(
 		http,
@@ -136,7 +133,7 @@ export async function updateSubscription(
 	repoName: string,
 	access_token: string,
 	hookId: string,
-	events: Array<String>,
+	events: Array<string>,
 ) {
 	return patchRequest(
 		http,
@@ -154,7 +151,7 @@ export async function addSubscribedEvents(
 	repoName: string,
 	access_token: string,
 	hookId: string,
-	events: Array<String>,
+	events: Array<string>,
 ) {
 	return patchRequest(
 		http,
@@ -172,7 +169,7 @@ export async function removeSubscribedEvents(
 	repoName: string,
 	access_token: string,
 	hookId: string,
-	events: Array<String>,
+	events: Array<string>,
 ) {
 	return patchRequest(
 		http,
@@ -270,9 +267,9 @@ export async function githubSearchIssuesPulls(
 	access_token: string,
 	resource: string | undefined,
 	state: string | undefined,
-	labels: Array<String>,
-	authors: Array<String>,
-	milestones: Array<String>,
+	labels: Array<string>,
+	authors: Array<string>,
+	milestones: Array<string>,
 ) {
 	let queryString = 'q=';
 	let authorsFilter = '';
@@ -295,15 +292,15 @@ export async function githubSearchIssuesPulls(
 	}
 
 	if (authors?.length) {
-		for (let author of authors) {
-			let authorQuery = `author:${author} `;
+		for (const author of authors) {
+			const authorQuery = `author:${author} `;
 			authorsFilter += authorQuery;
 		}
 	}
 
 	if (milestones?.length) {
-		for (let milestone of milestones) {
-			let milestoneQuery = `milestone:${milestone} `;
+		for (const milestone of milestones) {
+			const milestoneQuery = `milestone:${milestone} `;
 			milestonesFilter += milestoneQuery;
 		}
 	}
@@ -311,7 +308,7 @@ export async function githubSearchIssuesPulls(
 	if (labels?.length) {
 		let labelQuery = `label:`;
 		let index = 0;
-		for (let label of labels) {
+		for (const label of labels) {
 			if (index == labels.length - 1) {
 				labelQuery += `${label} `;
 			} else {
@@ -347,7 +344,7 @@ export async function githubSearchIssuesPulls(
 		authorsFilter +
 		labelsFiler +
 		milestonesFilter;
-	let ecodedQueryString = encodeURI(queryString);
+	const ecodedQueryString = encodeURI(queryString);
 
 	const response = await http.get(
 		BaseApiHost + 'search/issues?' + ecodedQueryString,
@@ -359,7 +356,7 @@ export async function githubSearchIssuesPulls(
 		},
 	);
 	// If it isn't a 2xx code, something wrong happened
-	let resultResponse = JSON.parse(response.content || '{}');
+	const resultResponse = JSON.parse(response.content || '{}');
 	if (!response.statusCode.toString().startsWith('2')) {
 		resultResponse['server_error'] = true;
 	} else {
@@ -385,7 +382,7 @@ export async function getRepoData(
 	);
 
 	// If it isn't a 2xx code, something wrong happened
-	let JSONResponse = JSON.parse(response.content || '{}');
+	const JSONResponse = JSON.parse(response.content || '{}');
 	if (!response.statusCode.toString().startsWith('2')) {
 		JSONResponse['serverError'] = true;
 	} else {
@@ -404,7 +401,7 @@ export async function mergePullRequest(
 	commitMessage: string,
 	method: string,
 ) {
-	let data = {};
+	const data = {};
 	if (commitTitle?.length) {
 		data['commit_title'] = commitTitle;
 	}
@@ -425,7 +422,7 @@ export async function mergePullRequest(
 		},
 	);
 	// If it isn't a 2xx code, something wrong happened
-	let JSONResponse = JSON.parse(response.content || '{}');
+	const JSONResponse = JSON.parse(response.content || '{}');
 	if (!response.statusCode.toString().startsWith('2')) {
 		JSONResponse['serverError'] = true;
 	} else {
@@ -435,7 +432,7 @@ export async function mergePullRequest(
 	return JSONResponse;
 }
 
-export async function getBasicUserInfo(http: IHttp, access_token: String) {
+export async function getBasicUserInfo(http: IHttp, access_token: string) {
 	try {
 		const response = await getRequest(
 			http,
@@ -465,12 +462,12 @@ export async function getBasicUserInfo(http: IHttp, access_token: String) {
 
 export async function getUserAssignedIssues(
 	http: IHttp,
-	username: String,
-	access_token: String,
+	username: string,
+	access_token: string,
 	filter: {
-		filter: String;
-		state: String;
-		sort: String;
+		filter: string;
+		state: string;
+		sort: string;
 	},
 ): Promise<IGitHubIssue[]> {
 	let url;
@@ -496,6 +493,7 @@ export async function getUserAssignedIssues(
 			}+is:issue+sort:${filter.sort.substring(
 				5,
 			)}-desc+mentions:${username}`;
+			break;
 		default:
 			break;
 	}
@@ -533,9 +531,9 @@ export async function getUserAssignedIssues(
 }
 
 export async function getIssueData(
-	repoInfo: String,
-	issueNumber: String,
-	access_token: String | null,
+	repoInfo: string,
+	issueNumber: string,
+	access_token: string | null,
 	http: IHttp,
 ): Promise<IGitHubIssue> {
 	try {
@@ -610,7 +608,7 @@ export async function addNewPullRequestComment(
 	pullRequestNumber: string | number,
 	newComment: string,
 ) {
-	let data = {
+	const data = {
 		body: newComment,
 	};
 	const response = await http.post(
@@ -624,7 +622,7 @@ export async function addNewPullRequestComment(
 		},
 	);
 	// If it isn't a 2xx code, something wrong happened
-	let JSONResponse = JSON.parse(response.content || '{}');
+	const JSONResponse = JSON.parse(response.content || '{}');
 	if (!response.statusCode.toString().startsWith('2')) {
 		JSONResponse['serverError'] = true;
 	} else {
@@ -664,11 +662,12 @@ export async function getPullRequestComments(
 export async function getIssuesComments(
 	http: IHttp,
 	repoName: string,
-	access_token: String | null,
+	access_token: string | null,
 	issueNumber: string | number,
 ) {
+	let response: any;
 	if (access_token) {
-		var response = await http.get(
+		response = await http.get(
 			`https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
 			{
 				headers: {
@@ -678,7 +677,7 @@ export async function getIssuesComments(
 			},
 		);
 	} else {
-		var response = await http.get(
+		response = await http.get(
 			`https://api.github.com/repos/${repoName}/issues/${issueNumber}/comments`,
 			{
 				headers: {
@@ -706,7 +705,7 @@ export async function addNewIssueComment(
 	issueNumber: string | number,
 	newComment: string,
 ) {
-	let data = {
+	const data = {
 		body: newComment,
 	};
 	const response = await http.post(
@@ -720,7 +719,7 @@ export async function addNewIssueComment(
 		},
 	);
 	// If it isn't a 2xx code, something wrong happened
-	let JSONResponse = JSON.parse(response.content || '{}');
+	const JSONResponse = JSON.parse(response.content || '{}');
 	if (!response.statusCode.toString().startsWith('2')) {
 		JSONResponse['serverError'] = true;
 	} else {
@@ -746,7 +745,7 @@ export async function getPullRequestData(
 		},
 	);
 	// If it isn't a 2xx code, something wrong happened
-	let JSONResponse = JSON.parse(response.content || '{}');
+	const JSONResponse = JSON.parse(response.content || '{}');
 	if (!response.statusCode.toString().startsWith('2')) {
 		JSONResponse['serverError'] = true;
 	} else {
@@ -800,11 +799,10 @@ export async function updateGithubIssues(
 	access_token: string,
 ) {
 	//this does not use the get , post , patch method defined because we dont want to throw an error for an eror response
-	let response: any;
-	let data = {
+	const data = {
 		assignees: assignees,
 	};
-	response = await http.patch(
+	const response = await http.patch(
 		BaseRepoApiHost + repoName + `/issues/${issueNumber}`,
 		{
 			headers: {

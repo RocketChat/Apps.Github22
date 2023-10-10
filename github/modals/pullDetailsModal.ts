@@ -6,14 +6,10 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
 import { AppEnum } from '../enum/App';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	storeInteractionRoomData,
 	getInteractionRoomData,
@@ -98,12 +94,12 @@ export async function pullDetailsModal({
 
 		let index = 1;
 
-		for (let file of pullRequestFiles) {
-			let fileName = file['filename'];
-			let rawUrl = file['raw_url'];
-			let status = file['status'];
-			let addition = file['additions'];
-			let deletions = file['deletions'];
+		for (const file of pullRequestFiles) {
+			const fileName = file['filename'];
+			const rawUrl = file['raw_url'];
+			const status = file['status'];
+			const addition = file['additions'];
+			const deletions = file['deletions'];
 			block.addSectionBlock({
 				text: {
 					text: `${index} ${fileName}`,

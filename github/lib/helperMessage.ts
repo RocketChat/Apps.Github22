@@ -9,10 +9,7 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 
 export async function helperMessage({
 	room,
-	read,
-	persistence,
 	modify,
-	http,
 	user,
 }: {
 	room: IRoom;
@@ -22,7 +19,7 @@ export async function helperMessage({
 	http: IHttp;
 	user?: IUser;
 }) {
-	let helperMessageString = `### Github App
+	const helperMessageString = `### Github App
     *The app can be accessed with any of the slash commands /gh or /github*
     1. See Interactive Button interface to fetch repository data -> \`/github Username/RepositoryName\`
     2. Get details of a Repository -> \`/github  Username/RepositoryName repo\`

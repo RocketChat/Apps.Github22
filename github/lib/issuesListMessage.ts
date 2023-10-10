@@ -1,28 +1,20 @@
 import {
 	IHttp,
-	IMessageBuilder,
 	IModify,
-	IModifyCreator,
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { IAuthData } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
-import {
-	ISlashCommand,
-	SlashCommandContext,
-} from '@rocket.chat/apps-engine/definition/slashcommands';
 
 export async function issueListMessage({
 	repository,
 	room,
-	read,
-	persistence,
 	modify,
 	http,
 	accessToken,
 }: {
-	repository: String;
+	repository: string;
 	room: IRoom;
 	read: IRead;
 	persistence: IPersistence;
@@ -30,6 +22,7 @@ export async function issueListMessage({
 	http: IHttp;
 	accessToken?: IAuthData;
 }) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gitResponse: any;
 	if (accessToken?.token) {
 		gitResponse = await http.get(
@@ -59,6 +52,7 @@ export async function issueListMessage({
 	await modify.getCreator().finish(textSender);
 	resData.forEach(async (issue) => {
 		if (typeof issue.pull_request === 'undefined' && ind < 10) {
+			// eslint-disable-next-line no-useless-escape
 			issue.title = issue.title.replace(/[\[\]()`]/g, '');
 			const textSender = await modify
 				.getCreator()

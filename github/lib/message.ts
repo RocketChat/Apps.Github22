@@ -38,6 +38,7 @@ export async function getDirect(
 			.setType(RoomType.DIRECT_MESSAGE)
 			.setCreator(appUser)
 			.setMembersToBeAddedByUsernames(usernames);
+		// eslint-disable-next-line prefer-const
 		roomId = await modify.getCreator().finish(newRoom);
 		return await read.getRoomReader().getById(roomId);
 	}

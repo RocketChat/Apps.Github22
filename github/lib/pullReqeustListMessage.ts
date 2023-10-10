@@ -1,8 +1,6 @@
 import {
 	IHttp,
-	IMessageBuilder,
 	IModify,
-	IModifyCreator,
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
@@ -12,13 +10,11 @@ import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 export async function pullRequestListMessage({
 	repository,
 	room,
-	read,
-	persistence,
 	modify,
 	http,
 	accessToken,
 }: {
-	repository: String;
+	repository: string;
 	room: IRoom;
 	read: IRead;
 	persistence: IPersistence;
@@ -26,6 +22,7 @@ export async function pullRequestListMessage({
 	http: IHttp;
 	accessToken?: IAuthData;
 }) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gitResponse: any;
 	if (accessToken?.token) {
 		gitResponse = await http.get(

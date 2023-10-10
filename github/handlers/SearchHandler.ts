@@ -20,7 +20,7 @@ export async function handleSearch(
 	room: IRoom,
 	modify: IModify,
 ) {
-	let accessToken = await getAccessTokenForUser(
+	const accessToken = await getAccessTokenForUser(
 		read,
 		context.getSender(),
 		app.oauth2Config,

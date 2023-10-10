@@ -85,7 +85,6 @@ export class CommandUtility implements ExecutorProps {
 						this.modify,
 						this.context,
 						this.room,
-						this.persistence,
 					);
 					break;
 				}
@@ -98,7 +97,6 @@ export class CommandUtility implements ExecutorProps {
 						this.room,
 						this.persistence,
 						this.sender,
-						this.http,
 					);
 					break;
 				}
@@ -106,7 +104,7 @@ export class CommandUtility implements ExecutorProps {
 					break;
 				}
 				case SubcommandEnum.SUBSCRIBE: {
-					ManageSubscriptions(
+					await ManageSubscriptions(
 						this.read,
 						this.context,
 						this.app,
@@ -118,7 +116,7 @@ export class CommandUtility implements ExecutorProps {
 					break;
 				}
 				case SubcommandEnum.NEW_ISSUE: {
-					handleNewIssue(
+					await handleNewIssue(
 						this.read,
 						this.context,
 						this.app,
@@ -130,7 +128,7 @@ export class CommandUtility implements ExecutorProps {
 					break;
 				}
 				case SubcommandEnum.SEARCH: {
-					handleSearch(
+					await handleSearch(
 						this.read,
 						this.context,
 						this.app,
@@ -157,10 +155,8 @@ export class CommandUtility implements ExecutorProps {
 					handleIssues(
 						this.read,
 						this.context,
-						this.app,
 						this.persistence,
 						this.http,
-						this.room,
 						this.modify,
 					);
 					break;

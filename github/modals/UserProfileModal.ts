@@ -11,7 +11,6 @@ import {
 	UIKitInteractionContext,
 } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { AppEnum } from '../enum/App';
 import { ModalsEnum } from '../enum/Modals';
 import { getBasicUserInfo } from '../helpers/githubSDK';
 import {
@@ -30,7 +29,7 @@ export async function userProfileModal({
 	slashcommandcontext,
 	uikitcontext,
 }: {
-	access_token: String;
+	access_token: string;
 	modify: IModify;
 	read: IRead;
 	persistence: IPersistence;

@@ -5,17 +5,13 @@ import {
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import {
-	AccessoryElements,
 	ITextObject,
 	TextObjectType,
 } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { ModalsEnum } from '../enum/Modals';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	storeInteractionRoomData,
 	getInteractionRoomData,
@@ -26,10 +22,10 @@ export async function githubIssuesListModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	data: any;
 	modify: IModify;
 	read: IRead;
@@ -72,23 +68,23 @@ export async function githubIssuesListModal({
 		});
 
 		block.addDividerBlock();
-		let issueList = data?.issues;
+		const issueList = data?.issues;
 		let index = 1;
 		if (issueList && Array.isArray(issueList)) {
-			for (let issue of issueList) {
+			for (const issue of issueList) {
 				block.addSectionBlock({
 					text: {
 						text: `#${issue.number} ${issue.title}`,
 						type: TextObjectType.PLAINTEXT,
 					},
 				});
-				let contextBlockElementsArray = [
+				const contextBlockElementsArray = [
 					block.newPlainTextObject(`User : ${issue.user_login} | `),
 					block.newPlainTextObject(`Status: ${issue.state} | `),
 				];
 				if (issue?.labels && Array.isArray(issue.labels)) {
 					let labelString = '';
-					for (let label of issue.labels) {
+					for (const label of issue.labels) {
 						labelString += `${label} `;
 					}
 					if (labelString.length) {
@@ -100,10 +96,11 @@ export async function githubIssuesListModal({
 				block.addContextBlock({
 					elements: contextBlockElementsArray,
 				});
-				let contextBlockElementAssigneesArray: Array<ITextObject> = [];
+				const contextBlockElementAssigneesArray: Array<ITextObject> =
+					[];
 				let assigneesString = '';
 				if (issue?.assignees && Array.isArray(issue.assignees)) {
-					for (let assignee of issue.assignees) {
+					for (const assignee of issue.assignees) {
 						assigneesString += `${assignee} `;
 					}
 					if (assigneesString.length) {
@@ -118,7 +115,7 @@ export async function githubIssuesListModal({
 					elements: contextBlockElementAssigneesArray,
 				});
 				//button click actions can only detected `value:string` hence search results object must be parsed to string and stored in `value` and then reparsed to javascript object in `blockActionHandler`
-				let actionBlockElementsArray = [
+				const actionBlockElementsArray = [
 					block.newButtonElement({
 						actionId: ModalsEnum.OPEN_GITHUB_RESULT_ACTION,
 						text: {
@@ -178,7 +175,7 @@ export async function githubIssuesListModal({
 				block.addActionsBlock({
 					elements: actionBlockElementsArray,
 				});
-				index++;
+				index = index + 1;
 				block.addDividerBlock();
 			}
 		}

@@ -6,7 +6,6 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { GithubApp } from '../GithubApp';
 import { sendNotification } from '../lib/message';
 import { userProfileModal } from '../modals/UserProfileModal';
@@ -20,9 +19,8 @@ export async function handleUserProfileRequest(
 	http: IHttp,
 	room: IRoom,
 	modify: IModify,
-	uikitcontext?: UIKitInteractionContext,
 ) {
-	let access_token = await getAccessTokenForUser(
+	const access_token = await getAccessTokenForUser(
 		read,
 		context.getSender(),
 		app.oauth2Config,

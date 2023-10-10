@@ -1,6 +1,4 @@
 import {
-	IHttp,
-	IHttpRequest,
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
@@ -13,7 +11,6 @@ import {
 	IOAuth2ClientOptions,
 } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { URL } from 'url';
 
 // const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'users');
 
@@ -111,7 +108,6 @@ export async function revokeUserAccessToken(
 	read: IRead,
 	user: IUser,
 	persis: IPersistence,
-	http: IHttp,
 	config: IOAuth2ClientOptions,
 ): Promise<boolean> {
 	try {

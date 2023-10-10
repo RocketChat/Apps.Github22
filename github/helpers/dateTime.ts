@@ -8,10 +8,10 @@ export const parseTime = (myDate) => {
 };
 
 export const parseDate = (myDate) => {
-	let date = new Date(myDate);
-	let year: string = `${date.getFullYear()}`;
-	let month: string = `${date.getMonth() + 1}`;
-	let dt: string = `${date.getDate()}`;
+	const date = new Date(myDate);
+	const year = `${date.getFullYear()}`;
+	let month = `${date.getMonth() + 1}`;
+	let dt = `${date.getDate()}`;
 
 	if (dt.length < 2) {
 		dt = '0' + dt;

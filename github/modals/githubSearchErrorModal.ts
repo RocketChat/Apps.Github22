@@ -1,27 +1,14 @@
-import {
-	IHttp,
-	IModify,
-	IPersistence,
-	IRead,
-} from '@rocket.chat/apps-engine/definition/accessors';
+import { IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
 import { AppEnum } from '../enum/App';
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function githubSearchErrorModal({
 	errorMessage,
 	modify,
-	read,
-	slashcommandcontext,
-	uikitcontext,
 }: {
 	errorMessage?: string;
 	modify: IModify;

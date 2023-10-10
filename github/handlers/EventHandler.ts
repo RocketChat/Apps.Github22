@@ -29,7 +29,7 @@ export async function SubscribeAllEvents(
 	room: IRoom,
 	modify: IModify,
 ) {
-	let accessToken = await getAccessTokenForUser(
+	const accessToken = await getAccessTokenForUser(
 		read,
 		context.getSender(),
 		app.oauth2Config,
@@ -52,7 +52,7 @@ export async function SubscribeAllEvents(
 				return;
 			}
 
-			let events: Array<string> = [
+			const events: Array<string> = [
 				'pull_request',
 				'push',
 				'issues',
@@ -60,38 +60,38 @@ export async function SubscribeAllEvents(
 				'star',
 			];
 			//if hook exists we set its take its hook id and add our aditional events to it
-			let eventSusbcriptions = new Map<string, boolean>();
+			const eventSusbcriptions = new Map<string, boolean>();
 			//this helps us mark the new events to be added
-			for (let event of events) {
+			for (const event of events) {
 				eventSusbcriptions.set(event, false);
 			}
-			let url = await getWebhookUrl(app);
-			let subscriptionStorage = new Subscription(
+			const url = await getWebhookUrl(app);
+			const subscriptionStorage = new Subscription(
 				persistence,
 				read.getPersistenceReader(),
 			);
-			let user = context.getSender();
-			let repositorySubscriptions =
+			const user = context.getSender();
+			const repositorySubscriptions =
 				await subscriptionStorage.getSubscriptionsByRepo(
 					repository,
 					user.id,
 				);
 			let hookId = '';
-			for (let susbcription of repositorySubscriptions) {
+			for (const susbcription of repositorySubscriptions) {
 				if (hookId == '') {
 					hookId = susbcription.webhookId;
 				}
 				eventSusbcriptions.set(susbcription.event, true);
 			}
-			let newEvents: Array<string> = [];
-			for (let [event, value] of eventSusbcriptions) {
+			const newEvents: Array<string> = [];
+			for (const [event, value] of eventSusbcriptions) {
 				if (!value) {
 					newEvents.push(event);
 				}
 			}
 			let createdEntry = false;
 			if (hookId == '') {
-				let response = await createSubscription(
+				const response = await createSubscription(
 					http,
 					repository,
 					url,
@@ -101,7 +101,7 @@ export async function SubscribeAllEvents(
 				hookId = response.id;
 			} else {
 				if (newEvents.length) {
-					let response = await updateSubscription(
+					const response = await updateSubscription(
 						http,
 						repository,
 						accessToken.token,
@@ -111,7 +111,7 @@ export async function SubscribeAllEvents(
 					hookId = response.id;
 				}
 			}
-			for (let event of events) {
+			for (const event of events) {
 				createdEntry = await subscriptionStorage.createSubscription(
 					repository,
 					event,
@@ -155,7 +155,7 @@ export async function UnsubscribeAllEvents(
 	room: IRoom,
 	modify: IModify,
 ) {
-	let accessToken = await getAccessTokenForUser(
+	const accessToken = await getAccessTokenForUser(
 		read,
 		context.getSender(),
 		app.oauth2Config,
@@ -163,7 +163,7 @@ export async function UnsubscribeAllEvents(
 	const repository = command[0];
 	if (accessToken && accessToken?.token) {
 		try {
-			let user = await context.getSender();
+			const user = await context.getSender();
 			const isValidRepo = await HandleInvalidRepoName(
 				repository,
 				http,
@@ -178,18 +178,11 @@ export async function UnsubscribeAllEvents(
 				return;
 			}
 
-			let events: Array<string> = [
-				'pull_request',
-				'push',
-				'issues',
-				'deployment_status',
-				'star',
-			];
-			let subscriptionStorage = new Subscription(
+			const subscriptionStorage = new Subscription(
 				persistence,
 				read.getPersistenceReader(),
 			);
-			let oldSubscriptions =
+			const oldSubscriptions =
 				await subscriptionStorage.getSubscriptionsByRepo(
 					repository,
 					user.id,
@@ -201,14 +194,14 @@ export async function UnsubscribeAllEvents(
 			);
 			let hookId = '';
 			//check if any subscription events of the repo is left in any other room
-			let eventSubscriptions = new Map<string, boolean>();
-			for (let subscription of oldSubscriptions) {
+			const eventSubscriptions = new Map<string, boolean>();
+			for (const subscription of oldSubscriptions) {
 				eventSubscriptions.set(subscription.event, false);
 				if (hookId == '') {
 					hookId = subscription.webhookId;
 				}
 			}
-			let updatedsubscriptions =
+			const updatedsubscriptions =
 				await subscriptionStorage.getSubscriptionsByRepo(
 					repository,
 					user.id,
@@ -221,25 +214,16 @@ export async function UnsubscribeAllEvents(
 					hookId,
 				);
 			} else {
-				for (let subscription of updatedsubscriptions) {
+				for (const subscription of updatedsubscriptions) {
 					eventSubscriptions.set(subscription.event, true);
 				}
-				let updatedEvents: Array<string> = [];
+				const updatedEvents: Array<string> = [];
 				let sameEvents = true;
-				for (let [event, present] of eventSubscriptions) {
+				for (const [event, present] of eventSubscriptions) {
 					sameEvents = sameEvents && present;
 					if (present) {
 						updatedEvents.push(event);
 					}
-				}
-				if (updatedEvents.length && !sameEvents) {
-					let response = await updateSubscription(
-						http,
-						repository,
-						accessToken.token,
-						hookId,
-						updatedEvents,
-					);
 				}
 			}
 
@@ -273,7 +257,7 @@ export async function ManageSubscriptions(
 	room: IRoom,
 	modify: IModify,
 ) {
-	let accessToken = await getAccessTokenForUser(
+	const accessToken = await getAccessTokenForUser(
 		read,
 		context.getSender(),
 		app.oauth2Config,

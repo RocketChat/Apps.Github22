@@ -18,7 +18,6 @@ export async function NewIssueStarterModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {

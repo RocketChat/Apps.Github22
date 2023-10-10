@@ -4,14 +4,11 @@ import {
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
-import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
-import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { UIKitViewCloseInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { ModalsEnum } from '../enum/Modals';
 import { pullDetailsModal } from '../modals/pullDetailsModal';
 import {
 	storeInteractionRoomData,
-	clearInteractionRoomData,
 	getInteractionRoomData,
 } from '../persistance/roomInteraction';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
@@ -19,7 +16,6 @@ import { GithubRepoIssuesStorage } from '../persistance/githubIssues';
 
 export class ExecuteViewClosedHandler {
 	constructor(
-		private readonly app: IApp,
 		private readonly read: IRead,
 		private readonly http: IHttp,
 		private readonly modify: IModify,
@@ -68,7 +64,7 @@ export class ExecuteViewClosedHandler {
 							)
 						).roomId;
 					}
-					let githubSearchStorage = new GithubSearchResultStorage(
+					const githubSearchStorage = new GithubSearchResultStorage(
 						this.persistence,
 						this.read.getPersistenceReader(),
 					);
@@ -97,7 +93,7 @@ export class ExecuteViewClosedHandler {
 							)
 						).roomId;
 					}
-					let githubIssuesStorage = new GithubRepoIssuesStorage(
+					const githubIssuesStorage = new GithubRepoIssuesStorage(
 						this.persistence,
 						this.read.getPersistenceReader(),
 					);
@@ -106,6 +102,7 @@ export class ExecuteViewClosedHandler {
 				break;
 			}
 		}
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return { success: true } as any;
 	}
 }

@@ -23,7 +23,6 @@ import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
 import {
-	addSubscribedEvents,
 	createSubscription,
 	updateSubscription,
 	createNewIssue,
@@ -70,7 +69,7 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
+							const room = (await this.read
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 							const repository =
@@ -94,7 +93,7 @@ export class ExecuteViewSubmitHandler {
 									'Invalid Input !',
 								);
 							} else {
-								let accessToken = await getAccessTokenForUser(
+								const accessToken = await getAccessTokenForUser(
 									this.read,
 									user,
 									this.app.oauth2Config,
@@ -111,25 +110,26 @@ export class ExecuteViewSubmitHandler {
 									//if we have a webhook for the repo and our room requires the same event,we just make our entries to the apps storage instead of making a new hook
 									//if we have a hook but we dont have all the events, we send in a patch request,
 
-									let url = await getWebhookUrl(this.app);
+									const url = await getWebhookUrl(this.app);
 
-									let subscriptionStorage = new Subscription(
-										this.persistence,
-										this.read.getPersistenceReader(),
-									);
-									let subscribedEvents = new Map<
+									const subscriptionStorage =
+										new Subscription(
+											this.persistence,
+											this.read.getPersistenceReader(),
+										);
+									const subscribedEvents = new Map<
 										string,
 										boolean
 									>();
 									let hookId = '';
 
-									let subscriptions =
+									const subscriptions =
 										await subscriptionStorage.getSubscriptionsByRepo(
 											repository,
 											user.id,
 										);
 									if (subscriptions && subscriptions.length) {
-										for (let subscription of subscriptions) {
+										for (const subscription of subscriptions) {
 											subscribedEvents.set(
 												subscription.event,
 												true,
@@ -140,12 +140,13 @@ export class ExecuteViewSubmitHandler {
 										}
 									}
 									let additionalEvents = 0;
-									for (let event of events) {
+									for (const event of events) {
 										if (!subscribedEvents.has(event)) {
 											additionalEvents++;
 											subscribedEvents.set(event, true);
 										}
 									}
+									// eslint-disable-next-line @typescript-eslint/no-explicit-any
 									let response: any;
 									//if hook is null we create a new hook, else we add more events to the new hook
 									if (hookId == '') {
@@ -158,10 +159,9 @@ export class ExecuteViewSubmitHandler {
 										);
 									} else {
 										//if hook is already present, we just need to send a patch request to add new events to existing hook
-										let newEvents: Array<string> = [];
-										for (let [
+										const newEvents: Array<string> = [];
+										for (const [
 											event,
-											present,
 										] of subscribedEvents) {
 											newEvents.push(event);
 										}
@@ -180,7 +180,7 @@ export class ExecuteViewSubmitHandler {
 									}
 									let createdEntry = false;
 									//subscribe rooms to hook events
-									for (let event of events) {
+									for (const event of events) {
 										createdEntry =
 											await subscriptionStorage.createSubscription(
 												repository,
@@ -231,7 +231,7 @@ export class ExecuteViewSubmitHandler {
 						user.id,
 					);
 					if (roomId) {
-						let room = (await this.read
+						const room = (await this.read
 							.getRoomReader()
 							.getById(roomId)) as IRoom;
 						let repository = view.state?.[
@@ -240,7 +240,7 @@ export class ExecuteViewSubmitHandler {
 						let title = view.state?.[
 							ModalsEnum.ISSUE_TITLE_INPUT
 						]?.[ModalsEnum.ISSUE_TITLE_ACTION] as string;
-						let issueBody =
+						const issueBody =
 							view.state?.[ModalsEnum.ISSUE_BODY_INPUT]?.[
 								ModalsEnum.ISSUE_BODY_INPUT_ACTION
 							];
@@ -268,7 +268,7 @@ export class ExecuteViewSubmitHandler {
 						) {
 							repository = repository?.trim();
 							title = title?.trim() || '';
-							let accessToken = await getAccessTokenForUser(
+							const accessToken = await getAccessTokenForUser(
 								this.read,
 								user,
 								this.app.oauth2Config,
@@ -282,7 +282,7 @@ export class ExecuteViewSubmitHandler {
 									'Login To Github !',
 								);
 							} else {
-								let reponse = await createNewIssue(
+								const reponse = await createNewIssue(
 									this.http,
 									repository,
 									title,
@@ -328,13 +328,13 @@ export class ExecuteViewSubmitHandler {
 					);
 
 					if (roomId) {
-						let room = (await this.read
+						const room = (await this.read
 							.getRoomReader()
 							.getById(roomId)) as IRoom;
 						let repository = view.state?.[
 							ModalsEnum.REPO_NAME_INPUT
 						]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
-						let accessToken = await getAccessTokenForUser(
+						const accessToken = await getAccessTokenForUser(
 							this.read,
 							user,
 							this.app.oauth2Config,
@@ -349,7 +349,7 @@ export class ExecuteViewSubmitHandler {
 							);
 						} else {
 							repository = repository?.trim();
-							let response = await getIssueTemplates(
+							const response = await getIssueTemplates(
 								this.http,
 								repository,
 								accessToken.token,
@@ -373,7 +373,7 @@ export class ExecuteViewSubmitHandler {
 										issueTemplateSelection,
 									);
 							} else {
-								let data = {
+								const data = {
 									repository: repository,
 								};
 								const createNewIssue = await NewIssueModal({
@@ -399,7 +399,7 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
+							const room = (await this.read
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 							let repository: string | undefined =
@@ -412,15 +412,15 @@ export class ExecuteViewSubmitHandler {
 								]?.[
 									ModalsEnum.ADD_MAIN_SEARCH_PARAMATER_OPTION
 								];
-							let authors: string | undefined =
+							const authors: string | undefined =
 								view.state?.[ModalsEnum.AUTHOR_NAMES_INPUT]?.[
 									ModalsEnum.AUTHOR_NAMES_INPUT_ACTION
 								];
-							let labels: string | undefined =
+							const labels: string | undefined =
 								view.state?.[
 									ModalsEnum.RESOURCE_LABELS_INPUT
 								]?.[ModalsEnum.RESOURCE_LABELS_INPUT_ACTION];
-							let milestones: string | undefined =
+							const milestones: string | undefined =
 								view.state?.[
 									ModalsEnum.RESOURCE_MILESTONES_INPUT
 								]?.[ModalsEnum.RESOURCE_LABELS_INPUT_ACTION];
@@ -463,7 +463,7 @@ export class ExecuteViewSubmitHandler {
 								resourceState = resourceState?.trim();
 							}
 
-							let accessToken = await getAccessTokenForUser(
+							const accessToken = await getAccessTokenForUser(
 								this.read,
 								user,
 								this.app.oauth2Config,
@@ -489,7 +489,7 @@ export class ExecuteViewSubmitHandler {
 									'Login To Github !',
 								);
 							} else {
-								let resultResponse =
+								const resultResponse =
 									await githubSearchIssuesPulls(
 										this.http,
 										repository,
@@ -506,43 +506,44 @@ export class ExecuteViewSubmitHandler {
 									triggerId &&
 									resultResponse?.server_error === false
 								) {
-									let total_count =
+									const total_count =
 										resultResponse?.total_count;
-									let searchItems = resultResponse?.items;
-									let searchResultsList: Array<IGitHubSearchResult> =
+									const searchItems = resultResponse?.items;
+									const searchResultsList: Array<IGitHubSearchResult> =
 										[];
 									if (
 										searchItems &&
 										Array.isArray(searchItems)
 									) {
-										for (let item of searchItems) {
-											let resultId = item?.id;
-											let title = item?.title;
-											let number = item?.number;
-											let html_url = item?.html_url;
-											let user_login = item?.user?.login;
-											let state = item?.state;
+										for (const item of searchItems) {
+											const resultId = item?.id;
+											const title = item?.title;
+											const number = item?.number;
+											const html_url = item?.html_url;
+											const user_login =
+												item?.user?.login;
+											const state = item?.state;
 											let labelString = '';
 											if (
 												item?.labels &&
 												Array.isArray(item.labels)
 											) {
-												for (let label of item.labels) {
+												for (const label of item.labels) {
 													labelString += `${label.name} `;
 												}
 											}
-											let resultString = `[ #${
+											const resultString = `[ #${
 												item.number
 											} ](${item?.html_url?.toString()}) *${item.title
 												?.toString()
 												?.trim()}* : ${item?.html_url}`;
-											let pull_request =
+											const pull_request =
 												item?.pull_request
 													? true
 													: false;
-											let pull_request_url = item
+											const pull_request_url = item
 												.pull_request?.url as string;
-											let searchResultItem: IGitHubSearchResult =
+											const searchResultItem: IGitHubSearchResult =
 												{
 													result_id: resultId,
 													title: title,
@@ -561,7 +562,7 @@ export class ExecuteViewSubmitHandler {
 												searchResultItem,
 											);
 										}
-										let githubSearchResult: IGitHubSearchResultData =
+										const githubSearchResult: IGitHubSearchResultData =
 											{
 												room_id: room.id,
 												user_id: user.id,
@@ -571,7 +572,7 @@ export class ExecuteViewSubmitHandler {
 												search_results:
 													searchResultsList,
 											};
-										let githubSearchStorage =
+										const githubSearchStorage =
 											new GithubSearchResultStorage(
 												this.persistence,
 												this.read.getPersistenceReader(),
@@ -623,15 +624,12 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
-								.getRoomReader()
-								.getById(roomId)) as IRoom;
-							let githubSearchStorage =
+							const githubSearchStorage =
 								new GithubSearchResultStorage(
 									this.persistence,
 									this.read.getPersistenceReader(),
 								);
-							let searchResults =
+							const searchResults =
 								await githubSearchStorage.getSearchResults(
 									roomId,
 									user,
@@ -663,10 +661,10 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
+							const room = (await this.read
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
-							let searchResult: string | undefined =
+							const searchResult: string | undefined =
 								view.state?.[
 									ModalsEnum.MULTI_SHARE_SEARCH_INPUT
 								]?.[ModalsEnum.MULTI_SHARE_SEARCH_INPUT_ACTION];
@@ -687,7 +685,7 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
+							const room = (await this.read
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 							const repository =
@@ -719,13 +717,13 @@ export class ExecuteViewSubmitHandler {
 								]?.[
 									ModalsEnum.PULL_REQUEST_MERGE_METHOD_OPTION
 								];
-							let accessToken = await getAccessTokenForUser(
+							const accessToken = await getAccessTokenForUser(
 								this.read,
 								user,
 								this.app.oauth2Config,
 							);
 							if (accessToken?.token) {
-								let mergeResponse = await mergePullRequest(
+								const mergeResponse = await mergePullRequest(
 									this.http,
 									repository,
 									accessToken.token,
@@ -735,7 +733,7 @@ export class ExecuteViewSubmitHandler {
 									mergeMethod,
 								);
 								if (mergeResponse?.serverError) {
-									let errorMessage = mergeResponse?.message;
+									const errorMessage = mergeResponse?.message;
 									const unauthorizedMessageModal =
 										await messageModal({
 											message: `🤖 Unable to merge pull request : ⚠️ ${errorMessage}`,
@@ -751,8 +749,8 @@ export class ExecuteViewSubmitHandler {
 											unauthorizedMessageModal,
 										);
 								} else {
-									let url = `https://github.com/${repository}/pull/${pullNumber}`;
-									let succesMessage = `🤖 ${mergeResponse?.message} ✔️ : ${url}`;
+									const url = `https://github.com/${repository}/pull/${pullNumber}`;
+									const succesMessage = `🤖 ${mergeResponse?.message} ✔️ : ${url}`;
 									await sendMessage(
 										this.modify,
 										room,
@@ -772,7 +770,7 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
+							const room = (await this.read
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 							const repository =
@@ -791,7 +789,7 @@ export class ExecuteViewSubmitHandler {
 								]?.[
 									ModalsEnum.PULL_REQUEST_COMMENT_INPUT_ACTION
 								];
-							let accessToken = await getAccessTokenForUser(
+							const accessToken = await getAccessTokenForUser(
 								this.read,
 								user,
 								this.app.oauth2Config,
@@ -802,7 +800,7 @@ export class ExecuteViewSubmitHandler {
 								newComment?.length &&
 								pullNumber?.length
 							) {
-								let addCommentResponse =
+								const addCommentResponse =
 									await addNewPullRequestComment(
 										this.http,
 										repository,
@@ -811,7 +809,7 @@ export class ExecuteViewSubmitHandler {
 										newComment,
 									);
 								if (addCommentResponse?.serverError) {
-									let errorMessage =
+									const errorMessage =
 										addCommentResponse?.message;
 									const unauthorizedMessageModal =
 										await messageModal({
@@ -828,14 +826,14 @@ export class ExecuteViewSubmitHandler {
 											unauthorizedMessageModal,
 										);
 								} else {
-									let pullRequestComments =
+									const pullRequestComments =
 										await getPullRequestComments(
 											this.http,
 											repository,
 											accessToken.token,
 											pullNumber,
 										);
-									let pullRequestData =
+									const pullRequestData =
 										await getPullRequestData(
 											this.http,
 											repository,
@@ -881,7 +879,7 @@ export class ExecuteViewSubmitHandler {
 												);
 										}
 									}
-									let data = {
+									const data = {
 										repo: repository,
 										pullNumber: pullNumber,
 										pullData: pullRequestData,
@@ -931,7 +929,7 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
+							const room = (await this.read
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 							const repository =
@@ -946,7 +944,7 @@ export class ExecuteViewSubmitHandler {
 								view.state?.[ModalsEnum.ISSUE_COMMENT_INPUT]?.[
 									ModalsEnum.ISSUE_COMMENT_INPUT_ACTION
 								];
-							let accessToken = await getAccessTokenForUser(
+							const accessToken = await getAccessTokenForUser(
 								this.read,
 								user,
 								this.app.oauth2Config,
@@ -957,7 +955,7 @@ export class ExecuteViewSubmitHandler {
 								newComment?.length &&
 								issueNumber?.length
 							) {
-								let addCommentResponse =
+								const addCommentResponse =
 									await addNewIssueComment(
 										this.http,
 										repository,
@@ -966,7 +964,7 @@ export class ExecuteViewSubmitHandler {
 										newComment,
 									);
 								if (addCommentResponse?.serverError) {
-									let errorMessage =
+									const errorMessage =
 										addCommentResponse?.message;
 									const unauthorizedMessageModal =
 										await messageModal({
@@ -983,13 +981,14 @@ export class ExecuteViewSubmitHandler {
 											unauthorizedMessageModal,
 										);
 								} else {
-									let issueComments = await getIssuesComments(
-										this.http,
-										repository,
-										accessToken?.token,
-										issueNumber,
-									);
-									let issueData = await getIssueData(
+									const issueComments =
+										await getIssuesComments(
+											this.http,
+											repository,
+											accessToken?.token,
+											issueNumber,
+										);
+									const issueData = await getIssueData(
 										repository,
 										issueNumber,
 										accessToken.token,
@@ -1038,7 +1037,7 @@ export class ExecuteViewSubmitHandler {
 												);
 										}
 									}
-									let data = {
+									const data = {
 										repo: repository,
 										issueNumber: issueNumber,
 										issueData: issueData,
@@ -1090,10 +1089,10 @@ export class ExecuteViewSubmitHandler {
 							ModalsEnum.REPO_NAME_INPUT
 						]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
 						repository = repository?.trim();
-						let response: any;
-						let data: any;
-						let pushRights: boolean = false;
-						let accessToken = await getAccessTokenForUser(
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						let response, data: any;
+						let pushRights = false;
+						const accessToken = await getAccessTokenForUser(
 							this.read,
 							user,
 							this.app.oauth2Config,
@@ -1104,7 +1103,7 @@ export class ExecuteViewSubmitHandler {
 								repository,
 							);
 						} else {
-							let repoDetails = await getRepoData(
+							const repoDetails = await getRepoData(
 								this.http,
 								repository,
 								accessToken.token,
@@ -1118,7 +1117,7 @@ export class ExecuteViewSubmitHandler {
 								repoDetails?.permissions?.admin;
 						}
 						if (response.serverError) {
-							let errorMessage = response?.message;
+							const errorMessage = response?.message;
 							const unauthorizedMessageModal = await messageModal(
 								{
 									message: `🤖 Error Fetching GitHub Issues : ⚠️ ${errorMessage}`,
@@ -1135,19 +1134,19 @@ export class ExecuteViewSubmitHandler {
 									unauthorizedMessageModal,
 								);
 						} else {
-							let issueList: Array<IGitHubIssue> = [];
-							for (let issue of response.issues) {
+							const issueList: Array<IGitHubIssue> = [];
+							for (const issue of response.issues) {
 								if (issue.pull_request) {
 									continue;
 								}
-								let issue_id = issue.id;
-								let labels: Array<string> = [];
-								let assignees: Array<string> = [];
+								const issue_id = issue.id;
+								const labels: Array<string> = [];
+								const assignees: Array<string> = [];
 								if (
 									issue?.labels &&
 									Array.isArray(issue.labels)
 								) {
-									for (let label of issue.labels) {
+									for (const label of issue.labels) {
 										labels.push(`${label.name}`);
 									}
 								}
@@ -1155,21 +1154,21 @@ export class ExecuteViewSubmitHandler {
 									issue?.assignees &&
 									Array.isArray(issue.assignees)
 								) {
-									for (let assignee of issue.assignees) {
+									for (const assignee of issue.assignees) {
 										assignees.push(assignee.login);
 									}
 								}
-								let title: string = issue.title;
-								let user_login: string = issue.user.login;
-								let number: string | number = issue.number;
-								let state: string = issue.state;
-								let html_url: string = issue.html_url;
-								let issue_compact = `[ #${
+								const title: string = issue.title;
+								const user_login: string = issue.user.login;
+								const number: string | number = issue.number;
+								const state: string = issue.state;
+								const html_url: string = issue.html_url;
+								const issue_compact = `[ #${
 									issue.number
 								} ](${issue?.html_url?.toString()}) *${issue.title
 									?.toString()
 									?.trim()}* : ${issue?.html_url}`;
-								let githubIssue: IGitHubIssue = {
+								const githubIssue: IGitHubIssue = {
 									issue_id,
 									labels,
 									assignees,
@@ -1183,15 +1182,15 @@ export class ExecuteViewSubmitHandler {
 								};
 								issueList.push(githubIssue);
 							}
-							let githubIssueStorage =
+							const githubIssueStorage =
 								new GithubRepoIssuesStorage(
 									this.persistence,
 									this.read.getPersistenceReader(),
 								);
-							let room = (await this.read
+							const room = (await this.read
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
-							let githubIssueData: IGitHubIssueData = {
+							const githubIssueData: IGitHubIssueData = {
 								repository: repository,
 								room_id: roomId,
 								user_id: user.id,
@@ -1245,7 +1244,7 @@ export class ExecuteViewSubmitHandler {
 						repository = repository?.trim();
 						issueNumber = issueNumber?.trim();
 						issueAssignees = issueAssignees?.trim();
-						let accessToken = await getAccessTokenForUser(
+						const accessToken = await getAccessTokenForUser(
 							this.read,
 							user,
 							this.app.oauth2Config,
@@ -1255,7 +1254,7 @@ export class ExecuteViewSubmitHandler {
 							if (issueAssignees) {
 								assigneesArray = issueAssignees.split(' ');
 							}
-							let response = await updateGithubIssues(
+							const response = await updateGithubIssues(
 								this.http,
 								repository,
 								assigneesArray,
@@ -1263,7 +1262,7 @@ export class ExecuteViewSubmitHandler {
 								accessToken.token,
 							);
 							if (response.serverError) {
-								let errorMessage = response?.message;
+								const errorMessage = response?.message;
 								const unauthorizedMessageModal =
 									await messageModal({
 										message: `🤖 Unable to assign issues : ⚠️ ${errorMessage}`,
@@ -1279,12 +1278,12 @@ export class ExecuteViewSubmitHandler {
 										unauthorizedMessageModal,
 									);
 							} else {
-								let githubissueStorage =
+								const githubissueStorage =
 									new GithubRepoIssuesStorage(
 										this.persistence,
 										this.read.getPersistenceReader(),
 									);
-								let repoIssuesData: IGitHubIssueData =
+								const repoIssuesData: IGitHubIssueData =
 									await githubissueStorage.getIssueData(
 										roomId as string,
 										user,
@@ -1292,7 +1291,7 @@ export class ExecuteViewSubmitHandler {
 								if (repoIssuesData?.issue_list?.length) {
 									let index = -1;
 									let currentIndex = 0;
-									for (let issue of repoIssuesData.issue_list) {
+									for (const issue of repoIssuesData.issue_list) {
 										if (issue.number == issueNumber) {
 											index = currentIndex;
 											break;
@@ -1303,7 +1302,7 @@ export class ExecuteViewSubmitHandler {
 										repoIssuesData.issue_list[
 											index
 										].assignees = assigneesArray;
-										let room = (await this.read
+										const room = (await this.read
 											.getRoomReader()
 											.getById(roomId)) as IRoom;
 										await githubissueStorage.updateIssueData(
@@ -1312,7 +1311,7 @@ export class ExecuteViewSubmitHandler {
 											repoIssuesData,
 										);
 									}
-									let data = {
+									const data = {
 										issues: repoIssuesData.issue_list,
 										pushRights: repoIssuesData.push_rights, //no access token, so user has no pushRights to the repo,
 										repo: repoIssuesData.repository,
@@ -1326,7 +1325,7 @@ export class ExecuteViewSubmitHandler {
 											persistence: this.persistence,
 											http: this.http,
 										});
-									let room = (await this.read
+									const room = (await this.read
 										.getRoomReader()
 										.getById(roomId)) as IRoom;
 									await sendNotification(
@@ -1363,15 +1362,12 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
-								.getRoomReader()
-								.getById(roomId)) as IRoom;
-							let githubIssueStorage =
+							const githubIssueStorage =
 								new GithubRepoIssuesStorage(
 									this.persistence,
 									this.read.getPersistenceReader(),
 								);
-							let issueData =
+							const issueData =
 								(await githubIssueStorage.getIssueData(
 									roomId,
 									user,
@@ -1401,10 +1397,10 @@ export class ExecuteViewSubmitHandler {
 							user.id,
 						);
 						if (roomId) {
-							let room = (await this.read
+							const room = (await this.read
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
-							let searchResult: string | undefined =
+							const searchResult: string | undefined =
 								view.state?.[
 									ModalsEnum.MULTI_SHARE_GITHUB_ISSUES_INPUT
 								]?.[

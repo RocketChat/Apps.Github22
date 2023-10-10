@@ -6,22 +6,13 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
-import { AppEnum } from '../enum/App';
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function issueTemplateSelectionModal({
 	data,
 	modify,
-	read,
-	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
@@ -37,16 +28,14 @@ export async function issueTemplateSelectionModal({
 
 	const block = modify.getCreator().getBlockBuilder();
 
-	const room =
-		slashcommandcontext?.getRoom() ||
-		uikitcontext?.getInteractionData().room;
 	const user =
 		slashcommandcontext?.getSender() ||
 		uikitcontext?.getInteractionData().user;
 
 	if (user?.id && data?.repository && data?.templates?.length) {
-		let repositoryName = data.repository as string;
-		let templates = data.templates as Array<any>;
+		const repositoryName = data.repository as string;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const templates = data.templates as Array<any>;
 		block.addSectionBlock({
 			text: {
 				text: `Choose Issue Template for ${repositoryName}`,
@@ -58,7 +47,7 @@ export async function issueTemplateSelectionModal({
 
 		let index = 1;
 
-		for (let template of templates) {
+		for (const template of templates) {
 			block.addSectionBlock({
 				text: {
 					text: `${template.name}`,
@@ -73,7 +62,7 @@ export async function issueTemplateSelectionModal({
 					value: `${repositoryName} ${template.download_url}`,
 				}),
 			});
-			index++;
+			index = index + 1;
 		}
 		block.addSectionBlock({
 			text: {

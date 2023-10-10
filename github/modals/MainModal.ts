@@ -14,9 +14,6 @@ import { ModalsEnum } from '../enum/Modals';
 
 export async function MainModal({
 	modify,
-	read,
-	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {

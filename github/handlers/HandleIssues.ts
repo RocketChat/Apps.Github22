@@ -21,7 +21,7 @@ export async function handleNewIssue(
 	room: IRoom,
 	modify: IModify,
 ) {
-	let accessToken = await getAccessTokenForUser(
+	const accessToken = await getAccessTokenForUser(
 		read,
 		context.getSender(),
 		app.oauth2Config,
@@ -56,10 +56,8 @@ export async function handleNewIssue(
 export async function handleIssues(
 	read: IRead,
 	context: SlashCommandContext,
-	app: GithubApp,
 	persistence: IPersistence,
 	http: IHttp,
-	room: IRoom,
 	modify: IModify,
 ) {
 	const triggerId = context.getTriggerId();

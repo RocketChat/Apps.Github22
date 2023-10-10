@@ -1,13 +1,10 @@
 import { ApiEndpoint } from '@rocket.chat/apps-engine/definition/api';
 import {
 	IRead,
-	IHttp,
 	IModify,
 	IPersistence,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import {
-	IApiEndpointInfo,
-	IApiEndpoint,
 	IApiRequest,
 	IApiResponse,
 } from '@rocket.chat/apps-engine/definition/api';
@@ -19,13 +16,12 @@ export class githubWebHooks extends ApiEndpoint {
 
 	public async post(
 		request: IApiRequest,
-		endpoint: IApiEndpointInfo,
 		read: IRead,
 		modify: IModify,
-		http: IHttp,
 		persis: IPersistence,
 	): Promise<IApiResponse> {
-		let event: string = request.headers['x-github-event'] as string;
+		const event: string = request.headers['x-github-event'] as string;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let payload: any;
 		if (
 			request.headers['content-type'] ===
@@ -36,7 +32,7 @@ export class githubWebHooks extends ApiEndpoint {
 			payload = request.content;
 		}
 
-		let subscriptionStorage = new Subscription(
+		const subscriptionStorage = new Subscription(
 			persis,
 			read.getPersistenceReader(),
 		);
@@ -49,7 +45,6 @@ export class githubWebHooks extends ApiEndpoint {
 		if (!subscriptions || subscriptions.length == 0) {
 			return this.success();
 		}
-		const eventCaps = event.toUpperCase();
 		let messageText = 'newEvent !';
 
 		if (event == 'push') {
@@ -91,8 +86,8 @@ export class githubWebHooks extends ApiEndpoint {
 				return this.success();
 			}
 		}
-		for (let subscription of subscriptions) {
-			let roomId = subscription.room;
+		for (const subscription of subscriptions) {
+			const roomId = subscription.room;
 			if (!roomId) {
 				continue;
 			}

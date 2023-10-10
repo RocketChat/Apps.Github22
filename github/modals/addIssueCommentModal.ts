@@ -6,30 +6,23 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
-import { AppEnum } from '../enum/App';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	storeInteractionRoomData,
 	getInteractionRoomData,
 } from '../persistance/roomInteraction';
-import { Subscription } from '../persistance/subscriptions';
-import { ISubscription } from '../definitions/subscription';
 
 export async function addIssueCommentsModal({
 	data,
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	data?: any;
 	modify: IModify;
 	read: IRead;

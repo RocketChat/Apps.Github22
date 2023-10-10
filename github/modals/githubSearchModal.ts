@@ -6,15 +6,9 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
-import { AppEnum } from '../enum/App';
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	storeInteractionRoomData,
 	getInteractionRoomData,
@@ -24,7 +18,6 @@ export async function githubSearchModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
@@ -75,7 +68,7 @@ export async function githubSearchModal({
 			}),
 		});
 
-		let newResourceStaticElement = block.newStaticSelectElement({
+		const newResourceStaticElement = block.newStaticSelectElement({
 			actionId: ModalsEnum.ADD_MAIN_SEARCH_PARAMATER_OPTION,
 			options: [
 				{
@@ -118,7 +111,7 @@ export async function githubSearchModal({
 			blockId: ModalsEnum.ADD_MAIN_SEARCH_PARAMATER_INPUT,
 		});
 
-		let newResourceStateStaticElement = block.newStaticSelectElement({
+		const newResourceStateStaticElement = block.newStaticSelectElement({
 			actionId: ModalsEnum.ADD_SEARCH_STATE_PARAMATER_INPUT_OPTION,
 			options: [
 				{

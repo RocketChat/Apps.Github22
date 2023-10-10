@@ -13,10 +13,10 @@ import { CommandUtility } from '../lib/commandUtility';
 
 export class GHCommand implements ISlashCommand {
 	public constructor(private readonly app: GithubApp) {}
-	public command: string = 'gh';
-	public i18nParamsExample: string = '';
-	public i18nDescription: string = 'cmd_description';
-	public providesPreview: boolean = false;
+	public command = 'gh';
+	public i18nParamsExample = '';
+	public i18nDescription = 'cmd_description';
+	public providesPreview = false;
 
 	public async executor(
 		context: SlashCommandContext,

@@ -46,7 +46,7 @@ export class Subscription {
 					`${user.id}`,
 				),
 			];
-			let subscriptionRecord: ISubscription = {
+			const subscriptionRecord: ISubscription = {
 				webhookId: webhookId,
 				user: user.id,
 				repoName: repoName,
@@ -84,14 +84,14 @@ export class Subscription {
 					event,
 				),
 			];
-			let subscriptions: Array<ISubscription> =
+			const subscriptions: Array<ISubscription> =
 				(await this.persistenceRead.readByAssociations(
 					associations,
 				)) as Array<ISubscription>;
 			return subscriptions;
 		} catch (error) {
 			console.warn('Get Subscribed Rooms Error :', error);
-			let subscriptions: Array<ISubscription> = [];
+			const subscriptions: Array<ISubscription> = [];
 			return subscriptions;
 		}
 	}
@@ -110,14 +110,14 @@ export class Subscription {
 					roomId,
 				),
 			];
-			let subscriptions: Array<ISubscription> =
+			const subscriptions: Array<ISubscription> =
 				(await this.persistenceRead.readByAssociations(
 					associations,
 				)) as Array<ISubscription>;
 			return subscriptions;
 		} catch (error) {
 			console.warn('Get Subscription Error :', error);
-			let subscriptions: Array<ISubscription> = [];
+			const subscriptions: Array<ISubscription> = [];
 			return subscriptions;
 		}
 	}

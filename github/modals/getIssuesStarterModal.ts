@@ -18,7 +18,6 @@ export async function GitHubIssuesStarterModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {

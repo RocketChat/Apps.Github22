@@ -1,11 +1,10 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import {
 	IHttp,
-	ILogger,
 	IModify,
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
-import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { basicQueryMessage } from '../helpers/basicQueryMessage';
 import { ModalsEnum } from '../enum/Modals';
@@ -20,7 +19,6 @@ import { AddSubscriptionModal } from '../modals/addSubscriptionsModal';
 import { deleteSubscriptionsModal } from '../modals/deleteSubscriptions';
 import {
 	deleteSubscription,
-	updateSubscription,
 	getIssueTemplateCode,
 	getPullRequestComments,
 	getPullRequestData,
@@ -45,7 +43,6 @@ import { getRepoData } from '../helpers/githubSDK';
 import { addPullRequestCommentsModal } from '../modals/addPullRequestCommentsModal';
 import { pullRequestCommentsModal } from '../modals/pullRequestCommentsModal';
 import { pullDetailsModal } from '../modals/pullDetailsModal';
-import { IGitHubSearchResult } from '../definitions/searchResult';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { IGitHubSearchResultData } from '../definitions/searchResultData';
 import { githubSearchResultModal } from '../modals/githubSearchResultModal';
@@ -90,8 +87,8 @@ export class ExecuteBlockActionHandler {
 				case 'githubDataSelect': {
 					try {
 						const param = data.value;
-						let query: String = '';
-						let lengthOfRepoString: number = 0;
+						let query = '';
+						let lengthOfRepoString = 0;
 						if (param && param.length) {
 							let i = param.length - 1;
 							for (
@@ -106,9 +103,9 @@ export class ExecuteBlockActionHandler {
 						const repository = param?.substring(
 							0,
 							lengthOfRepoString,
-						) as String;
-						let { user, room } = await context.getInteractionData();
-						let accessToken = (await getAccessTokenForUser(
+						) as string;
+						const { user, room } = context.getInteractionData();
+						const accessToken = (await getAccessTokenForUser(
 							this.read,
 							user,
 							this.app.oauth2Config,
@@ -136,7 +133,8 @@ export class ExecuteBlockActionHandler {
 					}
 				}
 				case ModalsEnum.SHARE_ISSUE_ACTION: {
-					let { user, value, room } = context.getInteractionData();
+					const { user, value } = context.getInteractionData();
+					let { room } = context.getInteractionData();
 					const access_token = (await getAccessTokenForUser(
 						this.read,
 						user,
@@ -185,13 +183,14 @@ export class ExecuteBlockActionHandler {
 						if (room?.id) {
 							await sendMessage(
 								this.modify,
+								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 								room!,
 								user,
 								`Issue`,
 								block,
 							);
 						} else {
-							let roomId = (
+							const roomId = (
 								await getInteractionRoomData(
 									this.read.getPersistenceReader(),
 									user.id,
@@ -317,7 +316,7 @@ export class ExecuteBlockActionHandler {
 							};
 					}
 
-					let access_token = (await getAccessTokenForUser(
+					const access_token = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
@@ -340,7 +339,7 @@ export class ExecuteBlockActionHandler {
 				case ModalsEnum.TRIGGER_ISSUES_MODAL: {
 					const { user } = context.getInteractionData();
 
-					let access_token = (await getAccessTokenForUser(
+					const access_token = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
@@ -375,6 +374,7 @@ export class ExecuteBlockActionHandler {
 				case ModalsEnum.SHARE_PROFILE_PARAMS: {
 					const profileInteractionData =
 						context.getInteractionData().value;
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					const datAny = profileInteractionData as any;
 					const storeData = {
 						profileParams: datAny as string[],
@@ -390,9 +390,10 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.SHARE_PROFILE_EXEC: {
-					let { user, room } = context.getInteractionData();
+					const { user } = context.getInteractionData();
+					let { room } = context.getInteractionData();
 					const block = this.modify.getCreator().getBlockBuilder();
-					let accessToken = (await getAccessTokenForUser(
+					const accessToken = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
@@ -465,13 +466,14 @@ export class ExecuteBlockActionHandler {
 						if (room?.id) {
 							await sendMessage(
 								this.modify,
+								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 								room!,
 								user,
 								`${userProfile.name}'s Github Profile`,
 								block,
 							);
 						} else {
-							let roomId = (
+							const roomId = (
 								await getInteractionRoomData(
 									this.read.getPersistenceReader(),
 									user.id,
@@ -534,18 +536,18 @@ export class ExecuteBlockActionHandler {
 						.openModalViewResponse(addSubscriptionModal);
 				}
 				case ModalsEnum.DELETE_SUBSCRIPTION_ACTION: {
-					let { user, room } = await context.getInteractionData();
-					let accessToken = (await getAccessTokenForUser(
+					const { user, room } = context.getInteractionData();
+					const accessToken = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
 					)) as IAuthData;
-					let value: string = context.getInteractionData()
+					const value: string = context.getInteractionData()
 						.value as string;
-					let splitted = value.split(',');
+					const splitted = value.split(',');
 					if (splitted.length == 2 && accessToken.token) {
-						let repoName = splitted[0];
-						let hookId = splitted[1];
+						const repoName = splitted[0];
+						const hookId = splitted[1];
 						let roomId;
 						if (room?.id) {
 							roomId = room.id;
@@ -563,11 +565,11 @@ export class ExecuteBlockActionHandler {
 							).roomId;
 						}
 						//delete the susbscriptions for persistance
-						let subscriptionStorage = new Subscription(
+						const subscriptionStorage = new Subscription(
 							this.persistence,
 							this.read.getPersistenceReader(),
 						);
-						let oldSubscriptions =
+						const oldSubscriptions =
 							await subscriptionStorage.getSubscriptionsByRepo(
 								repoName,
 								user.id,
@@ -578,11 +580,11 @@ export class ExecuteBlockActionHandler {
 							user.id,
 						);
 						//check if any subscription events of the repo is left in any other room
-						let eventSubscriptions = new Map<string, boolean>();
-						for (let subscription of oldSubscriptions) {
+						const eventSubscriptions = new Map<string, boolean>();
+						for (const subscription of oldSubscriptions) {
 							eventSubscriptions.set(subscription.event, false);
 						}
-						let updatedsubscriptions =
+						const updatedsubscriptions =
 							await subscriptionStorage.getSubscriptionsByRepo(
 								repoName,
 								user.id,
@@ -595,31 +597,22 @@ export class ExecuteBlockActionHandler {
 								hookId,
 							);
 						} else {
-							for (let subscription of updatedsubscriptions) {
+							for (const subscription of updatedsubscriptions) {
 								eventSubscriptions.set(
 									subscription.event,
 									true,
 								);
 							}
-							let updatedEvents: Array<string> = [];
+							const updatedEvents: Array<string> = [];
 							let sameEvents = true;
-							for (let [event, present] of eventSubscriptions) {
+							for (const [event, present] of eventSubscriptions) {
 								sameEvents = sameEvents && present;
 								if (present) {
 									updatedEvents.push(event);
 								}
 							}
-							if (updatedEvents.length && !sameEvents) {
-								let response = await updateSubscription(
-									this.http,
-									repoName,
-									accessToken.token,
-									hookId,
-									updatedEvents,
-								);
-							}
 						}
-						let userRoom = (await this.read
+						const userRoom = (await this.read
 							.getRoomReader()
 							.getById(roomId)) as IRoom;
 						await sendNotification(
@@ -665,21 +658,21 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.ISSUE_TEMPLATE_SELECTION_ACTION: {
-					let { user } = await context.getInteractionData();
-					let accessToken = (await getAccessTokenForUser(
+					const { user } = context.getInteractionData();
+					const accessToken = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
 					)) as IAuthData;
-					let value: string = context.getInteractionData()
+					const value: string = context.getInteractionData()
 						.value as string;
-					let actionDetailsArray = value?.trim()?.split(' ');
+					const actionDetailsArray = value?.trim()?.split(' ');
 					if (accessToken && actionDetailsArray?.length == 2) {
 						if (
 							actionDetailsArray[1] !==
 							ModalsEnum.BLANK_GITHUB_TEMPLATE
 						) {
-							let templateResponse = await getIssueTemplateCode(
+							const templateResponse = await getIssueTemplateCode(
 								this.http,
 								actionDetailsArray[1],
 								accessToken.token,
@@ -708,7 +701,7 @@ export class ExecuteBlockActionHandler {
 								.getInteractionResponder()
 								.openModalViewResponse(newIssueModal);
 						} else {
-							let data = {
+							const data = {
 								repository: actionDetailsArray[0],
 							};
 							const newIssueModal = await NewIssueModal({
@@ -727,8 +720,9 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.SHARE_SEARCH_RESULT_ACTION: {
-					let { user, room } = await context.getInteractionData();
-					let value: string = context.getInteractionData()
+					const { user } = context.getInteractionData();
+					let { room } = context.getInteractionData();
+					const value: string = context.getInteractionData()
 						.value as string;
 					if (user?.id) {
 						if (room?.id) {
@@ -739,7 +733,7 @@ export class ExecuteBlockActionHandler {
 								`${value}`,
 							);
 						} else {
-							let roomId = (
+							const roomId = (
 								await getInteractionRoomData(
 									this.read.getPersistenceReader(),
 									user.id,
@@ -759,10 +753,11 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES: {
-					let { user, room } = await context.getInteractionData();
-					let value: string = context.getInteractionData()
+					const { user } = context.getInteractionData();
+					let { room } = context.getInteractionData();
+					const value: string = context.getInteractionData()
 						.value as string;
-					let PullRequestDetails = value.split(' ');
+					const PullRequestDetails = value.split(' ');
 					if (PullRequestDetails.length == 2) {
 						const triggerId =
 							context.getInteractionData().triggerId;
@@ -796,7 +791,7 @@ export class ExecuteBlockActionHandler {
 								`${value}`,
 							);
 						} else {
-							let roomId = (
+							const roomId = (
 								await getInteractionRoomData(
 									this.read.getPersistenceReader(),
 									user.id,
@@ -816,10 +811,11 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.MULTI_SHARE_ADD_SEARCH_RESULT_ACTION: {
-					let { user, room } = await context.getInteractionData();
-					let searchResultId: string = context.getInteractionData()
+					const { user } = context.getInteractionData();
+					let { room } = context.getInteractionData();
+					const searchResultId: string = context.getInteractionData()
 						.value as string;
-					let roomId: string = '';
+					let roomId = '';
 					if (user?.id) {
 						if (room?.id) {
 							roomId = room.id;
@@ -834,11 +830,12 @@ export class ExecuteBlockActionHandler {
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 						}
-						let githubSearchStorage = new GithubSearchResultStorage(
-							this.persistence,
-							this.read.getPersistenceReader(),
-						);
-						let searchResultData: IGitHubSearchResultData =
+						const githubSearchStorage =
+							new GithubSearchResultStorage(
+								this.persistence,
+								this.read.getPersistenceReader(),
+							);
+						const searchResultData: IGitHubSearchResultData =
 							await githubSearchStorage.getSearchResults(
 								room?.id as string,
 								user,
@@ -846,7 +843,7 @@ export class ExecuteBlockActionHandler {
 						if (searchResultData?.search_results?.length) {
 							let index = -1;
 							let currentIndex = 0;
-							for (let searchResult of searchResultData.search_results) {
+							for (const searchResult of searchResultData.search_results) {
 								if (searchResult.result_id == searchResultId) {
 									index = currentIndex;
 									break;
@@ -882,8 +879,9 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.MULTI_SHARE_REMOVE_SEARCH_RESULT_ACTION: {
-					let { user, room } = await context.getInteractionData();
-					let searchResultId: string = context.getInteractionData()
+					const { user } = context.getInteractionData();
+					let { room } = context.getInteractionData();
+					const searchResultId: string = context.getInteractionData()
 						.value as string;
 					let roomId = '';
 					if (user?.id && searchResultId) {
@@ -900,11 +898,12 @@ export class ExecuteBlockActionHandler {
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 						}
-						let githubSearchStorage = new GithubSearchResultStorage(
-							this.persistence,
-							this.read.getPersistenceReader(),
-						);
-						let searchResultData: IGitHubSearchResultData =
+						const githubSearchStorage =
+							new GithubSearchResultStorage(
+								this.persistence,
+								this.read.getPersistenceReader(),
+							);
+						const searchResultData: IGitHubSearchResultData =
 							await githubSearchStorage.getSearchResults(
 								room?.id as string,
 								user,
@@ -912,7 +911,7 @@ export class ExecuteBlockActionHandler {
 						if (searchResultData?.search_results?.length) {
 							let index = -1;
 							let currentIndex = 0;
-							for (let searchResult of searchResultData.search_results) {
+							for (const searchResult of searchResultData.search_results) {
 								if (searchResult.result_id == searchResultId) {
 									index = currentIndex;
 									break;
@@ -948,21 +947,21 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.MERGE_PULL_REQUEST_ACTION: {
-					let value: string = context.getInteractionData()
+					const value: string = context.getInteractionData()
 						.value as string;
-					let splittedValues = value?.split(' ');
-					let { user } = await context.getInteractionData();
-					let accessToken = (await getAccessTokenForUser(
+					const splittedValues = value?.split(' ');
+					const { user } = context.getInteractionData();
+					const accessToken = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
 					)) as IAuthData;
 					if (splittedValues.length == 2 && accessToken?.token) {
-						let data = {
+						const data = {
 							repo: splittedValues[0],
 							pullNumber: splittedValues[1],
 						};
-						let repoDetails = await getRepoData(
+						const repoDetails = await getRepoData(
 							this.http,
 							splittedValues[0],
 							accessToken.token,
@@ -1006,17 +1005,17 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.COMMENT_PR_ACTION: {
-					let value: string = context.getInteractionData()
+					const value: string = context.getInteractionData()
 						.value as string;
-					let splittedValues = value?.split(' ');
-					let { user } = await context.getInteractionData();
-					let accessToken = (await getAccessTokenForUser(
+					const splittedValues = value?.split(' ');
+					const { user } = context.getInteractionData();
+					const accessToken = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
 					)) as IAuthData;
 					if (splittedValues.length == 2 && accessToken?.token) {
-						let data = {
+						const data = {
 							repo: splittedValues[0],
 							pullNumber: splittedValues[1],
 						};
@@ -1050,25 +1049,25 @@ export class ExecuteBlockActionHandler {
 				}
 
 				case ModalsEnum.ISSUE_COMMENT_LIST_ACTION: {
-					let value: string = context.getInteractionData()
+					const value: string = context.getInteractionData()
 						.value as string;
-					let splittedValues = value?.split(' ');
-					let { user } = await context.getInteractionData();
-					let accessToken = (await getAccessTokenForUser(
+					const splittedValues = value?.split(' ');
+					const { user } = context.getInteractionData();
+					const accessToken = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
 					)) as IAuthData;
 					if (splittedValues.length == 2) {
-						let repoName = splittedValues[0];
-						let issueNumber = splittedValues[1];
-						let issueComments = await getIssuesComments(
+						const repoName = splittedValues[0];
+						const issueNumber = splittedValues[1];
+						const issueComments = await getIssuesComments(
 							this.http,
 							repoName,
 							accessToken?.token,
 							issueNumber,
 						);
-						let issueData = await getIssueData(
+						const issueData = await getIssueData(
 							repoName,
 							issueNumber,
 							accessToken?.token,
@@ -1115,7 +1114,7 @@ export class ExecuteBlockActionHandler {
 									);
 							}
 						}
-						let data = {
+						const data = {
 							repo: repoName,
 							issueNumber: issueNumber,
 							issueData: issueData,
@@ -1137,17 +1136,17 @@ export class ExecuteBlockActionHandler {
 				}
 
 				case ModalsEnum.COMMENT_ISSUE_ACTION: {
-					let value: string = context.getInteractionData()
+					const value: string = context.getInteractionData()
 						.value as string;
-					let splittedValues = value?.split(' ');
-					let { user } = await context.getInteractionData();
-					let accessToken = (await getAccessTokenForUser(
+					const splittedValues = value?.split(' ');
+					const { user } = context.getInteractionData();
+					const accessToken = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
 					)) as IAuthData;
 					if (splittedValues.length == 2 && accessToken?.token) {
-						let data = {
+						const data = {
 							repo: splittedValues[0],
 							issueNumber: splittedValues[1],
 						};
@@ -1180,25 +1179,26 @@ export class ExecuteBlockActionHandler {
 				}
 
 				case ModalsEnum.PR_COMMENT_LIST_ACTION: {
-					let value: string = context.getInteractionData()
+					const value: string = context.getInteractionData()
 						.value as string;
-					let splittedValues = value?.split(' ');
-					let { user } = await context.getInteractionData();
-					let accessToken = (await getAccessTokenForUser(
+					const splittedValues = value?.split(' ');
+					const { user } = context.getInteractionData();
+					const accessToken = (await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
 					)) as IAuthData;
 					if (splittedValues.length == 2 && accessToken?.token) {
-						let repoName = splittedValues[0];
-						let pullNumber = splittedValues[1];
-						let pullRequestComments = await getPullRequestComments(
-							this.http,
-							repoName,
-							accessToken.token,
-							pullNumber,
-						);
-						let pullRequestData = await getPullRequestData(
+						const repoName = splittedValues[0];
+						const pullNumber = splittedValues[1];
+						const pullRequestComments =
+							await getPullRequestComments(
+								this.http,
+								repoName,
+								accessToken.token,
+								pullNumber,
+							);
+						const pullRequestData = await getPullRequestData(
 							this.http,
 							repoName,
 							accessToken.token,
@@ -1241,7 +1241,7 @@ export class ExecuteBlockActionHandler {
 									);
 							}
 						}
-						let data = {
+						const data = {
 							repo: repoName,
 							pullNumber: pullNumber,
 							pullData: pullRequestData,
@@ -1264,19 +1264,19 @@ export class ExecuteBlockActionHandler {
 				}
 				case ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE_PROFILE:
 				case ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE: {
-					let value: string = context.getInteractionData()
+					const value: string = context.getInteractionData()
 						.value as string;
-					let splittedValues = value?.split(' ');
+					const splittedValues = value?.split(' ');
 					if (splittedValues?.length >= 3) {
-						let repository = splittedValues[0];
-						let issueNumber = splittedValues[1];
-						let assignees: string = '';
+						const repository = splittedValues[0];
+						const issueNumber = splittedValues[1];
+						let assignees = '';
 						for (let i = 2; i < splittedValues.length; i++) {
 							if (splittedValues[i].length > 0) {
 								assignees += `${splittedValues[i]} `;
 							}
 						}
-						let data = {
+						const data = {
 							repository,
 							issueNumber,
 							assignees,
@@ -1299,18 +1299,18 @@ export class ExecuteBlockActionHandler {
 					let repository: string = context.getInteractionData()
 						.value as string;
 					repository = repository?.trim();
-					let { user } = await context.getInteractionData();
-					let accessToken = await getAccessTokenForUser(
+					const { user } = context.getInteractionData();
+					const accessToken = await getAccessTokenForUser(
 						this.read,
 						user,
 						this.app.oauth2Config,
 					);
 					if (!accessToken) {
-						let response = await getRepositoryIssues(
+						const response = await getRepositoryIssues(
 							this.http,
 							repository,
 						);
-						let data = {
+						const data = {
 							issues: response.issues,
 							pushRights: false, //no access token, so user has no pushRights to the repo,
 							repo: repository,
@@ -1332,16 +1332,16 @@ export class ExecuteBlockActionHandler {
 							context.getInteractionData().user,
 						);
 					} else {
-						let repoDetails = await getRepoData(
+						const repoDetails = await getRepoData(
 							this.http,
 							repository,
 							accessToken.token,
 						);
-						let response = await getRepositoryIssues(
+						const response = await getRepositoryIssues(
 							this.http,
 							repository,
 						);
-						let data = {
+						const data = {
 							issues: response.issues,
 							pushRights:
 								repoDetails?.permissions?.push ||
@@ -1368,10 +1368,11 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.MULTI_SHARE_ADD_GITHUB_ISSUE_ACTION: {
-					let { user, room } = await context.getInteractionData();
-					let issueId: string = context.getInteractionData()
+					const { user } = context.getInteractionData();
+					let { room } = context.getInteractionData();
+					const issueId: string = context.getInteractionData()
 						.value as string;
-					let roomId: string = '';
+					let roomId = '';
 					if (user?.id) {
 						if (room?.id) {
 							roomId = room.id;
@@ -1386,11 +1387,11 @@ export class ExecuteBlockActionHandler {
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 						}
-						let githubissueStorage = new GithubRepoIssuesStorage(
+						const githubissueStorage = new GithubRepoIssuesStorage(
 							this.persistence,
 							this.read.getPersistenceReader(),
 						);
-						let repoIssuesData: IGitHubIssueData =
+						const repoIssuesData: IGitHubIssueData =
 							await githubissueStorage.getIssueData(
 								room?.id as string,
 								user,
@@ -1398,7 +1399,7 @@ export class ExecuteBlockActionHandler {
 						if (repoIssuesData?.issue_list?.length) {
 							let index = -1;
 							let currentIndex = 0;
-							for (let issue of repoIssuesData.issue_list) {
+							for (const issue of repoIssuesData.issue_list) {
 								if (issue.issue_id == issueId) {
 									index = currentIndex;
 									break;
@@ -1413,7 +1414,7 @@ export class ExecuteBlockActionHandler {
 									repoIssuesData,
 								);
 							}
-							let data = {
+							const data = {
 								issues: repoIssuesData.issue_list,
 								pushRights: repoIssuesData.push_rights, //no access token, so user has no pushRights to the repo,
 								repo: repoIssuesData.repository,
@@ -1440,10 +1441,11 @@ export class ExecuteBlockActionHandler {
 					break;
 				}
 				case ModalsEnum.MULTI_SHARE_REMOVE_GITHUB_ISSUE_ACTION: {
-					let { user, room } = await context.getInteractionData();
-					let issueId: string = context.getInteractionData()
+					const { user } = context.getInteractionData();
+					let { room } = context.getInteractionData();
+					const issueId: string = context.getInteractionData()
 						.value as string;
-					let roomId: string = '';
+					let roomId = '';
 					if (user?.id) {
 						if (room?.id) {
 							roomId = room.id;
@@ -1458,11 +1460,11 @@ export class ExecuteBlockActionHandler {
 								.getRoomReader()
 								.getById(roomId)) as IRoom;
 						}
-						let githubissueStorage = new GithubRepoIssuesStorage(
+						const githubissueStorage = new GithubRepoIssuesStorage(
 							this.persistence,
 							this.read.getPersistenceReader(),
 						);
-						let repoIssuesData: IGitHubIssueData =
+						const repoIssuesData: IGitHubIssueData =
 							await githubissueStorage.getIssueData(
 								room?.id as string,
 								user,
@@ -1470,7 +1472,7 @@ export class ExecuteBlockActionHandler {
 						if (repoIssuesData?.issue_list?.length) {
 							let index = -1;
 							let currentIndex = 0;
-							for (let issue of repoIssuesData.issue_list) {
+							for (const issue of repoIssuesData.issue_list) {
 								if (issue.issue_id == issueId) {
 									index = currentIndex;
 									break;
@@ -1485,7 +1487,7 @@ export class ExecuteBlockActionHandler {
 									repoIssuesData,
 								);
 							}
-							let data = {
+							const data = {
 								issues: repoIssuesData.issue_list,
 								pushRights: repoIssuesData.push_rights, //no access token, so user has no pushRights to the repo,
 								repo: repoIssuesData.repository,

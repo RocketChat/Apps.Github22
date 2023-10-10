@@ -4,10 +4,6 @@ import {
 	IPersistence,
 	IHttp,
 } from '@rocket.chat/apps-engine/definition/accessors';
-import {
-	RocketChatAssociationModel,
-	RocketChatAssociationRecord,
-} from '@rocket.chat/apps-engine/definition/metadata';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
 import {
 	ButtonStyle,
@@ -38,7 +34,7 @@ export async function userIssuesModal({
 		state: string;
 		sort: string;
 	};
-	access_token: String;
+	access_token: string;
 	modify: IModify;
 	read: IRead;
 	persistence: IPersistence;

@@ -11,19 +11,9 @@ import {
 } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { ModalsEnum } from '../enum/Modals';
-import { getBasicUserInfo } from '../helpers/githubSDK';
-import {
-	storeInteractionRoomData,
-	getInteractionRoomData,
-} from '../persistance/roomInteraction';
 
 export async function shareProfileModal({
 	modify,
-	read,
-	persistence,
-	http,
-	slashcommandcontext,
-	uikitcontext,
 }: {
 	modify: IModify;
 	read: IRead;

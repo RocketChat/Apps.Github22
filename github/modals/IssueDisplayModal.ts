@@ -11,10 +11,9 @@ import {
 } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { IGitHubIssue } from '../definitions/githubIssue';
-import { IGithubReactions } from '../definitions/githubReactions';
 import { ModalsEnum } from '../enum/Modals';
 import { OcticonIcons } from '../enum/OcticonIcons';
-import { getIssueData, getUserAssignedIssues } from '../helpers/githubSDK';
+import { getIssueData } from '../helpers/githubSDK';
 import { CreateIssueStatsBar } from '../lib/CreateIssueStatsBar';
 import { CreateReactionsBar } from '../lib/CreateReactionsBar';
 import {
@@ -34,9 +33,9 @@ export async function IssueDisplayModal({
 	slashcommandcontext,
 	uikitcontext,
 }: {
-	repoName: String;
-	issueNumber: String;
-	access_token: String;
+	repoName: string;
+	issueNumber: string;
+	access_token: string;
 	modify: IModify;
 	read: IRead;
 	persistence: IPersistence;

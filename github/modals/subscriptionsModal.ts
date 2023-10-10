@@ -9,15 +9,9 @@ import {
 	TextObjectType,
 } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
-import { AppEnum } from '../enum/App';
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	getInteractionRoomData,
 	storeInteractionRoomData,
@@ -30,7 +24,6 @@ export async function subscriptionsModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
@@ -66,33 +59,33 @@ export async function subscriptionsModal({
 			).roomId;
 		}
 
-		let subscriptionStorage = new Subscription(
+		const subscriptionStorage = new Subscription(
 			persistence,
 			read.getPersistenceReader(),
 		);
-		let roomSubscriptions: Array<ISubscription> =
+		const roomSubscriptions: Array<ISubscription> =
 			await subscriptionStorage.getSubscriptions(roomId);
 
 		block.addDividerBlock();
 
-		let repositoryData = new Map<string, IRepositorySubscriptions>();
-		for (let subscription of roomSubscriptions) {
-			let repoName = subscription.repoName;
-			let userId = subscription.user;
-			let event = subscription.event;
-			let user = await read.getUserReader().getById(userId);
+		const repositoryData = new Map<string, IRepositorySubscriptions>();
+		for (const subscription of roomSubscriptions) {
+			const repoName = subscription.repoName;
+			const userId = subscription.user;
+			const event = subscription.event;
+			const user = await read.getUserReader().getById(userId);
 
 			if (repositoryData.has(repoName)) {
-				let repoData = repositoryData.get(
+				const repoData = repositoryData.get(
 					repoName,
 				) as IRepositorySubscriptions;
 				repoData.events.push(event);
 				repoData.user = user;
 				repositoryData.set(repoName, repoData);
 			} else {
-				let events: Array<string> = [];
+				const events: Array<string> = [];
 				events.push(event);
-				let repoData: IRepositorySubscriptions = {
+				const repoData: IRepositorySubscriptions = {
 					webhookId: subscription.webhookId,
 					events: events,
 					user: user,
@@ -102,10 +95,9 @@ export async function subscriptionsModal({
 			}
 		}
 		let index = 1;
-		for (let repository of repositoryData.values()) {
-			let repoName = repository.repoName;
-			let repoUser = repository.user;
-			let events = repository.events;
+		for (const repository of repositoryData.values()) {
+			const repoName = repository.repoName;
+			const events = repository.events;
 			block.addSectionBlock({
 				text: {
 					text: `${index}) ${repoName}`,
@@ -121,9 +113,9 @@ export async function subscriptionsModal({
 					url: `https://github.com/${repoName}`,
 				}),
 			});
-			let eventList: Array<ITextObject> = [];
+			const eventList: Array<ITextObject> = [];
 			eventList.push(block.newPlainTextObject('Events : '));
-			for (let event of events) {
+			for (const event of events) {
 				eventList.push(block.newPlainTextObject(`${event} `));
 			}
 			block.addContextBlock({ elements: eventList });

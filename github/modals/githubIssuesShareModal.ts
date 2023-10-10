@@ -6,16 +6,9 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
-import { AppEnum } from '../enum/App';
-// import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
-import { IGitHubSearchResultData } from '../definitions/searchResultData';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	getInteractionRoomData,
 	storeInteractionRoomData,
@@ -27,7 +20,6 @@ export async function githubIssuesShareModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
@@ -66,9 +58,9 @@ export async function githubIssuesShareModal({
 		}
 		let finalString = `\n`;
 		if (data.issue_list?.length) {
-			for (let searchResult of data.issue_list) {
+			for (const searchResult of data.issue_list) {
 				if (searchResult.share) {
-					let searchResultString = `${searchResult.issue_compact}  `;
+					const searchResultString = `${searchResult.issue_compact}  `;
 					finalString = `${finalString} \n${searchResultString}`;
 				}
 			}

@@ -6,27 +6,19 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
-import { AppEnum } from '../enum/App';
 // import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	storeInteractionRoomData,
 	getInteractionRoomData,
 } from '../persistance/roomInteraction';
-import { Subscription } from '../persistance/subscriptions';
-import { ISubscription } from '../definitions/subscription';
 
 export async function AddSubscriptionModal({
 	modify,
 	read,
 	persistence,
-	http,
 	slashcommandcontext,
 	uikitcontext,
 }: {
@@ -61,13 +53,6 @@ export async function AddSubscriptionModal({
 			).roomId;
 		}
 
-		let subscriptionStorage = new Subscription(
-			persistence,
-			read.getPersistenceReader(),
-		);
-		let roomSubscriptions: Array<ISubscription> =
-			await subscriptionStorage.getSubscriptions(roomId);
-
 		// shows indentations in input blocks but not inn section block
 		block.addInputBlock({
 			blockId: ModalsEnum.REPO_NAME_INPUT,
@@ -84,7 +69,7 @@ export async function AddSubscriptionModal({
 			}),
 		});
 
-		let newMultiStaticElemnt = block.newMultiStaticElement({
+		const newMultiStaticElemnt = block.newMultiStaticElement({
 			actionId: ModalsEnum.ADD_SUBSCRIPTION_EVENT_OPTIONS,
 			options: [
 				{

@@ -6,21 +6,15 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { ModalsEnum } from '../enum/Modals';
 import { AppEnum } from '../enum/App';
 // import { getRoomTasks, getUIData, persistUIData } from '../lib/persistence';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
-import {
-	UIKitBlockInteractionContext,
-	UIKitInteractionContext,
-} from '@rocket.chat/apps-engine/definition/uikit';
+import { UIKitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 
 export async function fileCodeModal({
 	data,
 	modify,
-	read,
-	persistence,
 	http,
 	slashcommandcontext,
 	uikitcontext,
@@ -37,15 +31,11 @@ export async function fileCodeModal({
 
 	const block = modify.getCreator().getBlockBuilder();
 
-	const room =
-		slashcommandcontext?.getRoom() ||
-		uikitcontext?.getInteractionData().room;
 	const user =
 		slashcommandcontext?.getSender() ||
 		uikitcontext?.getInteractionData().user;
 
 	if (user?.id) {
-		let roomId;
 		const pullRawData = await http.get(data.value);
 		const pullData = pullRawData.content;
 		block.addSectionBlock({

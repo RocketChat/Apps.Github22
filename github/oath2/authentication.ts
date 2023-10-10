@@ -1,8 +1,4 @@
-import {
-	IModify,
-	IPersistence,
-	IRead,
-} from '@rocket.chat/apps-engine/definition/accessors';
+import { IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { GithubApp } from '../GithubApp';
@@ -16,7 +12,6 @@ export async function authorize(
 	modify: IModify,
 	user: IUser,
 	room: IRoom,
-	persistence: IPersistence,
 ): Promise<void> {
 	const url = await app
 		.getOauth2ClientInstance()
