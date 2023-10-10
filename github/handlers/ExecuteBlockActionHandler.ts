@@ -1116,7 +1116,7 @@ export class ExecuteBlockActionHandler {
                     await unsubscribedPR(this.read,this.persistence,repo,Number(number),user);
 
                     const message = `You have unsubscribed from repository [${repo} Pull Request #${number}](https://github.com/${repo}/pull/${number})`;
-                    sendNotification(this.read, this.modify, user, room as IRoom, message);
+                    await sendNotification(this.read, this.modify, user, room as IRoom, message);
                     
                 }
             }
