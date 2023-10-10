@@ -36,5 +36,5 @@ export async function createReminder(
         await CreateReminder(read, persistence, user, repoName);
     }
     
-    sendNotification(read, modify, user, room, `Pull Request Reminder Set for [${repoName}](https://github.com/${repoName}) 👍`)
+    await sendNotification(read, modify, user, room, `Pull Request Reminder Set for [${repoName}](https://github.com/${repoName}) 👍`)
 }
