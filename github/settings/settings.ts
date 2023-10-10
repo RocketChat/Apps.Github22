@@ -8,7 +8,6 @@ export const settings: ISetting[] = [
 	{
 		id: AppSettings.ReminderCORNjobString,
 		i18nLabel: 'corn-job-string-for-pr-reminders',
-		i18nDescription: 'cron-job-string-for-pull-request-reminders',
 		type: SettingType.STRING,
 		required: true,
 		public: false,

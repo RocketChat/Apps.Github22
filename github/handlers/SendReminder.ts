@@ -18,8 +18,8 @@ export async function SendReminder(jobData: any, read: IRead, modify: IModify, h
   async function processReminder(reminders: IReminder[], read: IRead, app: GithubApp) {
     await Promise.all(reminders.map(async (user) => {
       try {
-        let User = await read.getUserReader().getById(user.userid);
-        let accessToken = await getAccessTokenForUser(read, User, app.oauth2Config);
+        const User = await read.getUserReader().getById(user.userid);
+        const accessToken = await getAccessTokenForUser(read, User, app.oauth2Config);
         let githubusername = '';
 
         const appUser = await read.getUserReader().getAppUser() as IUser;
