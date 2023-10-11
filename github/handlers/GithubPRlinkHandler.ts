@@ -6,30 +6,21 @@ import { ModalsEnum } from "../enum/Modals";
 
 
 export async function handleGithubPRLink(message:IMessage,read:IRead,http:IHttp,persistence:IPersistence,modify:IModify):Promise<String> {
-
-    // Look for a GitHub PR link in the text
     const githubPRLinkRegex = /\bhttps?:\/\/github\.com\/\S+\/pull\/\d+\b/;
     const text = message.text!;
     const prLinkMatch = text.match(githubPRLinkRegex);
     const prLink = prLinkMatch?.[0];
-    
-    // Extract username, repository name, and PR number from the link
     const githubLinkPartsRegex = /(?:https?:\/\/github\.com\/)(\S+)\/(\S+)\/pull\/(\d+)/;
     const linkPartsMatch = prLink?.match(githubLinkPartsRegex);
     const username = linkPartsMatch?.[1];
     const repositoryName = linkPartsMatch?.[2];
     const pullNumber = linkPartsMatch?.[3];
-    
-    // Prepare to create a message
     const messageBuilder = await modify.getCreator().startMessage()
         .setRoom(message.room)
         .setSender(message.sender)
         .setGroupable(true);
     
-    // Initialize message blocks
     const block = modify.getCreator().getBlockBuilder();
-
-
 
     block.addActionsBlock({
         blockId:"githubdata",
