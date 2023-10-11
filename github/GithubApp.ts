@@ -59,7 +59,6 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
     }
 
     async checkPostMessageSent?(message: IMessage, read: IRead, http: IHttp): Promise<boolean> {
-        console.log('test')
       if (await hasGithubPRLink(message)){
         return true
       }
