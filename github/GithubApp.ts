@@ -98,30 +98,6 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
         
         return extend.getMessage();
     }
-
-    // public async checkPreMessageSentModify(
-    //     message: IMessage,
-    //     read: IRead,
-    //     http: IHttp
-    // ): Promise<boolean> {
-    //     console.log('test')
-    //   if (await hasGithubPRLink(message)){
-    //     return true
-    //   }
-    //   return false; 
-    // }
-
-    // public async executePreMessageSentModify(
-    //     message: IMessage,
-    //     builder: IMessageBuilder,
-    //     read: IRead,
-    //     http: IHttp,
-    //     persistence: IPersistence
-    //     ): Promise<IMessage>{
-    //     console.log('executed')
-        
-    //    return await handleGithubPRLink(message,read,builder,persistence)
-    // }
     
     public async authorizationCallback(
         token: IAuthData,
