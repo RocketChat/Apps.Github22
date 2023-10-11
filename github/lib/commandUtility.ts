@@ -267,7 +267,6 @@ export class CommandUtility implements ExecutorProps {
         }
     }
 
-
     public async resolveCommand() {
         switch (this.command.length) {
             case 0: {
