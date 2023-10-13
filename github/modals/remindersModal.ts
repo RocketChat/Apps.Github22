@@ -7,36 +7,39 @@ import { UIKitBlockInteractionContext, UIKitInteractionContext } from '@rocket.c
 import { getUserReminder } from '../persistance/remind';
 import { IReminder } from '../definitions/Reminder';
 
-export async function reminderModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp ,slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
+export async function reminderModal({ modify, read, persistence, http, slashcommandcontext, uikitcontext }: { modify: IModify, read: IRead, persistence: IPersistence, http: IHttp, slashcommandcontext?: SlashCommandContext, uikitcontext?: UIKitInteractionContext }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.REMINDER_LIST_MODAL_VIEW;
 
     const block = modify.getCreator().getBlockBuilder();
 
     const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
     const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
-   
+
+    block.addDividerBlock();
+
     if (user?.id) {
-        
-        block.addDividerBlock();
-        
-        const reminders:IReminder = await getUserReminder(read,user);
+        const reminders: IReminder = await getUserReminder(read, user);
 
-        for (let repository of reminders.repos) {
+        if (reminders && reminders.repos.length > 0) {
+            for (let repository of reminders.repos) {
+                block.addSectionBlock({
+                    text: { text: `${repository}`, type: TextObjectType.PLAINTEXT },
+                    accessory: block.newButtonElement({
+                        actionId: ModalsEnum.OPEN_REPO_ACTION,
+                        text: {
+                            text: ModalsEnum.OPEN_REPO_LABEL,
+                            type: TextObjectType.PLAINTEXT
+                        },
+                        url: `https://github.com/${repository}`
+                    })
+                });
 
+                block.addDividerBlock();
+            }
+        } else {
             block.addSectionBlock({
-                text: { text: `${repository}`, type: TextObjectType.PLAINTEXT},
-                accessory: block.newButtonElement({
-                    actionId: ModalsEnum.OPEN_REPO_ACTION,
-                    text: {
-                        text: ModalsEnum.OPEN_REPO_LABEL,
-                        type: TextObjectType.PLAINTEXT
-                    },
-                    url:`https://github.com/${repository}`
-                })
+                text: { text: "You have no reminders.", type: TextObjectType.PLAINTEXT }
             });
-
-            block.addDividerBlock();
-
         }
     }
 
