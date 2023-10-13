@@ -39,6 +39,8 @@ export async function helperMessage({
     13. Add New Issues to GitHub Repository -> \`/github issue\`
     14. Search Issues and Pull Requests -> \`/github search\`
     15. Assign and Share Issues -> \`/github issues\`
+    16. Add a new repository for pull request review reminders -> \`/github reminder create\`
+    17. Get a list of repositories for which you've set up pull request review reminders -> \`/github reminder list\`
     `;
 
     const textSender = await modify
