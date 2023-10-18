@@ -53,6 +53,7 @@ import { addIssueCommentsModal } from "../modals/addIssueCommentModal";
 import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
 import { githubSearchModal } from "../modals/githubSearchModal";
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
+import { unsubscribedPR } from "../persistance/remind";
 
 export class ExecuteBlockActionHandler {
 
@@ -1104,6 +1105,19 @@ export class ExecuteBlockActionHandler {
                     });
 
                     return context.getInteractionResponder().openModalViewResponse(searchModal);
+                }
+
+                case ModalsEnum.UNSUBSCRIBE_REMINDER_ACTION:{
+                    const param:string[] = data.value?.split('|') as string[];
+                    let { user, room } = await context.getInteractionData();
+                    const repo = param[0];
+                    const number  = param[1];
+
+                    await unsubscribedPR(this.read,this.persistence,repo,Number(number),user);
+
+                    const message = `You have unsubscribed from repository [${repo} Pull Request #${number}](https://github.com/${repo}/pull/${number})`;
+                    await sendNotification(this.read, this.modify, user, room as IRoom, message);
+                    
                 }
             }
         } catch (error) {

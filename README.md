@@ -40,6 +40,8 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
     <li> Get Issues of a Repository -> /github  Username/RepositoryName issues </li>
     <li> Get Contributors of a Repository -> /github  Username/RepositoryName contributors </li>
     <li> Get Recent Pull Request of a Repository -> /github  Username/RepositoryName pulls </li>
+    <li>Add a new repository for pull request review reminders -> /github reminder create</li>
+    <li>Get a list of repositories for which you've set up pull request review reminders -> /github reminder list</li>
 </ul>
 
 <h2 align='center'>🚀 Contributing 🚀</h2>
