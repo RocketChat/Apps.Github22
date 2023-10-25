@@ -66,7 +66,6 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
     }
     
     async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
-        console.log('executed')
         
         await handleGithubPRLink(message,read,http,persistence,modify)
         
