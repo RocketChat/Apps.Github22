@@ -8,5 +8,8 @@ export enum SubcommandEnum {
     SEARCH = 'search',
     NEW_ISSUE = 'issue',
     ISSUES = 'issues',
-    PROFILE = 'me'
+    PROFILE = 'me',
+    REMIND = 'remind',
+    CREATE= 'create',
+    LIST ='list',
 }
