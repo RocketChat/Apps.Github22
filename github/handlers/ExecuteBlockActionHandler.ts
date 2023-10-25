@@ -53,7 +53,8 @@ import { addIssueCommentsModal } from "../modals/addIssueCommentModal";
 import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
 import { githubSearchModal } from "../modals/githubSearchModal";
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
-import { unsubscribedPR } from "../persistance/remind";
+import { removeRepoReminder, unsubscribedPR } from "../persistance/remind";
+import { reminderModal } from "../modals/remindersModal";
 
 export class ExecuteBlockActionHandler {
 
@@ -1118,6 +1119,15 @@ export class ExecuteBlockActionHandler {
                     const message = `You have unsubscribed from repository [${repo} Pull Request #${number}](https://github.com/${repo}/pull/${number})`;
                     await sendNotification(this.read, this.modify, user, room as IRoom, message);
                     
+                }
+                
+                case ModalsEnum.REMINDER_REMOVE_REPO_ACTION : {
+                   const {value, user} = context.getInteractionData(); 
+                    await removeRepoReminder(this.read, this.persistence, value as string, user);
+                    
+                   const updatedReminderModal = await reminderModal({modify: this.modify, read:this.read, persistence: this.persistence, http: this.http, uikitcontext: context});
+
+                   return context.getInteractionResponder().updateModalViewResponse( updatedReminderModal);
                 }
             }
         } catch (error) {
