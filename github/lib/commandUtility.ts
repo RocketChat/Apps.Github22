@@ -27,6 +27,8 @@ import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
 import { handleMainModal } from "../handlers/MainModalHandler";
 import { createReminder } from "../handlers/CreateReminder";
 import { ManageReminders, handleReminder } from "../handlers/HandleRemider";
+import { commandsEnum } from "../enum/commands";
+import { AddAnalyticData } from "../persistance/analytics";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -89,6 +91,8 @@ export class CommandUtility implements ExecutorProps {
                         this.room,
                         this.persistence
                     );
+                    AddAnalyticData(this.read,this.persistence,commandsEnum.LoginToGitHub)
+
                     break;
                 }
                 case SubcommandEnum.LOGOUT: {
@@ -102,9 +106,8 @@ export class CommandUtility implements ExecutorProps {
                         this.sender,
                         this.http
                     );
-                    break;
-                }
-                case SubcommandEnum.TEST: {
+                    AddAnalyticData(this.read,this.persistence,commandsEnum.LogoutFromGitHub)
+
                     break;
                 }
                 case SubcommandEnum.SUBSCRIBE: {
