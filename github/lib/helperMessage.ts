@@ -38,7 +38,7 @@ export async function helperMessage({
     12. Subscribe to all repository events -> \`/github Username/RepositoryName subscribe\`
     13. Unsubscribe to all repository events -> \`/github Username/RepositoryName unsubscribe\`
     14. Add New Issues to GitHub Repository -> \`/github issue\`
-    16. Search Issues and Pull Requests -> \`/github search\`
+    15. Search Issues and Pull Requests -> \`/github search\`
     16. Assign and Share Issues -> \`/github issues\`
     17. Add a new repository for pull request review reminders -> \`/github reminder create\`
     18. Get a list of repositories for which you've set up pull request review reminders -> \`/github reminder list\`

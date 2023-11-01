@@ -79,6 +79,7 @@ export class CommandUtility implements ExecutorProps {
                     modify: this.modify,
                     http: this.http,
                 });
+                AddAnalyticData(this.read,this.persistence,commandsEnum.SeeInteractiveButton)
             }
         } else {
             switch (this.command[0]) {
@@ -120,6 +121,7 @@ export class CommandUtility implements ExecutorProps {
                         this.room,
                         this.modify
                     );
+                    AddAnalyticData(this.read,this.persistence,commandsEnum.ManageSubscriptions)
                     break;
                 }
                 case SubcommandEnum.NEW_ISSUE: {
@@ -132,6 +134,7 @@ export class CommandUtility implements ExecutorProps {
                         this.room,
                         this.modify
                     );
+                    AddAnalyticData(this.read,this.persistence,commandsEnum.AddNewIssues)
                     break;
                 }
                 case SubcommandEnum.SEARCH: {
@@ -144,6 +147,7 @@ export class CommandUtility implements ExecutorProps {
                         this.room,
                         this.modify
                     );
+                    AddAnalyticData(this.read,this.persistence,commandsEnum.SearchIssuesAndPullRequests)
                     break;
                 }
                 case SubcommandEnum.PROFILE: {
@@ -156,6 +160,7 @@ export class CommandUtility implements ExecutorProps {
                         this.room,
                         this.modify
                     );
+                    AddAnalyticData(this.read,this.persistence,commandsEnum.ViewProfileAndIssues)
                     break;
                 }
                 case SubcommandEnum.ISSUES: {
@@ -168,6 +173,7 @@ export class CommandUtility implements ExecutorProps {
                         this.room,
                         this.modify
                     )
+                    AddAnalyticData(this.read,this.persistence,commandsEnum.AssignAndShareIssues)
                     break;
                 }
                 default: {
@@ -208,6 +214,7 @@ export class CommandUtility implements ExecutorProps {
                     this.room,
                     this.modify
                 );
+                AddAnalyticData(this.read,this.persistence,commandsEnum.AddReminder)
                 break;
             case SubcommandEnum.LIST:
                 await ManageReminders(
@@ -219,6 +226,7 @@ export class CommandUtility implements ExecutorProps {
                     this.room,
                     this.modify
                 );
+                AddAnalyticData(this.read,this.persistence,commandsEnum.ListReminders)
                 break;
             default:
                 break;
@@ -238,6 +246,7 @@ export class CommandUtility implements ExecutorProps {
                     this.room,
                     this.modify
                 );
+                AddAnalyticData(this.read,this.persistence,commandsEnum.SubscribeAllEvents)
                 break;
             case SubcommandEnum.UNSUBSCRIBE:
                 UnsubscribeAllEvents(
@@ -250,6 +259,7 @@ export class CommandUtility implements ExecutorProps {
                     this.room,
                     this.modify
                 );
+                AddAnalyticData(this.read,this.persistence,commandsEnum.UnsubscribeAllEvents)
                 break;
             default:
                 await basicQueryMessage({
@@ -297,6 +307,7 @@ export class CommandUtility implements ExecutorProps {
                 http: this.http,
                 slashcommandcontext: this.context,
             });
+            AddAnalyticData(this.read,this.persistence,commandsEnum.ReviewPullRequest)
             await this.modify
                 .getUiController()
                 .openModalView(modal, { triggerId }, this.context.getSender());
@@ -317,6 +328,7 @@ export class CommandUtility implements ExecutorProps {
                     this.room,
                     this.modify
                 );
+                AddAnalyticData(this.read,this.persistence,commandsEnum.OpenHomeModal)
                 break;
             }
             case 1: {

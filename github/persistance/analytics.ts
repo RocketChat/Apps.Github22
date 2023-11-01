@@ -1,3 +1,4 @@
+
 import {
     IPersistence,
     IRead
@@ -14,35 +15,31 @@ const assoc = new RocketChatAssociationRecord(
     'analytics'
 );
 
-
-
 export async function AddAnalyticData(
     read: IRead,
     persistence: IPersistence,
-    commandNumber: number,
+    commandNumber: number
 ): Promise<void> {
     const data = await getAnalyticData(read);
+
+    let decodedData: ICommandUsage[];
 
     if (data.length === 0) {
         const commandNumbers = [
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
         ];
-        const AnalyticsData = commandNumbers.map((command) => ({
+        decodedData = commandNumbers.map((command) => ({
             commandNumber: command,
-            count: 0,
-        })) as unknown as ICommandUsage[];
+            count: command === commandNumber ? 1 : 0,
+        })) as ICommandUsage[];
 
+        const encodedData = encoder(decodedData);
 
-        const encodedData = encoder(AnalyticsData);
-
-        await persistence.createWithAssociation(
-            encodedData,
-            assoc
-        );
+        await persistence.createWithAssociation(encodedData, assoc);
         return;
     } else {
-        let decodedData = decoder(data);
-        const command = decodedData.find((cmd) => cmd.commandNumber === commandNumber)
+        decodedData = decoder(data);
+        const command = decodedData.find((cmd) => cmd.commandNumber === commandNumber);
         if (command) {
             command.count++;
         }
