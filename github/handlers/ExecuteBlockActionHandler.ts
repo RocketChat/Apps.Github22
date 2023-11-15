@@ -18,7 +18,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubscriptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData, getIssuesComments } from "../helpers/githubSDK";
+import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData, getIssuesComments, approvePullRequest } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -734,7 +734,50 @@ export class ExecuteBlockActionHandler {
 
                     return context.getInteractionResponder().openModalViewResponse(shareProfileMod);
                 }
+                case ModalsEnum.APPROVE_PULL_REQUEST_ACTION:{
+                    
+                    let value: string = context.getInteractionData().value as string;
+                    let splittedValues = value?.split(" ");
+                    let { user } = await context.getInteractionData();
+                    let { room} = await context.getInteractionData();
+                    let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    
+                    if(splittedValues.length==2 && accessToken?.token){
+                        let data={
+                            "repo" : splittedValues[0],
+                            "pullNumber": splittedValues[1]
+                        }
+                        let repoDetails = await getRepoData(this.http,splittedValues[0],accessToken.token);
 
+                        if(repoDetails?.permissions?.admin || repoDetails?.permissions?.push || repoDetails?.permissions?.maintain ){
+                            const response  = await approvePullRequest(this.http,data.repo,accessToken.token,data.pullNumber);
+
+                            let message = `🤖 Pull Request successfully Approved ✔️ : https://github.com/${data.repo}/pull/${data.pullNumber}`
+
+                            if(response.state == "APPROVED" && room ){
+                                sendMessage(this.modify,room,user,message)
+                            }
+
+                            if(response.errors && room){
+                                sendNotification(this.read,this.modify,user,room,response.errors[0]);
+                            }
+
+                        }else{
+                            const unauthorizedMessageModal = await messageModal({
+                                message:"Unauthorized Action 🤖 You dont have push rights ⚠️",
+                                modify: this.modify,
+                                read: this.read,
+                                persistence: this.persistence,
+                                http: this.http,
+                                uikitcontext: context
+                            })
+                            return context
+                                .getInteractionResponder()
+                                .openModalViewResponse(unauthorizedMessageModal);
+                        }
+                    }
+                    break;
+                }
                 case ModalsEnum.ISSUE_COMMENT_LIST_ACTION:{
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
