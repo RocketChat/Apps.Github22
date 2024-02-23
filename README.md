@@ -73,7 +73,7 @@ The GitHub Rocket.Chat App provides a seamless integration between GitHub and Ro
   <li>Set up the Application on your server using our <a href="#desktop_computer-quick-setup-desktop_computer">Quick Setup</a> and <a href="#desktop_computer-application-setup-desktop_computer">Application Setup</a>.</li>
  <li>Explore the app and look for existing issues to solve. We look forward to new PRs :100:.</li>
  <li>If you find a bug or a missing feature, feel free to open a new Issue.</li>
- <li>If you are new to Rocket.Chat App Development, follow the <a href="https://developer.rocket.chat/apps-engine/rocket.chat-app">developement documentation</a> and <a href="https://rocketchat.github.io/Rocket.Chat.Apps-engine/">RocketChat Apps Engine TypeScript Defenitions</a></li>
+ <li>If you are new to Rocket.Chat App Development, follow the <a href="https://developer.rocket.chat/apps-engine/rocket.chat-apps-engine">developement documentation</a> and <a href="https://rocketchat.github.io/Rocket.Chat.Apps-engine/">RocketChat Apps Engine TypeScript Defenitions</a></li>
   <li>You can also follow other Rocket.Chat Apps for inspiration : <a href="https://github.com/Poll-Plus/rocket.chat.app-poll">Polls Plus App</a>, <a href="https://github.com/RocketChat/Apps.ClickUp">ClickUp Rocket.Chat App</a> , <a href="https://github.com/RocketChat/Apps.Figma">Figma Rocket.Chat App</a>
 </ul>
 
