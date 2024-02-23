@@ -24,6 +24,9 @@ import { handleSearch } from "../handlers/SearchHandler";
 import { handleIssues, handleNewIssue } from "../handlers/HandleIssues";
 import { handleUserProfileRequest } from "../handlers/UserProfileHandler";
 import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
+import { handleMainModal } from "../handlers/MainModalHandler";
+import { createReminder } from "../handlers/CreateReminder";
+import { ManageReminders, handleReminder } from "../handlers/HandleRemider";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -152,7 +155,7 @@ export class CommandUtility implements ExecutorProps {
                     );
                     break;
                 }
-                case SubcommandEnum.ISSUES :{
+                case SubcommandEnum.ISSUES: {
                     handleIssues(
                         this.read,
                         this.context,
@@ -181,10 +184,47 @@ export class CommandUtility implements ExecutorProps {
 
     private async handleDualParamCommands() {
         const query = this.command[1];
-        const repository = this.command[0];
+        const param = this.command[0];
 
+        if (param === 'reminder') {
+            this.handleReminderCommand(query);
+        } else {
+            this.handleSubscriptionCommands(query, param);
+        }
+    }
+
+    private async handleReminderCommand(query: string) {
         switch (query) {
-            case SubcommandEnum.SUBSCRIBE: {
+            case SubcommandEnum.CREATE:
+                await handleReminder(
+                    this.read,
+                    this.context,
+                    this.app,
+                    this.persistence,
+                    this.http,
+                    this.room,
+                    this.modify
+                );
+                break;
+            case SubcommandEnum.LIST:
+                await ManageReminders(
+                    this.read,
+                    this.context,
+                    this.app,
+                    this.persistence,
+                    this.http,
+                    this.room,
+                    this.modify
+                );
+                break;
+            default:
+                break;
+        }
+    }
+
+    private async handleSubscriptionCommands(query: string, repository: string) {
+        switch (query) {
+            case SubcommandEnum.SUBSCRIBE:
                 SubscribeAllEvents(
                     this.read,
                     this.context,
@@ -196,8 +236,7 @@ export class CommandUtility implements ExecutorProps {
                     this.modify
                 );
                 break;
-            }
-            case SubcommandEnum.UNSUBSCRIBE: {
+            case SubcommandEnum.UNSUBSCRIBE:
                 UnsubscribeAllEvents(
                     this.read,
                     this.context,
@@ -209,10 +248,9 @@ export class CommandUtility implements ExecutorProps {
                     this.modify
                 );
                 break;
-            }
-            default: {
+            default:
                 await basicQueryMessage({
-                    query,
+                    query: this.command[1],
                     repository,
                     room: this.room,
                     read: this.read,
@@ -224,7 +262,6 @@ export class CommandUtility implements ExecutorProps {
                 break;
             }
         }
-    }
 
     private async handleTriParamCommand() {
         const data = {
@@ -268,14 +305,15 @@ export class CommandUtility implements ExecutorProps {
     public async resolveCommand() {
         switch (this.command.length) {
             case 0: {
-                await helperMessage({
-                    room: this.room,
-                    read: this.read,
-                    persistence: this.persistence,
-                    modify: this.modify,
-                    http: this.http,
-                    user: this.sender
-                });
+                handleMainModal(
+                    this.read,
+                    this.context,
+                    this.app,
+                    this.persistence,
+                    this.http,
+                    this.room,
+                    this.modify
+                );
                 break;
             }
             case 1: {

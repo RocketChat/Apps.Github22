@@ -2,8 +2,11 @@ import {
     IAppAccessors,
     IAppInstallationContext,
     IConfigurationExtend,
+    IConfigurationModify,
     IHttp,
     ILogger,
+    IMessageBuilder,
+    IMessageExtender,
     IModify,
     IPersistence,
     IRead,
@@ -12,6 +15,7 @@ import { App } from "@rocket.chat/apps-engine/definition/App";
 import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
 import { GithubCommand } from "./commands/GithubCommand";
 import {
+    ButtonStyle,
     IUIKitResponse,
     UIKitBlockInteractionContext,
     UIKitViewCloseInteractionContext,
@@ -27,13 +31,12 @@ import {
     IOAuth2ClientOptions,
 } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { createOAuth2Client } from "@rocket.chat/apps-engine/definition/oauth2/OAuth2";
-import { createSectionBlock } from "./lib/blocks";
 import {
     sendDirectMessage,
     sendDirectMessageOnInstall,
+    sendMessage,
     sendNotification,
 } from "./lib/message";
-import { OAuth2Client } from "@rocket.chat/apps-engine/server/oauth2/OAuth2Client";
 import { deleteOathToken } from "./processors/deleteOAthToken";
 import { ProcessorsEnum } from "./enum/Processors";
 import {
@@ -41,16 +44,61 @@ import {
     ApiVisibility,
 } from "@rocket.chat/apps-engine/definition/api";
 import { githubWebHooks } from "./endpoints/githubEndpoints";
-import { IJobContext } from "@rocket.chat/apps-engine/definition/scheduler";
+import { IJobContext, StartupType } from "@rocket.chat/apps-engine/definition/scheduler";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
+import { IPreMessageSentExtend, IMessage,IPreMessageSentModify, IPostMessageSent } from "@rocket.chat/apps-engine/definition/messages";
+import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
+import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
+import { SendReminder } from "./handlers/SendReminder";
+import { AppSettings, settings } from "./settings/settings";
+import { ISetting } from "@rocket.chat/apps-engine/definition/settings";import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
 
-export class GithubApp extends App {
+export class GithubApp extends App implements IPreMessageSentExtend,IPostMessageSent{
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
     }
 
+    async checkPostMessageSent?(message: IMessage, read: IRead, http: IHttp): Promise<boolean> {
+      if (await hasGithubPRLink(message)){
+        return true
+      }
+      return false; 
+    }
+    
+    async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
+        
+        await handleGithubPRLink(message,read,http,persistence,modify)
+        
+    }
+
+    public async checkPreMessageSentExtend(
+        message: IMessage,
+        read: IRead,
+        http: IHttp
+    ): Promise<boolean> {
+        if (await isGithubLink(message)) {
+            return true;
+        }
+        return false;
+    }
+
+    public async executePreMessageSentExtend(
+        message: IMessage,
+        extend: IMessageExtender,
+        read: IRead,
+        http: IHttp,
+        persistence: IPersistence
+    ): Promise<IMessage> {
+
+        if (await hasGitHubCodeSegmentLink(message)) {
+            await handleGitHubCodeSegmentLink(message, read, http, message.sender, message.room, extend);
+        }
+        
+        return extend.getMessage();
+    }
+    
     public async authorizationCallback(
         token: IAuthData,
         user: IUser,
@@ -164,11 +212,17 @@ export class GithubApp extends App {
     ): Promise<void> {
         const gitHubCommand: GithubCommand = new GithubCommand(this);
         const ghCommand: GHCommand = new GHCommand(this);
+
         await Promise.all([
             configuration.slashCommands.provideSlashCommand(gitHubCommand),
             configuration.slashCommands.provideSlashCommand(ghCommand),
             this.getOauth2ClientInstance().setup(configuration),
         ]);
+        await Promise.all(
+            settings.map((setting) =>
+                configuration.settings.provideSetting(setting)
+            )
+        );
         configuration.scheduler.registerProcessors([
             {
                 id: ProcessorsEnum.REMOVE_GITHUB_LOGIN,
@@ -195,6 +249,17 @@ export class GithubApp extends App {
                     }
                 },
             },
+            {
+                id:ProcessorsEnum.PR_REMINDER,
+                processor:async(jobData,read,modify,http,persis) =>{
+                    await SendReminder(jobData,read,modify,http,persis,this)
+                },
+                startupSetting:{
+                    type:StartupType.RECURRING,
+                    interval:"0 9 * * *"
+                }
+
+            }
         ]);
         configuration.api.provideApi({
             visibility: ApiVisibility.PUBLIC,
@@ -211,5 +276,14 @@ export class GithubApp extends App {
     ): Promise<void> {
         const user = context.user;
         await sendDirectMessageOnInstall(read, modify, user, persistence);
+    }
+
+    public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
+        const interval:string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCORNjobString);
+        await configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
+        await configurationModify.scheduler.scheduleRecurring({
+            id:ProcessorsEnum.PR_REMINDER,
+            interval:interval,
+        })
     }
 }

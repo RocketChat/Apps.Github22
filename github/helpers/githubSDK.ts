@@ -1,6 +1,7 @@
 import { IHttp, HttpStatusCode } from "@rocket.chat/apps-engine/definition/accessors";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { ModalsEnum } from "../enum/Modals";
+import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 
 const BaseHost = "https://github.com/";
 const BaseApiHost = "https://api.github.com/";
@@ -432,6 +433,36 @@ export async function mergePullRequest(
     return JSONResponse;
 }
 
+export async function approvePullRequest(    
+    http: IHttp,
+    repoName: string,
+    access_token: string,
+    pullRequestNumber: string | number,
+    ){
+    const response = await http.post(
+        `https://api.github.com/repos/${repoName}/pulls/${pullRequestNumber}/reviews`,
+        {
+            headers: {
+                Authorization: `token ${access_token}`,
+                "Content-Type": "application/json",
+            },
+            data:{
+                'event':"APPROVE"
+            }
+        }
+    );
+
+    // If it isn't a 2xx code, something wrong happened
+    let JSONResponse = JSON.parse(response.content || "{}");
+
+    if (!response.statusCode.toString().startsWith("2")) {
+        JSONResponse["serverError"] = true;
+    } else {
+        JSONResponse["serverError"] = false;
+    }
+
+    return JSONResponse;
+}
 export async function getBasicUserInfo(
     http: IHttp,
     access_token: String,
