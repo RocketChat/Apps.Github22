@@ -121,12 +121,19 @@ export async function getUserReminder(read:IRead,User:IUser):Promise<IReminder>{
 export async function removeRepoReminder(read:IRead,persistence:IPersistence,repository:string,User:IUser){
     const reminders = await getAllReminders(read);
     const idx = reminders.findIndex((u: IReminder) => u.userid === User.id);
+
+    if (idx === -1) {
+        return;
+    }
+
     const repoindex = reminders[idx].repos.findIndex((repo)=>repo == repository);
 
-    if (idx === -1 || repoindex === -1) {
+    if (repoindex === -1) {
         return;
     }
 
     reminders[idx].repos.splice(repoindex,1);
     await persistence.updateByAssociation(assoc, reminders);
 }
+
+
