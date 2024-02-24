@@ -803,7 +803,7 @@ export class ExecuteViewSubmitHandler {
                         }
                     }
 
-                    // this.persistence.removeByAssociation(idRecord);
+                    this.persistence.removeByAssociation(idRecord);
 
                     break;
                 }
