@@ -7,7 +7,6 @@ import { ModalsEnum } from "../enum/Modals";
 import { getBasicUserInfo } from "../helpers/githubSDK";
 import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
 import {} from "@rocket.chat/apps-engine/definition/uikit/"
-import { githubActivityGraphUrl } from "../helpers/githubActivityGraphURL";
 
 export async function userProfileModal({
     access_token,
@@ -66,12 +65,6 @@ export async function userProfileModal({
             block.newPlainTextObject(`following: ${userInfo.following}`)
         ]
     });
-
-    block.addDividerBlock();
-
-    block.addImageBlock({imageUrl : githubActivityGraphUrl(userInfo.username), altText: "Github Contribution Graph"});
-
-
 
     block.addDividerBlock();
 

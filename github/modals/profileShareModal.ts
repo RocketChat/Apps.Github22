@@ -22,7 +22,7 @@ export async function shareProfileModal({
     uikitcontext?: UIKitInteractionContext
 }) : Promise<IUIKitModalViewParam> {
 
-    const viewId = "ProfileShareView";
+    const viewId = ModalsEnum.SHARE_PROFILE_EXEC;
     const block = modify.getCreator().getBlockBuilder();
 
     block.addActionsBlock({
@@ -30,7 +30,7 @@ export async function shareProfileModal({
         elements : [
             block.newMultiStaticElement({
                 actionId: ModalsEnum.SHARE_PROFILE_PARAMS,
-                initialValue: ['username', 'avatar', 'email', 'bio', 'followers', 'following' , 'contributionGraph'],
+                initialValue: ['username', 'avatar', 'email', 'bio', 'followers', 'following'],
                 options: [
                   {
                     value: 'followers',
@@ -77,28 +77,12 @@ export async function shareProfileModal({
                         text: 'bio'
                     }
                   },
-                  {
-                    value : 'contributionGraph',
-                    text : {
-                        text: 'Contribution',
-                        type : TextObjectType.PLAINTEXT
-                    }
-                  }
                 ],
                 placeholder: {
                     type: TextObjectType.PLAINTEXT,
                     text: 'Select Property to Share',
                   },
               }),
-              block.newButtonElement({
-                actionId : ModalsEnum.SHARE_PROFILE_EXEC,
-                text : {
-                    text : "Share to Chat",
-                    type : TextObjectType.PLAINTEXT
-                },
-                value : "shareChat"
-
-              })
         ]
     })
 
@@ -108,7 +92,14 @@ export async function shareProfileModal({
             type: TextObjectType.PLAINTEXT,
             text: "Share Profile"
         },
-        blocks: block.getBlocks()
+        blocks: block.getBlocks(),
+        submit:block.newButtonElement({
+            text : {
+                text : "Share to Chat",
+                type : TextObjectType.PLAINTEXT
+            },
+            value : "shareChat"
+          })
     }
 
 }
