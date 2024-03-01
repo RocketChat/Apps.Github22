@@ -154,12 +154,12 @@ export class ExecuteViewSubmitHandler {
                             }else{
                                 await sendNotification(this.read,this.modify,user,room,`Invalid Issue !`);
                             }
-                        } 
+                        }
                         break;
                     }
                     case ModalsEnum.NEW_ISSUE_STARTER_VIEW:{
                         const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
-        
+
                         if (roomId) {
                             let room = await this.read.getRoomReader().getById(roomId) as IRoom;
                             let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
@@ -167,7 +167,7 @@ export class ExecuteViewSubmitHandler {
                             if (!accessToken) {
                                 await sendNotification(this.read, this.modify, user, room, `Login To Github ! -> /github login`);
                             }else{
-                                
+
                                 repository=repository?.trim();
                                 let response = await getIssueTemplates(this.http,repository,accessToken.token);
                                 if((!response.template_not_found) && response?.templates?.length){
@@ -185,7 +185,7 @@ export class ExecuteViewSubmitHandler {
                                     .openModalViewResponse(createNewIssue);
                                 }
                             }
-                        } 
+                        }
                         break;
                     }
                     case ModalsEnum.SEARCH_VIEW: {
@@ -227,7 +227,7 @@ export class ExecuteViewSubmitHandler {
                             }else{
                                 resourceState = resourceState?.trim();
                             }
- 
+
                             let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
                             if(repository?.length == 0 && labelsArray?.length == 0 && authorsArray?.length == 0){
                                 await sendNotification(this.read, this.modify, user, room, "*Invalid Search Query !*");
@@ -404,7 +404,7 @@ export class ExecuteViewSubmitHandler {
                                     return context
                                         .getInteractionResponder()
                                         .openModalViewResponse(unauthorizedMessageModal);
-                                }else{                               
+                                }else{
                                     let pullRequestComments = await getPullRequestComments(this.http,repository,accessToken.token,pullNumber);
                                     let pullRequestData = await getPullRequestData(this.http,repository,accessToken.token,pullNumber);
                                     if(pullRequestData?.serverError || pullRequestComments?.pullRequestData){
@@ -482,7 +482,7 @@ export class ExecuteViewSubmitHandler {
                                     return context
                                         .getInteractionResponder()
                                         .openModalViewResponse(unauthorizedMessageModal);
-                                }else{                               
+                                }else{
                                     let issueComments = await getIssuesComments(this.http,repository,accessToken?.token,issueNumber);
                                     let issueData = await getIssueData(repository,issueNumber,accessToken.token,this.http);
                                     if(issueData?.issue_compact === "Error Fetching Issue" || issueComments?.issueData){
@@ -626,7 +626,7 @@ export class ExecuteViewSubmitHandler {
                                     .getInteractionResponder()
                                     .openModalViewResponse(issuesListModal);
                             }
-                        } 
+                        }
                     break;
                 }
                 case ModalsEnum.ADD_ISSUE_ASSIGNEE_VIEW: {
@@ -696,7 +696,7 @@ export class ExecuteViewSubmitHandler {
                                         }
                                 }
                             }
-                        } 
+                        }
                     break;
                 }
                 case ModalsEnum.ISSUE_LIST_VIEW:{
@@ -742,7 +742,7 @@ export class ExecuteViewSubmitHandler {
                         let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
 
                         await createReminder(repository,room,this.read,this.app,this.persistence,this.modify,this.http,user)
-                        
+
                     }
                     break;
                 }
@@ -764,8 +764,6 @@ export class ExecuteViewSubmitHandler {
                         const data = profileData[0] as {profileParams : string[]};
                         profileShareParams = data.profileParams;
                     }
-
-                    console.log(profileShareParams, "params")
 
                     if (profileShareParams.includes('avatar')){
                         block.addImageBlock({
