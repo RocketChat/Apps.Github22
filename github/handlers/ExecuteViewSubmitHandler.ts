@@ -765,8 +765,6 @@ export class ExecuteViewSubmitHandler {
                         profileShareParams = data.profileParams;
                     }
 
-                    console.log(profileShareParams, "params")
-
                     if (profileShareParams.includes('avatar')){
                         block.addImageBlock({
                             imageUrl : userProfile.avatar,

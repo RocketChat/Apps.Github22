@@ -287,11 +287,12 @@ export class ExecuteBlockActionHandler {
                 }
                 case ModalsEnum.SHARE_PROFILE_PARAMS : {
                     const profileInteractionData = context.getInteractionData().value;
-                    const dataAny = profileInteractionData as any;
-                    const storeData = {
-                        profileParams : dataAny as string[]
-                    }
+                    if(Array.isArray(profileInteractionData)) {
+                        const storeData = {
+                            profileParams: profileInteractionData as string[]
+                        }
                     await this.persistence.updateByAssociation(new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ProfileShareParam"), storeData);
+                    }
                     break;
                 }
                 case ModalsEnum.VIEW_FILE_ACTION: {
