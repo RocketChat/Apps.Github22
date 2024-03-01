@@ -287,11 +287,12 @@ export class ExecuteBlockActionHandler {
                 }
                 case ModalsEnum.SHARE_PROFILE_PARAMS : {
                     const profileInteractionData = context.getInteractionData().value;
-                    const dataAny = profileInteractionData as any;
-                    const storeData = {
-                        profileParams : dataAny as string[]
-                    }
+                    if(Array.isArray(profileInteractionData)) {
+                        const storeData = {
+                            profileParams: profileInteractionData as string[]
+                        }
                     await this.persistence.updateByAssociation(new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ProfileShareParam"), storeData);
+                    }
                     break;
                 }
                 case ModalsEnum.VIEW_FILE_ACTION: {
@@ -669,13 +670,13 @@ export class ExecuteBlockActionHandler {
                     return context.getInteractionResponder().openModalViewResponse(shareProfileMod);
                 }
                 case ModalsEnum.APPROVE_PULL_REQUEST_ACTION:{
-                    
+
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
                     let { user } = await context.getInteractionData();
                     let { room} = await context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
-                    
+
                     if(splittedValues.length==2 && accessToken?.token){
                         let data={
                             "repo" : splittedValues[0],
@@ -1024,8 +1025,8 @@ export class ExecuteBlockActionHandler {
                             }
                     }
                     break;
-                } 
-                
+                }
+
                 case ModalsEnum.GITHUB_LOGIN_ACTION :{
                     const {user, room} = context.getInteractionData();
                     if(room){
@@ -1071,7 +1072,7 @@ export class ExecuteBlockActionHandler {
                     });
                     return context.getInteractionResponder().openModalViewResponse(newIssueModal);
                 }
-                
+
                 case ModalsEnum.TRIGGER_SEARCH_MODAL: {
                     const searchModal = await githubSearchModal({
                         modify: this.modify,
@@ -1094,7 +1095,7 @@ export class ExecuteBlockActionHandler {
 
                     const message = `You have unsubscribed from repository [${repo} Pull Request #${number}](https://github.com/${repo}/pull/${number})`;
                     await sendNotification(this.read, this.modify, user, room as IRoom, message);
-                    
+
                 }
             }
         } catch (error) {
