@@ -279,7 +279,7 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
     }
 
     public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
-        const interval:string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCORNjobString);
+        const interval:string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCRONjobString);
         await configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
         await configurationModify.scheduler.scheduleRecurring({
             id:ProcessorsEnum.PR_REMINDER,
