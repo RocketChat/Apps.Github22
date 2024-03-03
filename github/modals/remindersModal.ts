@@ -1,5 +1,5 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { ITextObject, TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
+import { ButtonStyle, ITextObject, TextObjectType } from '@rocket.chat/apps-engine/definition/uikit/blocks';
 import { IUIKitModalViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { ModalsEnum } from '../enum/Modals';
 import { SlashCommandContext } from '@rocket.chat/apps-engine/definition/slashcommands';
@@ -24,15 +24,26 @@ export async function reminderModal({ modify, read, persistence, http, slashcomm
             for (let repository of reminders.repos) {
                 block.addSectionBlock({
                     text: { text: `${repository}`, type: TextObjectType.PLAINTEXT },
-                    accessory: block.newButtonElement({
-                        actionId: ModalsEnum.OPEN_REPO_ACTION,
-                        text: {
-                            text: ModalsEnum.OPEN_REPO_LABEL,
-                            type: TextObjectType.PLAINTEXT
-                        },
-                        url: `https://github.com/${repository}`
-                    })
                 });
+
+                block.addActionsBlock({
+                    blockId:ModalsEnum.REMINDER_LIST_MODAL,
+
+                    elements:[    
+                        block.newButtonElement({
+                        actionId: ModalsEnum.OPEN_REPO_ACTION,
+                        text: block.newPlainTextObject("Open"),
+                        url:`https://github.com/${repository}`,
+                        style: ButtonStyle.PRIMARY,
+                        
+                    }),
+                    block.newButtonElement({
+                        actionId: ModalsEnum.REMINDER_REMOVE_REPO_ACTION,
+                        text: block.newPlainTextObject("Remove"),
+                        value: `${repository}`,
+                        style: ButtonStyle.DANGER,
+                    })]
+                })
 
                 block.addDividerBlock();
             }

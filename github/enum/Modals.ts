@@ -215,5 +215,8 @@ export enum ModalsEnum {
     MAIN_MODAL_ASSIGN_ISSUES_DESCRIPTION = "Assign issues to your team members",
     NEW_REMINDER_VIEW = "new-reminder-view",
     UNSUBSCRIBE_REMINDER_ACTION = "unsubscribe-reminder-action",
-    REMINDER_LIST_MODAL_VIEW= "reminder-list-view"
+    REMINDER_LIST_MODAL_VIEW= "reminder-list-view",
+    REMINDER_LIST_MODAL="reminder-list-modal",
+    REMINDER_OPEN_REPO_ACTION="open-repo-action",
+    REMINDER_REMOVE_REPO_ACTION="remove-repo-reminder-action"
 }

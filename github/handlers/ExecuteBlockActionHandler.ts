@@ -53,7 +53,8 @@ import { addIssueCommentsModal } from "../modals/addIssueCommentModal";
 import { GitHubIssuesStarterModal } from "../modals/getIssuesStarterModal";
 import { githubSearchModal } from "../modals/githubSearchModal";
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
-import { unsubscribedPR } from "../persistance/remind";
+import { removeRepoReminder, unsubscribedPR } from "../persistance/remind";
+import { reminderModal } from "../modals/remindersModal";
 
 export class ExecuteBlockActionHandler {
 
@@ -287,71 +288,12 @@ export class ExecuteBlockActionHandler {
                 }
                 case ModalsEnum.SHARE_PROFILE_PARAMS : {
                     const profileInteractionData = context.getInteractionData().value;
-                    const { user } = context.getInteractionData();
-
-                    const userId = user.id;
                     if(Array.isArray(profileInteractionData)) {
                         const storeData = {
-                        profileParams: profileInteractionData as string[]
+                            profileParams: profileInteractionData as string[]
                         }
-                    await this.persistence.updateByAssociation(new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `${userId}ProfileShareParam`), storeData, true);
+                    await this.persistence.updateByAssociation(new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ProfileShareParam"), storeData);
                     }
-                    break;
-                }
-                case ModalsEnum.SHARE_PROFILE_EXEC : {
-                    const { user } = context.getInteractionData();
-                    const userId = user.id;
-                    const block = this.modify.getCreator().getBlockBuilder();
-                    const accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
-                    const userProfile = await getBasicUserInfo(this.http, accessToken.token);
-
-                    const idRecord = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `${userId}ProfileShareParam`);
-                    const profileData = await this.read.getPersistenceReader().readByAssociation(idRecord);
-
-                    let profileShareParams: string[] = [];
-
-                    if (profileData.length === 0) {
-                        profileShareParams = ['username', 'avatar', 'email', 'bio', 'followers', 'following', 'contributionGraph'];
-                    } else {
-                        const data = profileData[0] as { profileParams: string[] };
-                        profileShareParams = data.profileParams;
-                    }
-
-                    if (profileShareParams.includes('avatar')) {
-                        block.addImageBlock({
-                            imageUrl: userProfile.avatar,
-                            altText: "User Info"
-                        });
-                    }
-
-                    profileShareParams.forEach((value) => {
-                        if (value !== 'contributionGraph' && value !== 'avatar') {
-                            block.addSectionBlock({
-                                text: block.newPlainTextObject(value),
-                            });
-
-                            block.addContextBlock({
-                                elements: [
-                                    block.newPlainTextObject(userProfile[value], true),
-                                ]
-                            });
-
-                            block.addDividerBlock();
-                        }
-                    });
-
-                    if (profileShareParams.includes('contributionGraph')) {
-                        const graphImageUrl = `https://activity-graph.herokuapp.com/graph?username=${userProfile.username}&bg_color=ffffff&color=708090&line=24292e&point=24292e`;
-                        block.addImageBlock({ imageUrl: graphImageUrl, altText: "Github Contribution Graph" });
-                    }
-
-                    if (user?.id) {
-                        const roomId = (await getInteractionRoomData(this.read.getPersistenceReader(), user.id)).roomId;
-                        const room = await this.read.getRoomReader().getById(roomId) as IRoom;
-                        await sendMessage(this.modify, room, user, `${userProfile.name}'s Github Profile`, block);
-                    }
-
-                    this.persistence.removeByAssociation(idRecord);
                     break;
                 }
                 case ModalsEnum.VIEW_FILE_ACTION: {
@@ -1155,6 +1097,15 @@ export class ExecuteBlockActionHandler {
                     const message = `You have unsubscribed from repository [${repo} Pull Request #${number}](https://github.com/${repo}/pull/${number})`;
                     await sendNotification(this.read, this.modify, user, room as IRoom, message);
                     
+                }
+                
+                case ModalsEnum.REMINDER_REMOVE_REPO_ACTION : {
+                   const {value, user} = context.getInteractionData(); 
+                    await removeRepoReminder(this.read, this.persistence, value as string, user);
+                    
+                   const updatedReminderModal = await reminderModal({modify: this.modify, read:this.read, persistence: this.persistence, http: this.http, uikitcontext: context});
+
+                   return context.getInteractionResponder().updateModalViewResponse( updatedReminderModal);
                 }
             }
         } catch (error) {

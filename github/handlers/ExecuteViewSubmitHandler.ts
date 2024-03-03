@@ -17,7 +17,7 @@ import { IGitHubSearchResultData } from '../definitions/searchResultData';
 import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
-import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues, addNewIssueComment, getIssuesComments, getIssueData } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues, addNewIssueComment, getIssuesComments, getIssueData, getBasicUserInfo } from '../helpers/githubSDK';
 import { NewIssueModal } from '../modals/newIssueModal';
 import { issueTemplateSelectionModal } from '../modals/issueTemplateSelectionModal';
 import { githubIssuesListModal } from '../modals/githubIssuesListModal';
@@ -27,7 +27,8 @@ import { IGitHubIssueData } from '../definitions/githubIssueData';
 import { githubIssuesShareModal } from '../modals/githubIssuesShareModal';
 import { issueCommentsModal } from '../modals/issueCommentsModal';
 import { createReminder } from './CreateReminder';
-
+import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { IAuthData } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
 export class ExecuteViewSubmitHandler {
     constructor(
         private readonly app: GithubApp,
@@ -745,7 +746,65 @@ export class ExecuteViewSubmitHandler {
                     }
                     break;
                 }
-                
+                case ModalsEnum.SHARE_PROFILE_EXEC : {
+                    let {user, room} = context.getInteractionData();
+                    const block = this.modify.getCreator().getBlockBuilder();
+                    let accessToken = await getAccessTokenForUser(this.read, user ,this.app.oauth2Config) as IAuthData;
+                    const userProfile = await getBasicUserInfo(this.http, accessToken.token);
+
+                    const idRecord = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ProfileShareParam")
+
+                    const profileData = await this.read.getPersistenceReader().readByAssociation(idRecord);
+
+                    let profileShareParams: string[] = [];
+
+                    if (profileData.length == 0){
+                        profileShareParams = ['username', 'avatar', 'email', 'bio', 'followers', 'following'];
+                    }else {
+                        const data = profileData[0] as {profileParams : string[]};
+                        profileShareParams = data.profileParams;
+                    }
+
+                    if (profileShareParams.includes('avatar')){
+                        block.addImageBlock({
+                            imageUrl : userProfile.avatar,
+                            altText : "User Info"
+                        })
+                    }
+
+                    profileShareParams.map((value) => {
+                        if (value != 'avatar'){
+                            block.addSectionBlock({
+                                text : block.newPlainTextObject(value),
+                            })
+                            block.addContextBlock({
+                                elements : [
+                                    block.newPlainTextObject(userProfile[value], true),
+                                ]
+                            });
+                            block.addDividerBlock();
+                        }
+                    })
+
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify, room!, user, `${userProfile.name}'s Github Profile`, block)
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify, room, user, `${userProfile.name}'s Github Profile`, block)
+                        }
+                    }
+
+                    this.persistence.removeByAssociation(idRecord);
+
+                    break;
+                }
                 default:
                     break;
             }
