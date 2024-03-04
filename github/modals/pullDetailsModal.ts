@@ -56,6 +56,31 @@ export async function pullDetailsModal({
         const pullRawData = await http.get(
             `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}`
         );
+
+        // If pullsNumber doesn't exist, notify the user
+        if (pullRawData.statusCode === 404) {
+            block.addSectionBlock({
+                text: {
+                    text: `Pull request #${data?.number} doesn't exist.`,
+                    type: TextObjectType.PLAINTEXT,
+                },
+            });
+
+            return {
+                title: {
+                    type: TextObjectType.PLAINTEXT,
+                    text: AppEnum.DEFAULT_TITLE,
+                },
+                close: block.newButtonElement({
+                    text: {
+                        type: TextObjectType.PLAINTEXT,
+                        text: "Close",
+                    },
+                }),
+                blocks: block.getBlocks(),
+            };
+        }
+
         const pullData = pullRawData.data;
 
         const pullRequestFilesRaw = await http.get(
