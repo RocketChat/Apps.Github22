@@ -1,62 +1,45 @@
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { IHttp, IMessageBuilder, IModify, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
-import { IMessage } from "@rocket.chat/apps-engine/definition/messages";
-import { BlockBuilder, ButtonStyle, IBlock, TextObjectType } from "@rocket.chat/apps-engine/definition/uikit";
-import { ModalsEnum } from "../enum/Modals";
+import { IHttp, IMessageBuilder, IMessageExtender, IModify, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
+import { IMessage, IMessageAttachment, MessageActionButtonsAlignment, MessageActionType } from "@rocket.chat/apps-engine/definition/messages";
+import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 
+export async function handleGithubPRLinks(
+    message: IMessage,
+    read: IRead,
+    http: IHttp,
+    user: IUser,
+    room: IRoom,
+    extend: IMessageExtender
+) {
+    const githubPRLinkRegex = /https?:\/\/github\.com\/(\S+)\/(\S+)\/pull\/(\d+)/g;
+    const text = message.text!;
+    let prLinkMatches: RegExpExecArray | null;
+    const matches: RegExpExecArray[] = [];
 
-export async function handleGithubPRLink(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<String> {
-    try {
-        const githubPRLinkRegex = /\bhttps?:\/\/github\.com\/\S+\/pull\/\d+\b/;
-        const text = message.text!;
-        const prLinkMatch = text.match(githubPRLinkRegex);
-        const prLink = prLinkMatch?.[0];
-        const githubLinkPartsRegex = /(?:https?:\/\/github\.com\/)(\S+)\/(\S+)\/pull\/(\d+)/;
-        const linkPartsMatch = prLink?.match(githubLinkPartsRegex);
-        const username = linkPartsMatch?.[1];
-        const repositoryName = linkPartsMatch?.[2];
-        const pullNumber = linkPartsMatch?.[3];
+    while ((prLinkMatches = githubPRLinkRegex.exec(text)) !== null) {
+        matches.push(prLinkMatches);
+    }
 
-        if (!username || !repositoryName || !pullNumber) {
-            throw new Error("Invalid GitHub PR link");
-        }
+    if (matches.length > 3) {
+        return;
+    }
 
-        const messageBuilder = await modify.getCreator().startMessage()
-            .setRoom(message.room)
-            .setSender(message.sender)
-            .setGroupable(true);
+    for (const match of matches) {
+        const username = match[1];
+        const repositoryName = match[2];
+        const pullNumber = match[3];
 
-        const block = modify.getCreator().getBlockBuilder();
-
-        block.addActionsBlock({
-            blockId: "githubdata",
-            elements: [
-                block.newButtonElement({
-                    actionId: ModalsEnum.MERGE_PULL_REQUEST_ACTION,
-                    text: block.newPlainTextObject("Merge"),
-                    value: `${username}/${repositoryName} ${pullNumber}`,
-                    style: ButtonStyle.PRIMARY
-                }),
-                block.newButtonElement({
-                    actionId: ModalsEnum.PR_COMMENT_LIST_ACTION,
-                    text: block.newPlainTextObject("Comment"),
-                    value: `${username}/${repositoryName} ${pullNumber}`,
-                    style: ButtonStyle.PRIMARY
-                }),
-                block.newButtonElement({
-                    actionId: ModalsEnum.APPROVE_PULL_REQUEST_ACTION,
-                    text: block.newPlainTextObject("Approve"),
-                    value: `${username}/${repositoryName} ${pullNumber}`,
-                    style: ButtonStyle.PRIMARY
-                })
-            ]
-        })
-
-        messageBuilder.setBlocks(block);
-
-        return await modify.getCreator().finish(messageBuilder);
-    } catch (error) {
-        console.error("Error in handleGithubPRLink:", error);
-        return "Error: Unable to process the GitHub PR link.";
+        const attachment: IMessageAttachment = {
+            actionButtonsAlignment: MessageActionButtonsAlignment.VERTICAL,
+            actions: [
+                {
+                    type: MessageActionType.BUTTON,
+                    text: `PR Actions in ${repositoryName} #${pullNumber}`,
+                    msg: `/github ${username}/${repositoryName} pulls ${pullNumber}`,
+                    msg_in_chat_window: true,
+                },
+            ],
+        };
+        extend.addAttachment(attachment);
     }
 }

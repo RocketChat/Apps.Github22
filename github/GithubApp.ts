@@ -84,8 +84,7 @@ export class GithubApp extends App implements IPreMessageSentExtend {
             await handleGitHubCodeSegmentLink(message, read, http, message.sender, message.room, extend);
         }
         if (await hasGithubPRLink(message)) {
-            console.log("test")
-            await handleGithubPRLinks(message, read, http, message.sender, message.room, extend)
+            await handleGithubPRLinks(message, read, http, message.sender, message.room, extend);
         }
 
         return extend.getMessage();
