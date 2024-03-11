@@ -11,7 +11,7 @@ import {
     TextObjectType,
     UIKitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
-import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
+import { IUIKitContextualBarViewParam, IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
 import { ModalsEnum } from "../enum/Modals";
 import { OcticonIcons } from "../enum/OcticonIcons";
 import { getBasicUserInfo, getUserAssignedIssues } from "../helpers/githubSDK";
@@ -20,7 +20,7 @@ import {
     storeInteractionRoomData,
 } from "../persistance/roomInteraction";
 
-export async function userIssuesModal({
+export async function userIssuesContextualBar({
     filter,
     access_token,
     modify,
@@ -42,7 +42,8 @@ export async function userIssuesModal({
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+}): Promise<IUIKitContextualBarViewParam> {
+
     const viewId = ModalsEnum.USER_ISSUE_VIEW;
     const block = modify.getCreator().getBlockBuilder();
     const room =

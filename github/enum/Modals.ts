@@ -17,7 +17,7 @@ export enum ModalsEnum {
     MENTIONED_ISSUE_FILTER = 'mentioned',
     SWITCH_ISSUE_FILTER = 'switch-issue-filter',
     USER_ISSUE_VIEW = 'user-issue-view',
-    TRIGGER_ISSUES_MODAL = 'trigger-issue-modal',
+    TRIGGER_ISSUES_CONTEXTUAL_BAR = 'trigger-issue-modal',
     TRIGGER_REPOS_MODAL = 'trigger-repos-modal',
     TRIGGER_ACTIVITY_MODAL = 'trigger-activity-modal',
     TRIGGER_NOTIFICATIONS_MODAL = 'trigger-notifications-modal',
