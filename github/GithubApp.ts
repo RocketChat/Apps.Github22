@@ -52,10 +52,13 @@ import { IPreMessageSentExtend, IMessage,IPreMessageSentModify, IPostMessageSent
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 import { SendReminder } from "./handlers/SendReminder";
-import { AppSettings, settings } from "./settings/settings";
-import { ISetting } from "@rocket.chat/apps-engine/definition/settings";import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
+import { settings } from "./settings/settings";
+import { ISetting } from "@rocket.chat/apps-engine/definition/settings";
+import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
+import { UpdateSetting } from "./persistance/setting";
+import { AppSettings } from "./enum/Setting";
 
-export class GithubApp extends App implements IPreMessageSentExtend,IPostMessageSent{
+export class GithubApp extends App implements IPreMessageSentExtend, IPostMessageSent {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
     }
@@ -250,15 +253,20 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
                 },
             },
             {
-                id:ProcessorsEnum.PR_REMINDER,
-                processor:async(jobData,read,modify,http,persis) =>{
-                    await SendReminder(jobData,read,modify,http,persis,this)
+                id: ProcessorsEnum.PR_REMINDER,
+                processor: async (jobData, read, modify, http, persis) => {
+                    await SendReminder(jobData, read, modify, http, persis, this)
                 },
-                startupSetting:{
-                    type:StartupType.RECURRING,
-                    interval:"0 9 * * *"
+                startupSetting: {
+                    type: StartupType.RECURRING,
+                    interval: "0 9 * * *"
                 }
-
+            },
+            {
+                id:ProcessorsEnum.SETTING_UPDATE,
+                processor:async(jobContext, read, modify, http, persis)=>{
+                    await UpdateSetting(read, persis, this.getAccessors().environmentReader.getSettings())
+                },
             }
         ]);
         configuration.api.provideApi({
@@ -276,14 +284,16 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
     ): Promise<void> {
         const user = context.user;
         await sendDirectMessageOnInstall(read, modify, user, persistence);
+        await UpdateSetting(read, persistence, this.getAccessors().environmentReader.getSettings())
     }
 
     public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
-        const interval:string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCRONjobString);
+        const interval: string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCRONjobID);
         await configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
         await configurationModify.scheduler.scheduleRecurring({
-            id:ProcessorsEnum.PR_REMINDER,
-            interval:interval,
+            id: ProcessorsEnum.PR_REMINDER,
+            interval: interval,
         })
+        await configurationModify.scheduler.scheduleOnce({id:ProcessorsEnum.SETTING_UPDATE,when:"one second"});
     }
 }
