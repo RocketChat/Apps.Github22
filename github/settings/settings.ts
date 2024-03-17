@@ -18,7 +18,7 @@ export const settings: ISetting[] = [
         type: SettingType.STRING,
         required: true,
         public: false,
-        packageValue: '0 9 * * *',
+        packageValue: AppSettings.ReminderCRONjobPackageValue,
     },
     {
         id: AppSettings.BaseHostID,
@@ -26,7 +26,7 @@ export const settings: ISetting[] = [
         type: SettingType.STRING,
         required: true,
         public: false,
-        packageValue: 'https://github.com/',
+        packageValue: AppSettings.BaseHostPackageValue,
     },
     {
         id: AppSettings.BaseApiHostID,
@@ -34,6 +34,6 @@ export const settings: ISetting[] = [
         type: SettingType.STRING,
         required: true,
         public: false,
-        packageValue: 'https://api.github.com/',
+        packageValue: AppSettings.BaseApiHostPackageValue,
     },
 ];
