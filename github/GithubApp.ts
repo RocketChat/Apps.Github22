@@ -52,11 +52,10 @@ import { IPreMessageSentExtend, IMessage,IPreMessageSentModify, IPostMessageSent
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 import { SendReminder } from "./handlers/SendReminder";
-import { settings } from "./settings/settings";
+import { AppSettings, settings } from "./settings/settings";
 import { ISetting } from "@rocket.chat/apps-engine/definition/settings";
 import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
 import { UpdateSetting } from "./persistance/setting";
-import { AppSettings } from "./enum/Setting";
 
 export class GithubApp extends App implements IPreMessageSentExtend, IPostMessageSent {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {

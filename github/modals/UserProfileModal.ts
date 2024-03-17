@@ -6,7 +6,9 @@ import { AppEnum } from "../enum/App";
 import { ModalsEnum } from "../enum/Modals";
 import { getBasicUserInfo } from "../helpers/githubSDK";
 import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
-import {} from "@rocket.chat/apps-engine/definition/uikit/"
+import { } from "@rocket.chat/apps-engine/definition/uikit/"
+import { GitHubApi } from "../helpers/githubSDKclass";
+import { GetSetting } from "../persistance/setting";
 
 export async function userProfileModal({
     access_token,
@@ -42,8 +44,10 @@ export async function userProfileModal({
         }
     }
 
-    const userInfo = await getBasicUserInfo(http, access_token);
 
+    const settings = await GetSetting(read);
+    const gitHubApiClient = new GitHubApi(http, access_token, settings!.BaseHost, settings!.BaseApiHost);
+    const userInfo = await gitHubApiClient.getBasicUserInfo();
 
     block.addContextBlock({
         elements: [

@@ -1,6 +1,16 @@
 import { ISetting, SettingType } from '@rocket.chat/apps-engine/definition/settings';
-import { AppSettings } from '../enum/Setting';
 
+export enum AppSettings {
+    ReminderCRONjobID = 'reminder_cron_job_id',
+    ReminderCRONjobLabel = 'cron-job-string-for-pr-reminders',
+    ReminderCRONjobPackageValue = '0 9 * * *',
+    BaseHostID = "base_host",
+    BaseHostLabel = "base-host",
+    BaseHostPackageValue = "https://github.com/",
+    BaseApiHostID = "base_api_host",
+    BaseApiHostLabel = "base-api-host",
+    BaseApiHostPackageValue = "https://api.github.com/"
+}
 export const settings: ISetting[] = [
     {
         id: AppSettings.ReminderCRONjobID,
