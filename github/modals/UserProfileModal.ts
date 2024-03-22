@@ -11,6 +11,7 @@ import {
     getInteractionRoomData,
     storeInteractionRoomData,
 } from "../persistance/roomInteraction";
+import { IAppSetting } from "../definitions/AppSetting";
 
 export async function userProfileModal({
     access_token,
@@ -47,7 +48,7 @@ export async function userProfileModal({
     }
     let userInfo: UserInformation | undefined;
     try {
-        const settings = await GetSetting(read);
+        const settings:IAppSetting = await GetSetting(read);
         const gitHubApiClient = new GitHubApi(
             http,
             access_token,
@@ -109,8 +110,6 @@ export async function userProfileModal({
         ]
     })
 }
-
-
     return  {
         id: viewId,
         title: {

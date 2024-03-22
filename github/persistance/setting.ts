@@ -7,13 +7,8 @@ import {
     RocketChatAssociationModel,
     RocketChatAssociationRecord
 } from '@rocket.chat/apps-engine/definition/metadata';
-import { AppSettings } from '../settings/settings';
-
-export interface ISetting {
-    ReminderCron: string;
-    BaseHost: string;
-    BaseApiHost: string;
-}
+import { IAppSetting } from '../definitions/AppSetting';
+import { AppSettingsEnum } from '../settings/settings';
 
 const assoc = new RocketChatAssociationRecord(
     RocketChatAssociationModel.MISC,
@@ -25,10 +20,10 @@ export async function UpdateSetting(
     persistence: IPersistence,
     settingReader: ISettingRead,
 ): Promise<void> {
-    const ReminderCron = (await settingReader.getById(AppSettings.ReminderCRONjobID)).value as string;
-    const BaseHost = (await settingReader.getById(AppSettings.BaseHostID)).value as string;
-    const BaseApiHost = (await settingReader.getById(AppSettings.BaseApiHostID)).value as string;
-    const Setting: ISetting = {
+    const ReminderCron = (await settingReader.getValueById(AppSettingsEnum.ReminderCRONjobID)) as string;
+    const BaseHost = (await settingReader.getValueById(AppSettingsEnum.BaseHostID)) as string;
+    const BaseApiHost = (await settingReader.getValueById(AppSettingsEnum.BaseApiHostID)) as string;
+    const Setting: IAppSetting = {
         ReminderCron,
         BaseHost,
         BaseApiHost
@@ -38,8 +33,8 @@ export async function UpdateSetting(
 
 export async function GetSetting(
     read: IRead,
-): Promise<ISetting> {
+): Promise<IAppSetting> {
     const data = await read.getPersistenceReader().readByAssociation(assoc);
-    const settingData = data[0] as ISetting;
+    const settingData = data[0] as IAppSetting;
     return settingData;
 }

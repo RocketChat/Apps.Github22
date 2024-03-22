@@ -53,7 +53,7 @@ import { IPreMessageSentExtend, IMessage,IPreMessageSentModify, IPostMessageSent
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 import { SendReminder } from "./handlers/SendReminder";
-import { AppSettings, settings } from "./settings/settings";
+import { AppSettingsEnum, settings } from "./settings/settings";
 import { ISetting } from "@rocket.chat/apps-engine/definition/settings";
 import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
 import { UpdateSetting } from "./persistance/setting";
@@ -292,7 +292,7 @@ export class GithubApp extends App implements IPreMessageSentExtend, IPostMessag
     }
 
     public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
-        const interval: string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCRONjobID);
+        const interval: string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettingsEnum.ReminderCRONjobID);
         await configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
         await configurationModify.scheduler.scheduleRecurring({
             id: ProcessorsEnum.PR_REMINDER,
