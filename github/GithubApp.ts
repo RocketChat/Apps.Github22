@@ -253,13 +253,13 @@ export class GithubApp extends App implements IPreMessageSentExtend, IPostMessag
                 },
             },
             {
-                id: ProcessorsEnum.PR_REMINDER,
-                processor: async (jobData, read, modify, http, persis) => {
-                    await SendReminder(jobData, read, modify, http, persis, this)
+                id:ProcessorsEnum.PR_REMINDER,
+                processor:async(jobData,read,modify,http,persis) =>{
+                    await SendReminder(jobData,read,modify,http,persis,this)
                 },
-                startupSetting: {
-                    type: StartupType.RECURRING,
-                    interval: "0 9 * * *"
+                startupSetting:{
+                    type:StartupType.RECURRING,
+                    interval:"0 9 * * *"
                 }
             },
             {
