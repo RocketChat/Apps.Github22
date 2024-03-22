@@ -4,11 +4,13 @@ import { ButtonStyle, TextObjectType, UIKitInteractionContext } from "@rocket.ch
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
 import { AppEnum } from "../enum/App";
 import { ModalsEnum } from "../enum/Modals";
-import { getBasicUserInfo } from "../helpers/githubSDK";
-import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
-import { } from "@rocket.chat/apps-engine/definition/uikit/"
 import { GitHubApi } from "../helpers/githubSDKclass";
 import { GetSetting } from "../persistance/setting";
+import { UserInformation } from "../definitions/Userinfo";
+import {
+    getInteractionRoomData,
+    storeInteractionRoomData,
+} from "../persistance/roomInteraction";
 
 export async function userProfileModal({
     access_token,
@@ -43,17 +45,24 @@ export async function userProfileModal({
             roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
         }
     }
+    let userInfo: UserInformation | undefined;
+    try {
+        const settings = await GetSetting(read);
+        const gitHubApiClient = new GitHubApi(
+            http,
+            access_token,
+            settings!.BaseHost,
+            settings!.BaseApiHost
+        );
+        userInfo = await gitHubApiClient.getBasicUserInfo();
+    } catch (error) {
+        console.log("Error occurred while fetching user info:", error);
+    }
 
-
-    const settings = await GetSetting(read);
-    const gitHubApiClient = new GitHubApi(http, access_token, settings!.BaseHost, settings!.BaseApiHost);
-    const userInfo = await gitHubApiClient.getBasicUserInfo();
-
-    block.addContextBlock({
-        elements: [
-            block.newPlainTextObject(userInfo.email, true),
-        ]
-    })
+    if (userInfo) {
+        block.addContextBlock({
+            elements: [block.newPlainTextObject(userInfo.email, true)],
+        });
 
     block.addSectionBlock({
         text: block.newPlainTextObject(userInfo.bio),
@@ -99,13 +108,14 @@ export async function userProfileModal({
             )
         ]
     })
+}
 
 
     return  {
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
-            text: userInfo.name
+            text: userInfo ? userInfo.name : "User Profile",
         },
         blocks: block.getBlocks()
     }

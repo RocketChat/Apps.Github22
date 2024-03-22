@@ -38,7 +38,7 @@ export async function UpdateSetting(
 
 export async function GetSetting(
     read: IRead,
-): Promise<ISetting | undefined> {
+): Promise<ISetting> {
     const data = await read.getPersistenceReader().readByAssociation(assoc);
     const settingData = data[0] as ISetting;
     return settingData;

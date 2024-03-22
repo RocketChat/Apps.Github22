@@ -1,4 +1,6 @@
 import { IHttp, HttpStatusCode, IRead } from "@rocket.chat/apps-engine/definition/accessors";
+import { UserInfo } from "os";
+import { UserInformation } from "../definitions/Userinfo";
 import { ModalsEnum } from "../enum/Modals";
 
 class GitHubApi {
@@ -29,7 +31,7 @@ class GitHubApi {
         return JSON.parse(response.content || "{}");
     }
 
-    public async getBasicUserInfo() {
+    public async getBasicUserInfo(): Promise<UserInformation> {
         try {
             const response = await this.getRequest(
                 this.BaseApiHost + 'user'
@@ -43,15 +45,8 @@ class GitHubApi {
                 following: response.following,
                 avatar: response.avatar_url
             }
-        } catch (e) {
-            return {
-                name: "",
-                email: "",
-                bio: "",
-                followers: "",
-                following: "",
-                avatar: ""
-            };
+        } catch (error) {
+           throw error;
         }
     }
 }

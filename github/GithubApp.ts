@@ -3,6 +3,7 @@ import {
     IAppInstallationContext,
     IConfigurationExtend,
     IConfigurationModify,
+    IEnvironmentRead,
     IHttp,
     ILogger,
     IMessageBuilder,
@@ -283,7 +284,11 @@ export class GithubApp extends App implements IPreMessageSentExtend, IPostMessag
     ): Promise<void> {
         const user = context.user;
         await sendDirectMessageOnInstall(read, modify, user, persistence);
-        await UpdateSetting(read, persistence, this.getAccessors().environmentReader.getSettings())
+    }
+
+    public async onEnable(environment: IEnvironmentRead, configurationModify: IConfigurationModify): Promise<boolean> {
+        await configurationModify.scheduler.scheduleOnce({id:ProcessorsEnum.SETTING_UPDATE,when:"one second"});
+        return true;
     }
 
     public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
