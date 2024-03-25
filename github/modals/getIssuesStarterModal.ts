@@ -82,7 +82,6 @@ export async function GitHubIssuesStarterModal({
             },
         }),
         submit: block.newButtonElement({
-            actionId: ModalsEnum.NEW_ISSUE_STARTER__ACTION,
             text: {
                 type: TextObjectType.PLAINTEXT,
                 emoji:true,

@@ -928,23 +928,17 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.MULTI_SHARE_ADD_GITHUB_ISSUE_ACTION:{
-                    let { user, room } = await context.getInteractionData();
+                    let { user } = await context.getInteractionData();
+                    let room: IRoom | undefined;
                     let issueId: string = context.getInteractionData().value as string;
-                    let roomId:string="";
+                    let roomId: string = "";
                     if(user?.id){
-                        if(room?.id){
-                            roomId = room.id;
-                        }else{
-                            roomId = (
-                                await getInteractionRoomData(
-                                    this.read.getPersistenceReader(),
-                                    user.id
-                                )
-                            ).roomId;
-                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
-                        }
-                        let githubissueStorage = new GithubRepoIssuesStorage(this.persistence,this.read.getPersistenceReader());
-                        let repoIssuesData: IGitHubIssueData = await githubissueStorage.getIssueData(room?.id as string,user);
+                        roomId = (await getInteractionRoomData(this.read.getPersistenceReader(), user.id)).roomId;
+                        room = await this.read.getRoomReader().getById(roomId) as IRoom;
+
+                        if(room){
+                            let githubissueStorage = new GithubRepoIssuesStorage(this.persistence,this.read.getPersistenceReader());
+                            let repoIssuesData: IGitHubIssueData = await githubissueStorage.getIssueData(room?.id as string,user);
                             if(repoIssuesData?.issue_list?.length){
                                 let index = -1;
                                 let currentIndex = 0;
@@ -973,7 +967,8 @@ export class ExecuteBlockActionHandler {
                                     http: this.http,
                                 })
                                 await this.modify.getUiController().updateModalView(githubIssuesModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
-                            }
+                                }
+                        }
                     }
                     break;
                 }
