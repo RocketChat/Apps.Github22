@@ -165,6 +165,14 @@ export async function pullDetailsModal({
                 },
                 value: `${data?.repository} ${data?.number}`,
             }),
+            block.newButtonElement({
+                actionId: ModalsEnum.APPROVE_PULL_REQUEST_ACTION,
+                text: {
+                    text: ModalsEnum.APPROVE_PULL_REQUEST_LABEL,
+                    type: TextObjectType.PLAINTEXT,
+                },
+                value: `${data?.repository} ${data?.number}`,
+            }),
         ],
     });
 
