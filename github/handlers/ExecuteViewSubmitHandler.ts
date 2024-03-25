@@ -29,6 +29,7 @@ import { issueCommentsModal } from '../modals/issueCommentsModal';
 import { createReminder } from './CreateReminder';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IAuthData } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
+import { PersistanceEnum } from '../enum/Persistance';
 export class ExecuteViewSubmitHandler {
     constructor(
         private readonly app: GithubApp,
@@ -747,58 +748,52 @@ export class ExecuteViewSubmitHandler {
                     break;
                 }
                 case ModalsEnum.SHARE_PROFILE_EXEC : {
-                    let {user, room} = context.getInteractionData();
+                    const { user } = context.getInteractionData();
+                    const userId = user.id;
                     const block = this.modify.getCreator().getBlockBuilder();
-                    let accessToken = await getAccessTokenForUser(this.read, user ,this.app.oauth2Config) as IAuthData;
+                    const accessToken = await getAccessTokenForUser(this.read, user ,this.app.oauth2Config) as IAuthData;
                     const userProfile = await getBasicUserInfo(this.http, accessToken.token);
 
-                    const idRecord = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ProfileShareParam")
+                    const idRecord = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `${userId}${PersistanceEnum.SHARE_PROFILE_PARAMS}`)
 
                     const profileData = await this.read.getPersistenceReader().readByAssociation(idRecord);
 
                     let profileShareParams: string[] = [];
 
-                    if (profileData.length == 0){
+                    if (profileData.length === 0) {
                         profileShareParams = ['username', 'avatar', 'email', 'bio', 'followers', 'following'];
-                    }else {
-                        const data = profileData[0] as {profileParams : string[]};
+                    } else {
+                        const data = profileData[0] as { profileParams: string[] };
                         profileShareParams = data.profileParams;
                     }
 
-                    if (profileShareParams.includes('avatar')){
+                    if (profileShareParams.includes('avatar')) {
                         block.addImageBlock({
-                            imageUrl : userProfile.avatar,
-                            altText : "User Info"
-                        })
+                            imageUrl: userProfile.avatar,
+                            altText: "User Info"
+                        });
                     }
 
-                    profileShareParams.map((value) => {
-                        if (value != 'avatar'){
+                    profileShareParams.forEach((value) => {
+                        if (value !== 'avatar') {
                             block.addSectionBlock({
-                                text : block.newPlainTextObject(value),
-                            })
+                                text: block.newPlainTextObject(value),
+                            });
+
                             block.addContextBlock({
-                                elements : [
+                                elements: [
                                     block.newPlainTextObject(userProfile[value], true),
                                 ]
                             });
+
                             block.addDividerBlock();
                         }
-                    })
+                    });
 
-                    if(user?.id){
-                        if(room?.id){
-                            await sendMessage(this.modify, room!, user, `${userProfile.name}'s Github Profile`, block)
-                        }else{
-                            let roomId = (
-                                await getInteractionRoomData(
-                                    this.read.getPersistenceReader(),
-                                    user.id
-                                )
-                            ).roomId;
-                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
-                            await sendMessage(this.modify, room, user, `${userProfile.name}'s Github Profile`, block)
-                        }
+                    if (user?.id) {
+                        const roomId = (await getInteractionRoomData(this.read.getPersistenceReader(), user.id)).roomId;
+                        const room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                        await sendMessage(this.modify, room, user, `${userProfile.name}'s Github Profile`, block);
                     }
 
                     this.persistence.removeByAssociation(idRecord);
@@ -816,4 +811,4 @@ export class ExecuteViewSubmitHandler {
             success: true,
         };
     }
-}
+}   

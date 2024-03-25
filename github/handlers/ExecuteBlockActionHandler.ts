@@ -55,7 +55,7 @@ import { githubSearchModal } from "../modals/githubSearchModal";
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
 import { removeRepoReminder, unsubscribedPR } from "../persistance/remind";
 import { reminderModal } from "../modals/remindersModal";
-
+import {PersistanceEnum} from '../enum/Persistance'
 export class ExecuteBlockActionHandler {
 
     constructor(
@@ -288,11 +288,13 @@ export class ExecuteBlockActionHandler {
                 }
                 case ModalsEnum.SHARE_PROFILE_PARAMS : {
                     const profileInteractionData = context.getInteractionData().value;
+                    const { user } = context.getInteractionData();
+                    const userId = user.id;
                     if(Array.isArray(profileInteractionData)) {
                         const storeData = {
-                            profileParams: profileInteractionData as string[]
+                        profileParams: profileInteractionData as string[]
                         }
-                    await this.persistence.updateByAssociation(new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "ProfileShareParam"), storeData);
+                    await this.persistence.updateByAssociation(new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `${userId}${PersistanceEnum.SHARE_PROFILE_PARAMS}`), storeData, true);
                     }
                     break;
                 }
