@@ -1,16 +1,39 @@
 import { ISetting, SettingType } from '@rocket.chat/apps-engine/definition/settings';
 
-export enum AppSettings{
-    ReminderCRONjobString = 'reminderCronJobString'
+export enum AppSettingsEnum {
+    ReminderCRONjobID = 'reminder_cron_job_id',
+    ReminderCRONjobLabel = 'cron_job_string_for_pr_reminders_label',
+    ReminderCRONjobPackageValue = '0 9 * * *',
+    BaseHostID = "base_host_id",
+    BaseHostLabel = "base_host_label",
+    BaseHostPackageValue = "https://github.com/",
+    BaseApiHostID = "base_api_host_id",
+    BaseApiHostLabel = "base_api_host_label",
+    BaseApiHostPackageValue = "https://api.github.com/"
 }
-
 export const settings: ISetting[] = [
-	{
-		id: AppSettings.ReminderCRONjobString,
-		i18nLabel: 'cron-job-string-for-pr-reminders',
-		type: SettingType.STRING,
-		required: true,
-		public: false,
-		packageValue: '0 9 * * *',
-	},
+    {
+        id: AppSettingsEnum.ReminderCRONjobID,
+        i18nLabel: AppSettingsEnum.ReminderCRONjobLabel,
+        type: SettingType.STRING,
+        required: true,
+        public: false,
+        packageValue: AppSettingsEnum.ReminderCRONjobPackageValue,
+    },
+    {
+        id: AppSettingsEnum.BaseHostID,
+        i18nLabel: AppSettingsEnum.BaseHostLabel,
+        type: SettingType.STRING,
+        required: true,
+        public: false,
+        packageValue: AppSettingsEnum.BaseHostPackageValue,
+    },
+    {
+        id: AppSettingsEnum.BaseApiHostID,
+        i18nLabel: AppSettingsEnum.BaseApiHostLabel,
+        type: SettingType.STRING,
+        required: true,
+        public: false,
+        packageValue: AppSettingsEnum.BaseApiHostPackageValue,
+    },
 ];

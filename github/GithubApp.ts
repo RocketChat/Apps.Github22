@@ -3,6 +3,7 @@ import {
     IAppInstallationContext,
     IConfigurationExtend,
     IConfigurationModify,
+    IEnvironmentRead,
     IHttp,
     ILogger,
     IMessageBuilder,
@@ -52,10 +53,12 @@ import { IPreMessageSentExtend, IMessage,IPreMessageSentModify, IPostMessageSent
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 import { SendReminder } from "./handlers/SendReminder";
-import { AppSettings, settings } from "./settings/settings";
-import { ISetting } from "@rocket.chat/apps-engine/definition/settings";import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
+import { AppSettingsEnum, settings } from "./settings/settings";
+import { ISetting } from "@rocket.chat/apps-engine/definition/settings";
+import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
+import { UpdateSetting } from "./persistance/setting";
 
-export class GithubApp extends App implements IPreMessageSentExtend,IPostMessageSent{
+export class GithubApp extends App implements IPreMessageSentExtend, IPostMessageSent {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
     }
@@ -258,7 +261,12 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
                     type:StartupType.RECURRING,
                     interval:"0 9 * * *"
                 }
-
+            },
+            {
+                id:ProcessorsEnum.SETTING_UPDATE,
+                processor:async(jobContext, read, modify, http, persis)=>{
+                    await UpdateSetting(read, persis, this.getAccessors().environmentReader.getSettings())
+                },
             }
         ]);
         configuration.api.provideApi({
@@ -278,12 +286,18 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
         await sendDirectMessageOnInstall(read, modify, user, persistence);
     }
 
+    public async onEnable(environment: IEnvironmentRead, configurationModify: IConfigurationModify): Promise<boolean> {
+        await configurationModify.scheduler.scheduleOnce({id:ProcessorsEnum.SETTING_UPDATE,when:"one second"});
+        return true;
+    }
+
     public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
-        const interval:string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCRONjobString);
+        const interval: string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettingsEnum.ReminderCRONjobID);
         await configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
         await configurationModify.scheduler.scheduleRecurring({
-            id:ProcessorsEnum.PR_REMINDER,
-            interval:interval,
+            id: ProcessorsEnum.PR_REMINDER,
+            interval: interval,
         })
+        await configurationModify.scheduler.scheduleOnce({id:ProcessorsEnum.SETTING_UPDATE,when:"one second"});
     }
 }
