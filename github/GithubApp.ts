@@ -48,29 +48,17 @@ import { IJobContext, StartupType } from "@rocket.chat/apps-engine/definition/sc
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { clearInteractionRoomData, getInteractionRoomData } from "./persistance/roomInteraction";
 import { GHCommand } from "./commands/GhCommand";
-import { IPreMessageSentExtend, IMessage,IPreMessageSentModify, IPostMessageSent } from "@rocket.chat/apps-engine/definition/messages";
+import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/definition/messages";
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 import { SendReminder } from "./handlers/SendReminder";
 import { AppSettings, settings } from "./settings/settings";
-import { ISetting } from "@rocket.chat/apps-engine/definition/settings";import { handleGithubPRLink } from "./handlers/GithubPRlinkHandler";
+import { ISetting } from "@rocket.chat/apps-engine/definition/settings";
+import { handleGithubPRLinks } from "./handlers/GithubPRlinkHandler";
 
-export class GithubApp extends App implements IPreMessageSentExtend,IPostMessageSent{
+export class GithubApp extends App implements IPreMessageSentExtend {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);
-    }
-
-    async checkPostMessageSent?(message: IMessage, read: IRead, http: IHttp): Promise<boolean> {
-      if (await hasGithubPRLink(message)){
-        return true
-      }
-      return false; 
-    }
-    
-    async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
-        
-        await handleGithubPRLink(message,read,http,persistence,modify)
-        
     }
 
     public async checkPreMessageSentExtend(
@@ -95,7 +83,10 @@ export class GithubApp extends App implements IPreMessageSentExtend,IPostMessage
         if (await hasGitHubCodeSegmentLink(message)) {
             await handleGitHubCodeSegmentLink(message, read, http, message.sender, message.room, extend);
         }
-        
+        if (await hasGithubPRLink(message)) {
+            await handleGithubPRLinks(message, read, http, message.sender, message.room, extend);
+        }
+
         return extend.getMessage();
     }
     
