@@ -2,16 +2,14 @@ import { IHttp, IModify, IPersistence, IRead } from "@rocket.chat/apps-engine/de
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { ButtonStyle, TextObjectType, UIKitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
-import { AppEnum } from "../enum/App";
 import { ModalsEnum } from "../enum/Modals";
 import { GitHubApi } from "../helpers/githubSDKclass";
-import { GetSetting } from "../persistance/setting";
 import { UserInformation } from "../definitions/Userinfo";
 import {
     getInteractionRoomData,
     storeInteractionRoomData,
 } from "../persistance/roomInteraction";
-import { IAppSetting } from "../definitions/AppSetting";
+import { AppSettingsEnum } from "../settings/settings";
 
 export async function userProfileModal({
     access_token,
@@ -48,12 +46,13 @@ export async function userProfileModal({
     }
     let userInfo: UserInformation | undefined;
     try {
-        const settings:IAppSetting = await GetSetting(read);
+        let BaseHost = await read.getEnvironmentReader().getSettings().getValueById(AppSettingsEnum.BaseHostID);
+        let BaseApiHost = await read.getEnvironmentReader().getSettings().getValueById(AppSettingsEnum.BaseApiHostID);
         const gitHubApiClient = new GitHubApi(
             http,
             access_token,
-            settings!.BaseHost,
-            settings!.BaseApiHost
+            BaseHost,
+            BaseApiHost
         );
         userInfo = await gitHubApiClient.getBasicUserInfo();
     } catch (error) {
