@@ -3,6 +3,7 @@ import {
     IAppInstallationContext,
     IConfigurationExtend,
     IConfigurationModify,
+    IEnvironmentRead,
     IHttp,
     ILogger,
     IMessageBuilder,
@@ -52,7 +53,7 @@ import { IPreMessageSentExtend, IMessage } from "@rocket.chat/apps-engine/defini
 import { handleGitHubCodeSegmentLink } from "./handlers/GitHubCodeSegmentHandler";
 import { isGithubLink, hasGitHubCodeSegmentLink, hasGithubPRLink } from "./helpers/checkLinks";
 import { SendReminder } from "./handlers/SendReminder";
-import { AppSettings, settings } from "./settings/settings";
+import { AppSettingsEnum, settings } from "./settings/settings";
 import { ISetting } from "@rocket.chat/apps-engine/definition/settings";
 import { handleGithubPRLinks } from "./handlers/GithubPRlinkHandler";
 
@@ -249,8 +250,7 @@ export class GithubApp extends App implements IPreMessageSentExtend {
                     type:StartupType.RECURRING,
                     interval:"0 9 * * *"
                 }
-
-            }
+            },
         ]);
         configuration.api.provideApi({
             visibility: ApiVisibility.PUBLIC,
@@ -270,11 +270,11 @@ export class GithubApp extends App implements IPreMessageSentExtend {
     }
 
     public async onSettingUpdated(setting: ISetting, configurationModify: IConfigurationModify, read: IRead, http: IHttp): Promise<void> {
-        const interval:string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettings.ReminderCRONjobString);
+        const interval: string = await this.getAccessors().environmentReader.getSettings().getValueById(AppSettingsEnum.ReminderCRONjobID);
         await configurationModify.scheduler.cancelJob(ProcessorsEnum.PR_REMINDER);
         await configurationModify.scheduler.scheduleRecurring({
-            id:ProcessorsEnum.PR_REMINDER,
-            interval:interval,
+            id: ProcessorsEnum.PR_REMINDER,
+            interval: interval,
         })
     }
 }
