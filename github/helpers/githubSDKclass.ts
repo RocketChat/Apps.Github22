@@ -77,6 +77,59 @@ class GitHubApi {
         }
     }
 
+    public async getUserAssignedIssues(
+        username: String,
+        filter: {
+            filter: String,
+            state: String,
+            sort: String
+        },
+    ): Promise<IGitHubIssue[]> {
+        let url: string = "";
+        switch (filter.filter) {
+            case ModalsEnum.CREATED_ISSUE_FILTER:
+                url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+author:${username}`
+                break;
+            case ModalsEnum.ASSIGNED_ISSUE_FILTER:
+                url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+assignee:${username}`
+                break;
+            case ModalsEnum.MENTIONED_ISSUE_FILTER:
+                url = `https://api.github.com/search/issues?q=is:${filter.state}+is:issue+sort:${filter.sort.substring(5)}-desc+mentions:${username}`
+            default:
+                break;
+        }
+
+        try {
+            const response = await this.getRequest(url);
+
+            const getAssignees = (assignees: any[]): string[] => assignees.map((val): string => {
+                return val.login as string;
+            })
+
+            const modifiedResponse: Array<IGitHubIssue> = response.items.map((value): IGitHubIssue => {
+                return {
+                    issue_id: value.id as string,
+                    issue_compact: value.body as string,
+                    repo_url: value.repository_url as string,
+                    user_login: value.user.login as string,
+                    user_avatar: value.user.avatar_url as string,
+                    number: value.number as number,
+                    title: value.title as string,
+                    body: value.body as string,
+                    assignees: getAssignees(value.assignees),
+                    state: value.state as string,
+                    last_updated_at: value.updated_at as string,
+                    comments: value.comments as number,
+                }
+            })
+
+            return modifiedResponse;
+        }
+        catch (e) {
+            return [];
+        }
+    }
+
     public async getIssueData(
         repoInfo: String,
         issueNumber: String,
