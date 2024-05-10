@@ -1,4 +1,9 @@
-import { IRead, IPersistence, IHttp, IModify } from "@rocket.chat/apps-engine/definition/accessors";
+import {
+    IRead,
+    IPersistence,
+    IHttp,
+    IModify,
+} from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { UIKitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
@@ -16,37 +21,34 @@ export async function handleUserProfileRequest(
     room: IRoom,
     modify: IModify,
     uikitcontext?: UIKitInteractionContext
-){
+) {
     let access_token = await getAccessTokenForUser(
         read,
         context.getSender(),
         app.oauth2Config
     );
-    if (access_token?.token){
+    if (access_token?.token) {
         const triggerId = context.getTriggerId();
-        if (triggerId){
+        if (triggerId) {
             const modal = await userProfileModal({
-                access_token: access_token.token,
+                app: app,
                 modify: modify,
                 read: read,
                 persistence: persistence,
                 http: http,
-                slashcommandcontext: context
+                slashcommandcontext: context,
             });
-            await modify.getUiController().openModalView(
-                modal,
-                {triggerId},
-                context.getSender()
-            );
+            await modify
+                .getUiController()
+                .openModalView(modal, { triggerId }, context.getSender());
         }
-    }else {
+    } else {
         await sendNotification(
             read,
             modify,
             context.getSender(),
             room,
             "Login is Mandatory for getting User Info ! `/github login`"
-        )
+        );
     }
-
 }

@@ -1,6 +1,15 @@
-import { IHttp, IModify, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
+import {
+    IHttp,
+    IModify,
+    IPersistence,
+    IRead,
+} from "@rocket.chat/apps-engine/definition/accessors";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
-import { ButtonStyle, TextObjectType, UIKitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
+import {
+    ButtonStyle,
+    TextObjectType,
+    UIKitInteractionContext,
+} from "@rocket.chat/apps-engine/definition/uikit";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
 import { ModalsEnum } from "../enum/Modals";
 import { GitHubApi } from "../helpers/githubSDKclass";
@@ -10,49 +19,63 @@ import {
     storeInteractionRoomData,
 } from "../persistance/roomInteraction";
 import { AppSettingsEnum } from "../settings/settings";
+import { GithubApp } from "../GithubApp";
 
 export async function userProfileModal({
-    access_token,
+    app,
     modify,
     read,
     persistence,
     http,
     slashcommandcontext,
-    uikitcontext
-} : {
-    access_token: String,
-    modify : IModify,
-    read: IRead,
-    persistence: IPersistence,
-    http: IHttp,
-    slashcommandcontext: SlashCommandContext,
-    uikitcontext?: UIKitInteractionContext
-}) : Promise<IUIKitModalViewParam> {
-
+    uikitcontext,
+}: {
+    app: GithubApp;
+    modify: IModify;
+    read: IRead;
+    persistence: IPersistence;
+    http: IHttp;
+    slashcommandcontext: SlashCommandContext;
+    uikitcontext?: UIKitInteractionContext;
+}): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.USER_PROFILE_VIEW;
     const block = modify.getCreator().getBlockBuilder();
-    const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
-    const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
+    const room =
+        slashcommandcontext?.getRoom() ||
+        uikitcontext?.getInteractionData().room;
+    const user =
+        slashcommandcontext?.getSender() ||
+        uikitcontext?.getInteractionData().user;
 
-    if (user?.id){
+    if (user?.id) {
         let roomId;
-        if (room?.id){
+        if (room?.id) {
             roomId = room.id;
             await storeInteractionRoomData(persistence, user.id, roomId);
-        }
-        else {
-            roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
+        } else {
+            roomId = (
+                await getInteractionRoomData(
+                    read.getPersistenceReader(),
+                    user.id
+                )
+            ).roomId;
         }
     }
     let userInfo: UserInformation | undefined;
     try {
-        let BaseHost = await read.getEnvironmentReader().getSettings().getValueById(AppSettingsEnum.BaseHostID);
-        let BaseApiHost = await read.getEnvironmentReader().getSettings().getValueById(AppSettingsEnum.BaseApiHostID);
-        const gitHubApiClient = new GitHubApi(
+        let BaseHost = await read
+            .getEnvironmentReader()
+            .getSettings()
+            .getValueById(AppSettingsEnum.BaseHostID);
+        let BaseApiHost = await read
+            .getEnvironmentReader()
+            .getSettings()
+            .getValueById(AppSettingsEnum.BaseApiHostID);
+        const gitHubApiClient = await GitHubApi.getInstance(
             http,
-            access_token,
-            BaseHost,
-            BaseApiHost
+            read,
+            user,
+            app
         );
         userInfo = await gitHubApiClient.getBasicUserInfo();
     } catch (error) {
@@ -64,58 +87,57 @@ export async function userProfileModal({
             elements: [block.newPlainTextObject(userInfo.email, true)],
         });
 
-    block.addSectionBlock({
-        text: block.newPlainTextObject(userInfo.bio),
-        accessory : block.newImageElement({
-            imageUrl: userInfo.avatar,
-            altText: userInfo.name
-        })
-    })
-
-    block.addContextBlock({
-        elements: [
-            block.newPlainTextObject(`followers: ${userInfo.followers}`),
-            block.newPlainTextObject(`following: ${userInfo.following}`)
-        ]
-    });
-
-    block.addDividerBlock();
-
-    block.addSectionBlock({
-        text: block.newPlainTextObject("Select from the following options.")
-    })
-
-    block.addActionsBlock({
-        elements : [
-            block.newButtonElement({
-                text : {
-                    text : "Share Profile",
-                    type : TextObjectType.PLAINTEXT
-                },
-                actionId: ModalsEnum.SHARE_PROFILE,
-                style : ButtonStyle.PRIMARY
+        block.addSectionBlock({
+            text: block.newPlainTextObject(userInfo.bio),
+            accessory: block.newImageElement({
+                imageUrl: userInfo.avatar,
+                altText: userInfo.name,
             }),
-            block.newButtonElement(
-                {
+        });
+
+        block.addContextBlock({
+            elements: [
+                block.newPlainTextObject(`followers: ${userInfo.followers}`),
+                block.newPlainTextObject(`following: ${userInfo.following}`),
+            ],
+        });
+
+        block.addDividerBlock();
+
+        block.addSectionBlock({
+            text: block.newPlainTextObject(
+                "Select from the following options."
+            ),
+        });
+
+        block.addActionsBlock({
+            elements: [
+                block.newButtonElement({
+                    text: {
+                        text: "Share Profile",
+                        type: TextObjectType.PLAINTEXT,
+                    },
+                    actionId: ModalsEnum.SHARE_PROFILE,
+                    style: ButtonStyle.PRIMARY,
+                }),
+                block.newButtonElement({
                     actionId: ModalsEnum.TRIGGER_ISSUES_MODAL,
                     value: "Trigger Issues Modal",
                     text: {
                         type: TextObjectType.PLAINTEXT,
-                        text: "Issues"
+                        text: "Issues",
                     },
-                    style: ButtonStyle.PRIMARY
-                },
-            )
-        ]
-    })
-}
-    return  {
+                    style: ButtonStyle.PRIMARY,
+                }),
+            ],
+        });
+    }
+    return {
         id: viewId,
         title: {
             type: TextObjectType.PLAINTEXT,
             text: userInfo ? userInfo.name : "User Profile",
         },
-        blocks: block.getBlocks()
-    }
-
+        blocks: block.getBlocks(),
+    };
 }
