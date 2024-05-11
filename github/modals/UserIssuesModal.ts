@@ -14,15 +14,16 @@ import {
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
 import { ModalsEnum } from "../enum/Modals";
 import { OcticonIcons } from "../enum/OcticonIcons";
-import { getBasicUserInfo, getUserAssignedIssues } from "../helpers/githubSDK";
 import {
     getInteractionRoomData,
     storeInteractionRoomData,
 } from "../persistance/roomInteraction";
+import { GitHubApi } from "../helpers/githubSDKclass";
+import { GithubApp } from "../GithubApp";
 
 export async function userIssuesModal({
     filter,
-    access_token,
+    app,
     modify,
     read,
     persistence,
@@ -35,7 +36,7 @@ export async function userIssuesModal({
         state: string;
         sort: string;
     };
-    access_token: String;
+    app: GithubApp;
     modify: IModify;
     read: IRead;
     persistence: IPersistence;
@@ -51,6 +52,12 @@ export async function userIssuesModal({
     const user =
         slashcommandcontext?.getSender() ||
         uikitcontext?.getInteractionData().user;
+    const gitHubApiClient = await GitHubApi.getInstance(
+        http,
+        read,
+        user,
+        app
+    );
 
     if (user?.id) {
         let roomId;
@@ -67,12 +74,10 @@ export async function userIssuesModal({
         }
     }
 
-    const userInfo = await getBasicUserInfo(http, access_token);
+    const userInfo = await gitHubApiClient.getBasicUserInfo();
 
-    const repoInfo = await getUserAssignedIssues(
-        http,
+    const repoInfo = await gitHubApiClient.getUserAssignedIssues(
         userInfo.username,
-        access_token,
         filter
     );
 

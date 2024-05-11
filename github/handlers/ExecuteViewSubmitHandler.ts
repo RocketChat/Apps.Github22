@@ -17,7 +17,7 @@ import { IGitHubSearchResultData } from '../definitions/searchResultData';
 import { githubSearchErrorModal } from '../modals/githubSearchErrorModal';
 import { GithubSearchResultStorage } from '../persistance/searchResults';
 import { githubSearchResultShareModal } from '../modals/githubSearchResultsShareModal';
-import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, getIssueTemplates,githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues, addNewIssueComment, getIssuesComments, getIssueData, getBasicUserInfo } from '../helpers/githubSDK';
+import { addSubscribedEvents, createSubscription, updateSubscription, createNewIssue, githubSearchIssuesPulls, mergePullRequest, addNewPullRequestComment, getPullRequestData, getPullRequestComments, getRepoData, getRepositoryIssues, updateGithubIssues, addNewIssueComment, getIssuesComments, getIssueData, getBasicUserInfo } from '../helpers/githubSDK';
 import { NewIssueModal } from '../modals/newIssueModal';
 import { issueTemplateSelectionModal } from '../modals/issueTemplateSelectionModal';
 import { githubIssuesListModal } from '../modals/githubIssuesListModal';
@@ -29,6 +29,7 @@ import { issueCommentsModal } from '../modals/issueCommentsModal';
 import { createReminder } from './CreateReminder';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IAuthData } from '@rocket.chat/apps-engine/definition/oauth2/IOAuth2';
+import { GitHubApi } from '../helpers/githubSDKclass';
 export class ExecuteViewSubmitHandler {
     constructor(
         private readonly app: GithubApp,
@@ -40,6 +41,12 @@ export class ExecuteViewSubmitHandler {
 
     public async run(context: UIKitViewSubmitInteractionContext) {
         const { user, view } = context.getInteractionData();
+        const gitHubApiClient = await GitHubApi.getInstance(
+            this.http,
+            this.read,
+            user,
+            this.app
+        );
 
         try {
             switch (view.id) {
@@ -154,12 +161,12 @@ export class ExecuteViewSubmitHandler {
                             }else{
                                 await sendNotification(this.read,this.modify,user,room,`Invalid Issue !`);
                             }
-                        } 
+                        }
                         break;
                     }
                     case ModalsEnum.NEW_ISSUE_STARTER_VIEW:{
                         const { roomId } = await getInteractionRoomData(this.read.getPersistenceReader(), user.id);
-        
+
                         if (roomId) {
                             let room = await this.read.getRoomReader().getById(roomId) as IRoom;
                             let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
@@ -167,9 +174,9 @@ export class ExecuteViewSubmitHandler {
                             if (!accessToken) {
                                 await sendNotification(this.read, this.modify, user, room, `Login To Github ! -> /github login`);
                             }else{
-                                
+
                                 repository=repository?.trim();
-                                let response = await getIssueTemplates(this.http,repository,accessToken.token);
+                                const response = await gitHubApiClient.getIssueTemplates(repository);
                                 if((!response.template_not_found) && response?.templates?.length){
                                     const issueTemplateSelection = await issueTemplateSelectionModal({ data: response, modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
                                     return context
@@ -185,7 +192,7 @@ export class ExecuteViewSubmitHandler {
                                     .openModalViewResponse(createNewIssue);
                                 }
                             }
-                        } 
+                        }
                         break;
                     }
                     case ModalsEnum.SEARCH_VIEW: {
@@ -227,7 +234,7 @@ export class ExecuteViewSubmitHandler {
                             }else{
                                 resourceState = resourceState?.trim();
                             }
- 
+
                             let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
                             if(repository?.length == 0 && labelsArray?.length == 0 && authorsArray?.length == 0){
                                 await sendNotification(this.read, this.modify, user, room, "*Invalid Search Query !*");
@@ -404,7 +411,7 @@ export class ExecuteViewSubmitHandler {
                                     return context
                                         .getInteractionResponder()
                                         .openModalViewResponse(unauthorizedMessageModal);
-                                }else{                               
+                                }else{
                                     let pullRequestComments = await getPullRequestComments(this.http,repository,accessToken.token,pullNumber);
                                     let pullRequestData = await getPullRequestData(this.http,repository,accessToken.token,pullNumber);
                                     if(pullRequestData?.serverError || pullRequestComments?.pullRequestData){
@@ -482,9 +489,9 @@ export class ExecuteViewSubmitHandler {
                                     return context
                                         .getInteractionResponder()
                                         .openModalViewResponse(unauthorizedMessageModal);
-                                }else{                               
-                                    let issueComments = await getIssuesComments(this.http,repository,accessToken?.token,issueNumber);
-                                    let issueData = await getIssueData(repository,issueNumber,accessToken.token,this.http);
+                                }else{
+                                    let issueComments = await gitHubApiClient.getIssuesComments(repository,issueNumber);
+                                    let issueData = await gitHubApiClient.getIssueData(repository,issueNumber);
                                     if(issueData?.issue_compact === "Error Fetching Issue" || issueComments?.issueData){
                                         if(issueData?.issue_compact === "Error Fetching Issue"){
                                             const unauthorizedMessageModal = await messageModal({
@@ -546,10 +553,10 @@ export class ExecuteViewSubmitHandler {
                             let pushRights: boolean= false;
                             let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
                             if (!accessToken) {
-                                response =  await getRepositoryIssues(this.http,repository);
+                                response =  await gitHubApiClient.getRepositoryIssues(repository);
                             }else{
                                 let repoDetails = await getRepoData(this.http,repository,accessToken.token);
-                                response =  await getRepositoryIssues(this.http,repository);
+                                response =  await gitHubApiClient.getRepositoryIssues(repository);
                                 pushRights = repoDetails?.permissions?.push || repoDetails?.permissions?.admin;
                             }
                             if(response.serverError){
@@ -626,7 +633,7 @@ export class ExecuteViewSubmitHandler {
                                     .getInteractionResponder()
                                     .openModalViewResponse(issuesListModal);
                             }
-                        } 
+                        }
                     break;
                 }
                 case ModalsEnum.ADD_ISSUE_ASSIGNEE_VIEW: {
@@ -696,7 +703,7 @@ export class ExecuteViewSubmitHandler {
                                         }
                                 }
                             }
-                        } 
+                        }
                     break;
                 }
                 case ModalsEnum.ISSUE_LIST_VIEW:{
@@ -742,7 +749,7 @@ export class ExecuteViewSubmitHandler {
                         let repository = view.state?.[ModalsEnum.REPO_NAME_INPUT]?.[ModalsEnum.REPO_NAME_INPUT_ACTION] as string;
 
                         await createReminder(repository,room,this.read,this.app,this.persistence,this.modify,this.http,user)
-                        
+
                     }
                     break;
                 }

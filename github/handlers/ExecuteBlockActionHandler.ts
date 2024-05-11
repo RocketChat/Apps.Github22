@@ -18,7 +18,7 @@ import {
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { AddSubscriptionModal } from "../modals/addSubscriptionsModal";
 import { deleteSubscriptionsModal } from "../modals/deleteSubscriptions";
-import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData, getIssuesComments, approvePullRequest } from "../helpers/githubSDK";
+import { deleteSubscription, updateSubscription, getPullRequestComments, getPullRequestData, getRepositoryIssues, getIssuesComments, approvePullRequest } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
 import { GithubApp } from "../GithubApp";
@@ -55,6 +55,7 @@ import { githubSearchModal } from "../modals/githubSearchModal";
 import { NewIssueStarterModal } from "../modals/newIssueStarterModal";
 import { removeRepoReminder, unsubscribedPR } from "../persistance/remind";
 import { reminderModal } from "../modals/remindersModal";
+import { GitHubApi } from "../helpers/githubSDKclass";
 
 export class ExecuteBlockActionHandler {
 
@@ -71,6 +72,12 @@ export class ExecuteBlockActionHandler {
         context: UIKitBlockInteractionContext
     ): Promise<IUIKitResponse> {
         const data = context.getInteractionData();
+        const gitHubApiClient = await GitHubApi.getInstance(
+            this.http,
+            this.read,
+            data.user,
+            this.app
+        );
 
         try {
             const { actionId } = data;
@@ -126,7 +133,7 @@ export class ExecuteBlockActionHandler {
                     const repoName = value?.split(",")[0] ?? "";
                     const issueNumber = value?.split(",")[1] ?? "";
 
-                    const issueInfo : IGitHubIssue = await getIssueData(repoName, issueNumber, access_token.token, this.http);
+                    const issueInfo : IGitHubIssue = await gitHubApiClient.getIssueData(repoName, issueNumber);
 
                     const block = this.modify.getCreator().getBlockBuilder();
 
@@ -178,7 +185,7 @@ export class ExecuteBlockActionHandler {
                     const issueDisplayModal = await IssueDisplayModal({
                         repoName : repoInfo,
                         issueNumber : issueNumber,
-                        access_token : access_token.token,
+                        app: this.app,
                         modify : this.modify,
                         read : this.read,
                         persistence : this.persistence,
@@ -244,7 +251,7 @@ export class ExecuteBlockActionHandler {
 
                     let access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                     const issueModal = await userIssuesModal({
-                        access_token : access_token.token,
+                        app: this.app,
                         filter : filter,
                         modify : this.modify,
                         read : this.read,
@@ -270,7 +277,7 @@ export class ExecuteBlockActionHandler {
 
                     const issuesModal = await userIssuesModal({
                         filter : filter,
-                        access_token : access_token.token,
+                        app: this.app,
                         modify: this.modify,
                         read : this.read,
                         persistence : this.persistence,
@@ -398,8 +405,7 @@ export class ExecuteBlockActionHandler {
                     if(accessToken && actionDetailsArray?.length == 2){
 
                         if(actionDetailsArray[1] !== ModalsEnum.BLANK_GITHUB_TEMPLATE){
-
-                            let templateResponse = await getIssueTemplateCode(this.http,actionDetailsArray[1],accessToken.token);
+                            let templateResponse = await gitHubApiClient.getIssueTemplateCode(actionDetailsArray[1]);
                             let data = {};
                             if(templateResponse?.template){
                                 data = {
@@ -671,13 +677,13 @@ export class ExecuteBlockActionHandler {
                     return context.getInteractionResponder().openModalViewResponse(shareProfileMod);
                 }
                 case ModalsEnum.APPROVE_PULL_REQUEST_ACTION:{
-                    
+
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
                     let { user } = await context.getInteractionData();
                     let { room} = await context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
-                    
+
                     if(splittedValues.length==2 && accessToken?.token){
                         let data={
                             "repo" : splittedValues[0],
@@ -722,8 +728,8 @@ export class ExecuteBlockActionHandler {
                     if(splittedValues.length==2){
                         let repoName = splittedValues[0];
                         let issueNumber = splittedValues[1];
-                        let issueComments = await getIssuesComments(this.http,repoName,accessToken?.token,issueNumber);
-                        let issueData = await getIssueData(repoName,issueNumber,accessToken?.token,this.http);
+                        let issueComments = await gitHubApiClient.getIssuesComments(repoName, issueNumber);
+                        let issueData = await gitHubApiClient.getIssueData(repoName, issueNumber);
                         if(issueData?.issue_compact === "Error Fetching Issue" || issueComments?.issueData){
                             if(issueData?.issue_compact === "Error Fetching Issue"){
                                 const unauthorizedMessageModal = await messageModal({
@@ -906,7 +912,7 @@ export class ExecuteBlockActionHandler {
                     let { user } = await context.getInteractionData();
                     let accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config);
                     if (!accessToken) {
-                        let response =  await getRepositoryIssues(this.http,repository);
+                        let response = await gitHubApiClient.getRepositoryIssues(repository);
                         let data = {
                             issues: response.issues,
                             pushRights : false, //no access token, so user has no pushRights to the repo,
@@ -916,7 +922,7 @@ export class ExecuteBlockActionHandler {
                         await this.modify.getUiController().updateModalView(issuesListModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                     }else{
                         let repoDetails = await getRepoData(this.http,repository,accessToken.token);
-                        let response =  await getRepositoryIssues(this.http,repository);
+                        let response = await gitHubApiClient.getRepositoryIssues(repository);
                         let data = {
                             issues: response.issues,
                             pushRights : repoDetails?.permissions?.push || repoDetails?.permissions?.admin,
@@ -1026,8 +1032,8 @@ export class ExecuteBlockActionHandler {
                             }
                     }
                     break;
-                } 
-                
+                }
+
                 case ModalsEnum.GITHUB_LOGIN_ACTION :{
                     const {user, room} = context.getInteractionData();
                     if(room){
@@ -1073,7 +1079,7 @@ export class ExecuteBlockActionHandler {
                     });
                     return context.getInteractionResponder().openModalViewResponse(newIssueModal);
                 }
-                
+
                 case ModalsEnum.TRIGGER_SEARCH_MODAL: {
                     const searchModal = await githubSearchModal({
                         modify: this.modify,
@@ -1096,13 +1102,13 @@ export class ExecuteBlockActionHandler {
 
                     const message = `You have unsubscribed from repository [${repo} Pull Request #${number}](https://github.com/${repo}/pull/${number})`;
                     await sendNotification(this.read, this.modify, user, room as IRoom, message);
-                    
+
                 }
-                
+
                 case ModalsEnum.REMINDER_REMOVE_REPO_ACTION : {
-                   const {value, user} = context.getInteractionData(); 
+                   const {value, user} = context.getInteractionData();
                     await removeRepoReminder(this.read, this.persistence, value as string, user);
-                    
+
                    const updatedReminderModal = await reminderModal({modify: this.modify, read:this.read, persistence: this.persistence, http: this.http, uikitcontext: context});
 
                    return context.getInteractionResponder().updateModalViewResponse( updatedReminderModal);

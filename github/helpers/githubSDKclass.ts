@@ -21,7 +21,7 @@ class GitHubApi {
 
     private async initialize(
         read: IRead,
-        user: IUser,
+        user: IUser | undefined,
         app: GithubApp
     ): Promise<void> {
         const environmentReader = read.getEnvironmentReader();
@@ -32,18 +32,20 @@ class GitHubApi {
             .getSettings()
             .getValueById(AppSettingsEnum.BaseApiHostID);
 
-        const accessTokenResponse = await getAccessTokenForUser(
-            read,
-            user,
-            app.oauth2Config
-        );
-        this.accessToken = accessTokenResponse?.token;
+        if (user) {
+            const accessTokenResponse = await getAccessTokenForUser(
+                read,
+                user,
+                app.oauth2Config
+            );
+            this.accessToken = accessTokenResponse?.token;
+        }
     }
 
     public static async getInstance(
         http: IHttp,
         read: IRead,
-        user: IUser,
+        user: IUser | undefined,
         app: GithubApp
     ): Promise<GitHubApi> {
         if (!GitHubApi.instance) {
@@ -128,21 +130,21 @@ class GitHubApi {
         let url: string = "";
         switch (filter.filter) {
             case ModalsEnum.CREATED_ISSUE_FILTER:
-                url = `https://api.github.com/search/issues?q=is:${
+                url = `search/issues?q=is:${
                     filter.state
                 }+is:issue+sort:${filter.sort.substring(
                     5
                 )}-desc+author:${username}`;
                 break;
             case ModalsEnum.ASSIGNED_ISSUE_FILTER:
-                url = `https://api.github.com/search/issues?q=is:${
+                url = `search/issues?q=is:${
                     filter.state
                 }+is:issue+sort:${filter.sort.substring(
                     5
                 )}-desc+assignee:${username}`;
                 break;
             case ModalsEnum.MENTIONED_ISSUE_FILTER:
-                url = `https://api.github.com/search/issues?q=is:${
+                url = `search/issues?q=is:${
                     filter.state
                 }+is:issue+sort:${filter.sort.substring(
                     5
