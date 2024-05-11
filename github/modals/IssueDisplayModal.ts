@@ -6,16 +6,18 @@ import { IGitHubIssue } from "../definitions/githubIssue";
 import { IGithubReactions } from "../definitions/githubReactions";
 import { ModalsEnum } from "../enum/Modals";
 import { OcticonIcons } from "../enum/OcticonIcons";
-import { getIssueData, getUserAssignedIssues } from "../helpers/githubSDK";
+import { getIssueData } from "../helpers/githubSDK";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
 import { CreateReactionsBar } from "../lib/CreateReactionsBar";
 import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
+import { GitHubApi } from "../helpers/githubSDKclass";
+import { GithubApp } from "../GithubApp";
 
 export async function IssueDisplayModal ({
     repoName,
     issueNumber,
-    access_token,
+    app,
     modify,
     read,
     persistence,
@@ -25,7 +27,7 @@ export async function IssueDisplayModal ({
 } : {
     repoName : String,
     issueNumber : String,
-    access_token: String,
+    app: GithubApp,
     modify : IModify,
     read: IRead,
     persistence: IPersistence,
@@ -37,6 +39,12 @@ export async function IssueDisplayModal ({
     const block = modify.getCreator().getBlockBuilder();
     const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
     const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
+    const gitHubApiClient = await GitHubApi.getInstance(
+        http,
+        read,
+        user,
+        app
+    );
 
     if (user?.id){
         let roomId;
@@ -49,7 +57,7 @@ export async function IssueDisplayModal ({
         }
     }
 
-    const issueInfo : IGitHubIssue = await getIssueData(repoName, issueNumber, access_token, http);
+    const issueInfo : IGitHubIssue = await gitHubApiClient.getIssueData(repoName, issueNumber);
 
     if (issueInfo.issue_id == 0){
         block.addSectionBlock({
