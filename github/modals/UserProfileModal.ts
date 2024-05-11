@@ -63,14 +63,6 @@ export async function userProfileModal({
     }
     let userInfo: UserInformation | undefined;
     try {
-        let BaseHost = await read
-            .getEnvironmentReader()
-            .getSettings()
-            .getValueById(AppSettingsEnum.BaseHostID);
-        let BaseApiHost = await read
-            .getEnvironmentReader()
-            .getSettings()
-            .getValueById(AppSettingsEnum.BaseApiHostID);
         const gitHubApiClient = await GitHubApi.getInstance(
             http,
             read,

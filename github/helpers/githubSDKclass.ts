@@ -13,7 +13,7 @@ class GitHubApi {
     private http: IHttp;
     private BaseHost: string;
     private BaseApiHost: string;
-    private accessToken: IAuthData | undefined;
+    private accessToken: string | undefined;
 
     constructor(http: IHttp) {
         this.http = http;
@@ -32,11 +32,12 @@ class GitHubApi {
             .getSettings()
             .getValueById(AppSettingsEnum.BaseApiHostID);
 
-        this.accessToken = await getAccessTokenForUser(
+        const accessTokenResponse = await getAccessTokenForUser(
             read,
             user,
             app.oauth2Config
         );
+        this.accessToken = accessTokenResponse?.token;
     }
 
     public static async getInstance(
