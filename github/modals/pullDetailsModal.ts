@@ -15,6 +15,7 @@ import {
     UIKitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
+import { messageModal } from "./messageModal";
 
 export async function pullDetailsModal({
     data,
@@ -88,6 +89,19 @@ export async function pullDetailsModal({
         );
 
         const pullRequestFiles = pullRequestFilesRaw.data;
+
+        if(!pullRawData.statusCode.toString().startsWith("2")){
+            const modal = await messageModal({
+                message:`🤖 Error Fetching Pull Request Data ⚠️`,
+                modify: modify,
+                read: read,
+                persistence: persistence,
+                http: http,
+                uikitcontext: uikitcontext
+            })
+
+            return modal
+        }
 
         block.addSectionBlock({
             text: {
