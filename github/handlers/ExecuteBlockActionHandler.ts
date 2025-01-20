@@ -400,10 +400,10 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        id: this.app.getID(),
                     });
-                    return context
-                        .getInteractionResponder()
-                        .openModalViewResponse(codeModal);
+                    const triggerId = context.getInteractionData().triggerId
+                    await this.modify.getUiController().openSurfaceView(codeModal, { triggerId }, context.getInteractionData().user);
                 }
                 case ModalsEnum.OPEN_ADD_SUBSCRIPTIONS_MODAL: {
                     const addSubscriptionModal = await AddSubscriptionModal({
@@ -986,11 +986,11 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        id: this.app.getID(),
                     });
 
-                    return context
-                        .getInteractionResponder()
-                        .openModalViewResponse(shareProfileMod);
+                    const triggerId = context.getInteractionData().triggerId;
+                    await this.modify.getUiController().openSurfaceView(shareProfileMod, { triggerId }, context.getInteractionData().user);
                 }
                 case ModalsEnum.APPROVE_PULL_REQUEST_ACTION: {
                     let value: string = context.getInteractionData()

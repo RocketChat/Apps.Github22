@@ -52,6 +52,7 @@ export async function NewIssueModal({
         uikitcontext?.getInteractionData().user;
 
     const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
         type: UIKitSurfaceType.MODAL,
         title: {
             type: "plain_text",
