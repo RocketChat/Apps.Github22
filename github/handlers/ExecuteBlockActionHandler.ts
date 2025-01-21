@@ -332,13 +332,12 @@ export class ExecuteBlockActionHandler {
                         read: this.read,
                         persistence: this.persistence,
                         http: this.http,
+                        id: this.app.getID(),
                     });
 
                     await this.persistence.updateByAssociation(record, filter);
-
-                    return context
-                        .getInteractionResponder()
-                        .updateModalViewResponse(issueModal);
+                    const triggerId = context.getInteractionData().triggerId;
+                    await this.modify.getUiController().updateSurfaceView(issueModal, {triggerId}, user)
                 }
                 case ModalsEnum.TRIGGER_ISSUES_MODAL: {
                     const { user } = context.getInteractionData();
@@ -363,11 +362,10 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        id: this.app.getID(),
                     });
-
-                    return context
-                        .getInteractionResponder()
-                        .openModalViewResponse(issuesModal);
+                    const triggerId = context.getInteractionData().triggerId;
+                    await this.modify.getUiController().openSurfaceView(issuesModal, {triggerId}, user)
                 }
                 case ModalsEnum.TRIGGER_REPOS_MODAL: {
                     break;
@@ -972,10 +970,10 @@ export class ExecuteBlockActionHandler {
                                 persistence: this.persistence,
                                 http: this.http,
                                 uikitcontext: context,
+                                id: this.app.getID()
                             });
-                        return context
-                            .getInteractionResponder()
-                            .openModalViewResponse(addPRCommentModal);
+                        const triggerId = context.getInteractionData().triggerId;
+                        await this.modify.getUiController().openSurfaceView(addPRCommentModal, {triggerId}, user)
                     }
                     break;
                 }
@@ -1165,10 +1163,10 @@ export class ExecuteBlockActionHandler {
                             persistence: this.persistence,
                             http: this.http,
                             uikitcontext: context,
+                            id: this.app.getID(),
                         });
-                        return context
-                            .getInteractionResponder()
-                            .openModalViewResponse(addIssueCommentModal);
+                        const triggerId = context.getInteractionData().triggerId;
+                            await this.modify.getUiController().openSurfaceView(addIssueCommentModal, {triggerId}, user)
                     }
                     break;
                 }
@@ -1196,10 +1194,10 @@ export class ExecuteBlockActionHandler {
                                 persistence: this.persistence,
                                 http: this.http,
                                 uikitcontext: context,
+                                id: this.app.getID()
                             });
-                        return context
-                            .getInteractionResponder()
-                            .openModalViewResponse(addIssueCommentModal);
+                            const triggerId = context.getInteractionData().triggerId;
+                            await this.modify.getUiController().openSurfaceView(addIssueCommentModal, {triggerId}, user)
                     } else {
                         const unauthorizedMessageModal = await messageModal({
                             message:
@@ -1318,10 +1316,10 @@ export class ExecuteBlockActionHandler {
                                 persistence: this.persistence,
                                 http: this.http,
                                 uikitcontext: context,
+                                id: this.app.getID(),
                             });
-                        return context
-                            .getInteractionResponder()
-                            .openModalViewResponse(addPRCommentModal);
+                        const triggerId = context.getInteractionData().triggerId;
+                        await this.modify.getUiController().openSurfaceView(addPRCommentModal, { triggerId }, user);
                     }
                     break;
                 }

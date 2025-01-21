@@ -484,10 +484,11 @@ export class ExecuteViewSubmitHandler {
                                         read:this.read,
                                         persistence: this.persistence,
                                         http: this.http,
-                                        uikitcontext: context
+                                        uikitcontext: context,
+                                        id: this.app.getID(),
                                     })
                                     await sendNotification(this.read,this.modify,user,room,`New Comment posted to ${repository} pull request #${pullNumber} by ${addCommentResponse?.user?.login} : ${addCommentResponse?.html_url}`);
-                                    await this.modify.getUiController().updateModalView(addPRCommentModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                                    return await this.modify.getUiController().updateSurfaceView(addPRCommentModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                                 }
                             }
                         }
@@ -510,8 +511,7 @@ export class ExecuteViewSubmitHandler {
                                     let errorMessage = addCommentResponse?.message;
                                     const unauthorizedMessageModal = await messageModal(
                                         {
-                                            message:
-                                                "Unauthorized Action 🤖 You dont have push rights ⚠️",
+                                            message: errorMessage,
                                             modify: this.modify,
                                             read: this.read,
                                             persistence: this.persistence,
@@ -577,14 +577,14 @@ export class ExecuteViewSubmitHandler {
                                         read:this.read,
                                         persistence: this.persistence,
                                         http: this.http,
-                                        uikitcontext: context
+                                        uikitcontext: context,
+                                        id: this.app.getID(),
                                     })
                                     await sendNotification(this.read,this.modify,user,room,`New Comment posted to ${repository} issue #${issueNumber} by ${addCommentResponse?.user?.login} : ${addCommentResponse?.html_url}`);
-                                    await this.modify.getUiController().updateModalView(addIssueCommentModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                                    return await this.modify.getUiController().openSurfaceView(addIssueCommentModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                                 }
                             }
                         }
-                        return context.getInteractionResponder().successResponse();
                     }
                     break;
                 }
