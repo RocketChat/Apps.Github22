@@ -113,8 +113,8 @@ export class ExecuteViewSubmitHandler {
                                 }
 
                             }
-                            const modal = await subscriptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context });
-                            await this.modify.getUiController().updateModalView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
+                            const modal = await subscriptionsModal({ modify: this.modify, read: this.read, persistence: this.persistence, http: this.http, uikitcontext: context, id: this.app.getID() });
+                            await this.modify.getUiController().updateSurfaceView(modal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                             return context.getInteractionResponder().successResponse();
                         }
                         break;

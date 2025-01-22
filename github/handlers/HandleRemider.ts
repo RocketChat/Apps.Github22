@@ -32,10 +32,11 @@ export async function handleReminder(
                 persistence: persistence,
                 http: http,
                 slashcommandcontext: context,
+                id: app.getID(),
             });
             await modify
                 .getUiController()
-                .openModalView(
+                .openSurfaceView(
                     modal,
                     { triggerId },
                     context.getSender()
@@ -77,10 +78,11 @@ export async function ManageReminders(
                 persistence: persistence,
                 http: http,
                 slashcommandcontext: context,
+                id: app.getID(),
             });
             await modify
                 .getUiController()
-                .openModalView(modal, { triggerId }, context.getSender());
+                .openSurfaceView(modal, { triggerId }, context.getSender());
         } else {
             console.log("Invalid Trigger ID !");
         }

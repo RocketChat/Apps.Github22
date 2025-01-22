@@ -410,10 +410,10 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        id: this.app.getID(),
                     });
-                    return context
-                        .getInteractionResponder()
-                        .openModalViewResponse(addSubscriptionModal);
+                    const triggerId = context.getInteractionData().triggerId;
+                    await this.modify.getUiController().openSurfaceView(addSubscriptionModal, { triggerId }, context.getInteractionData().user);
                 }
                 case ModalsEnum.OPEN_DELETE_SUBSCRIPTIONS_MODAL: {
                     const addSubscriptionModal = await deleteSubscriptionsModal(
@@ -423,11 +423,10 @@ export class ExecuteBlockActionHandler {
                             persistence: this.persistence,
                             http: this.http,
                             uikitcontext: context,
+                            id: this.app.getID(),
                         },
                     );
-                    return context
-                        .getInteractionResponder()
-                        .openModalViewResponse(addSubscriptionModal);
+                    await this.modify.getUiController().openSurfaceView(addSubscriptionModal, {triggerId: context.getInteractionData().triggerId}, context.getInteractionData().user)
                 }
                 case ModalsEnum.DELETE_SUBSCRIPTION_ACTION: {
                     let { user, room } = await context.getInteractionData();
@@ -533,8 +532,9 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        id: this.app.getID()
                     });
-                    await this.modify.getUiController().updateModalView(
+                    await this.modify.getUiController().updateSurfaceView(
                         modal,
                         {
                             triggerId: context.getInteractionData().triggerId,
@@ -550,8 +550,9 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        id: this.app.getID(),
                     });
-                    await this.modify.getUiController().updateModalView(
+                    await this.modify.getUiController().updateSurfaceView(
                         modal,
                         {
                             triggerId: context.getInteractionData().triggerId,
@@ -1627,11 +1628,10 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        id: this.app.getID(),
                     });
 
-                    return context
-                        .getInteractionResponder()
-                        .openModalViewResponse(opensubscriptionsModal);
+                    await this.modify.getUiController().updateSurfaceView(opensubscriptionsModal, { triggerId: context.getInteractionData().triggerId }, context.getInteractionData().user);
                 }
 
                 case ModalsEnum.TRIGGER_NEW_ISSUE_MODAL: {
@@ -1709,11 +1709,19 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        id: this.app.getID(),
                     });
+                    const triggerId = context.getInteractionData().triggerId;
+                    if (triggerId) {
+                        await this.modify
+                            .getUiController()
+                            .openSurfaceView(
+                                updatedReminderModal,
+                                { triggerId },
+                                context.getInteractionData().user,
+                            );
+                    }
 
-                    return context
-                        .getInteractionResponder()
-                        .updateModalViewResponse(updatedReminderModal);
                 }
             }
         } catch (error) {
