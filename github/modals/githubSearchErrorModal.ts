@@ -3,6 +3,7 @@ import {
     IModify,
     IPersistence,
     IRead,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit/blocks";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
@@ -14,6 +15,7 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
 
 export async function githubSearchErrorModal({
@@ -22,37 +24,42 @@ export async function githubSearchErrorModal({
     read,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
     errorMessage?: string;
     modify: IModify;
     read: IRead;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.GITHUB_SEARCH_ERROR_VIEW;
 
-    const block = modify.getCreator().getBlockBuilder();
- 
-    block.addSectionBlock({
-        text: {
-            text: `🤖 GitHub Search Error : ${errorMessage}`,
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            text: AppEnum.DEFAULT_TITLE,
             type: TextObjectType.MARKDOWN,
         },
-    });
-        
-    
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: AppEnum.DEFAULT_TITLE,
-        },
-        close: block.newButtonElement({
+        blocks: [{
+            type: 'section',
             text: {
-                type: TextObjectType.PLAINTEXT,
+                type: TextObjectType.MARKDOWN,
+                text: `🤖 GitHub Search Error : ${errorMessage}`
+            }
+        }],
+        close: {
+            type: 'button',
+            text: {
+                type: 'plain_text',
                 text: "Close",
             },
-        }),
-        blocks: block.getBlocks(),
+            actionId: '',
+            blockId: '',
+            appId: id,
+        }
     };
+
+    return modal;
 }

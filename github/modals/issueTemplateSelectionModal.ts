@@ -3,6 +3,7 @@ import {
     IModify,
     IPersistence,
     IRead,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit/blocks";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
@@ -14,7 +15,9 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 
 export async function issueTemplateSelectionModal({
     data,
@@ -24,6 +27,7 @@ export async function issueTemplateSelectionModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
     data?;
     modify: IModify;
@@ -32,10 +36,9 @@ export async function issueTemplateSelectionModal({
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.ISSUE_TEMPLATE_SELECTION_VIEW;
-
-    const block = modify.getCreator().getBlockBuilder();
 
     const room =
         slashcommandcontext?.getRoom() ||
@@ -44,66 +47,92 @@ export async function issueTemplateSelectionModal({
         slashcommandcontext?.getSender() ||
         uikitcontext?.getInteractionData().user;
 
-    if (user?.id && data?.repository && data?.templates?.length) {
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            type: TextObjectType.PLAINTEXT,
+            text: ModalsEnum.NEW_ISSUE_TITLE,
+        },
+        blocks: [],
+        close: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Close",
+            },
+            appId: id,
+            blockId: "",
+            actionId: "",
+        },
+    };
 
+    let blocks: LayoutBlock[] = [];
+
+    if (user?.id && data?.repository && data?.templates?.length) {
         let repositoryName = data.repository as string;
         let templates = data.templates as Array<any>;
-        block.addSectionBlock({
-            text: {
-                text: `Choose Issue Template for ${repositoryName}`,
-                type: TextObjectType.PLAINTEXT,
-            },
-        });
 
-        block.addDividerBlock();
+        blocks.push(
+            {
+                type: "section",
+                text: {
+                    text: `Choose Issue Template for ${repositoryName}`,
+                    type: TextObjectType.PLAINTEXT,
+                },
+            },
+            {
+                type: "divider",
+            },
+        );
 
         let index = 1;
 
         for (let template of templates) {
-            block.addSectionBlock({
+
+            blocks.push({
+                type: 'section',
                 text: {
                     text: `${template.name}`,
                     type: TextObjectType.PLAINTEXT,
                 },
-                accessory: block.newButtonElement({
-                    actionId: ModalsEnum.ISSUE_TEMPLATE_SELECTION_ACTION,
+                accessory : {
+                    type: 'button',
                     text: {
                         text: ModalsEnum.ISSUE_TEMPLATE_SELECTION_LABEL,
                         type: TextObjectType.PLAINTEXT,
                     },
                     value: `${repositoryName} ${template.download_url}`,
-                }),
-            });
+                    actionId: ModalsEnum.ISSUE_TEMPLATE_SELECTION_ACTION,
+                    blockId: '',
+                    appId: id,
+                }
+            })
             index++;
         }
-        block.addSectionBlock({
+
+        blocks.push({
+            type: 'section',
             text: {
-                text: `Blank Template`,
+                text: 'Blank Template',
                 type: TextObjectType.PLAINTEXT,
             },
-            accessory: block.newButtonElement({
-                actionId: ModalsEnum.ISSUE_TEMPLATE_SELECTION_ACTION,
+            accessory : {
+                type: 'button',
                 text: {
                     text: ModalsEnum.ISSUE_TEMPLATE_SELECTION_LABEL,
                     type: TextObjectType.PLAINTEXT,
                 },
                 value: `${repositoryName} ${ModalsEnum.BLANK_GITHUB_TEMPLATE}`,
-            }),
-        });
+                actionId: ModalsEnum.ISSUE_TEMPLATE_SELECTION_ACTION,
+                blockId: '',
+                appId: id,
+            }
+        })
     }
 
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.NEW_ISSUE_TITLE,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Close",
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+    modal.blocks = blocks;
+
+    return modal;
 }

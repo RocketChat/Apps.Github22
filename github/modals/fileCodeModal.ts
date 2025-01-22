@@ -3,6 +3,7 @@ import {
     IModify,
     IPersistence,
     IRead,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit/blocks";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
@@ -14,8 +15,9 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
-
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 
 export async function fileCodeModal({
     data,
@@ -25,6 +27,7 @@ export async function fileCodeModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
     data;
     modify: IModify;
@@ -33,10 +36,9 @@ export async function fileCodeModal({
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.CODE_VIEW;
-
-    const block = modify.getCreator().getBlockBuilder();
 
     const room =
         slashcommandcontext?.getRoom() ||
@@ -45,13 +47,40 @@ export async function fileCodeModal({
         slashcommandcontext?.getSender() ||
         uikitcontext?.getInteractionData().user;
 
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            text: AppEnum.DEFAULT_TITLE,
+            type: "plain_text",
+        },
+        blocks: [],
+        close: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Close",
+            },
+            appId: id,
+            blockId: "submit_block",
+            actionId: "",
+        },
+    };
+
+    let blocks: LayoutBlock[] = [];
     if (user?.id) {
         let roomId;
         const pullRawData = await http.get(data.value);
         const pullData = pullRawData.content;
-        block.addSectionBlock({
-            text: { text: `${pullData}`, type: TextObjectType.MARKDOWN },
-        });
+
+        blocks.push(
+            {
+                type: "section",
+                text: { text: `${pullData}`, type: TextObjectType.MARKDOWN },
+            },
+            { type: "divider" },
+        );
 
         // shows indentations in input blocks but not inn section block
         // block.addInputBlock({
@@ -65,20 +94,6 @@ export async function fileCodeModal({
         // });
     }
 
-    block.addDividerBlock();
-
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: AppEnum.DEFAULT_TITLE,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Close",
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+    modal.blocks = blocks;
+    return modal;
 }

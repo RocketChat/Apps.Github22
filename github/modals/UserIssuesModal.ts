@@ -3,13 +3,18 @@ import {
     IRead,
     IPersistence,
     IHttp,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
+import {
+    RocketChatAssociationModel,
+    RocketChatAssociationRecord,
+} from "@rocket.chat/apps-engine/definition/metadata";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import {
     ButtonStyle,
     TextObjectType,
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
 import { ModalsEnum } from "../enum/Modals";
@@ -19,6 +24,7 @@ import {
     getInteractionRoomData,
     storeInteractionRoomData,
 } from "../persistance/roomInteraction";
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 
 export async function userIssuesModal({
     filter,
@@ -29,6 +35,7 @@ export async function userIssuesModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
     filter: {
         filter: string;
@@ -42,9 +49,9 @@ export async function userIssuesModal({
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.USER_ISSUE_VIEW;
-    const block = modify.getCreator().getBlockBuilder();
     const room =
         slashcommandcontext?.getRoom() ||
         uikitcontext?.getInteractionData().room;
@@ -52,6 +59,17 @@ export async function userIssuesModal({
         slashcommandcontext?.getSender() ||
         uikitcontext?.getInteractionData().user;
 
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            type: "plain_text",
+            text: "Your Issues",
+        },
+        blocks: [],
+    };
+
+    let blocks: LayoutBlock[] = [];
     if (user?.id) {
         let roomId;
         if (room?.id) {
@@ -61,7 +79,7 @@ export async function userIssuesModal({
             roomId = (
                 await getInteractionRoomData(
                     read.getPersistenceReader(),
-                    user.id
+                    user.id,
                 )
             ).roomId;
         }
@@ -73,12 +91,14 @@ export async function userIssuesModal({
         http,
         userInfo.username,
         access_token,
-        filter
+        filter,
     );
 
-    block.addActionsBlock({
+    blocks.push({
+        type: "actions",
         elements: [
-            block.newStaticSelectElement({
+            {
+                type: "static_select",
                 placeholder: {
                     text: "Select an Issue Filter",
                     type: TextObjectType.PLAINTEXT,
@@ -108,19 +128,25 @@ export async function userIssuesModal({
                         },
                     },
                 ],
-            }),
+                blockId: "",
+                appId: id,
+            },
         ],
     });
 
-    block.addActionsBlock({
+    blocks.push({
+        type: "actions",
         elements: [
-            block.newStaticSelectElement({
+            {
+                type: "static_select",
                 placeholder: {
                     text: "Select Issues State",
                     type: TextObjectType.PLAINTEXT,
                 },
                 initialValue: filter.state,
                 actionId: ModalsEnum.SWITCH_ISSUE_STATE,
+                blockId: "",
+                appId: id,
                 options: [
                     {
                         value: ModalsEnum.ISSUE_STATE_OPEN,
@@ -128,7 +154,6 @@ export async function userIssuesModal({
                             text: "Open Issues",
                             type: TextObjectType.PLAINTEXT,
                         },
-
                     },
                     {
                         value: ModalsEnum.ISSUE_STATE_CLOSED,
@@ -138,26 +163,29 @@ export async function userIssuesModal({
                         },
                     },
                 ],
-            }),
-            block.newStaticSelectElement({
-                actionId: ModalsEnum.SWITCH_ISSUE_SORT,
+            },
+            {
+                type: "static_select",
                 placeholder: {
                     text: "Sort Issues By...",
                     type: TextObjectType.PLAINTEXT,
                 },
-                initialValue: filter.sort,
+                initialValue: filter.state,
+                actionId: ModalsEnum.SWITCH_ISSUE_STATE,
+                blockId: "",
+                appId: id,
                 options: [
-                    {
-                        value: ModalsEnum.ISSUE_SORT_CREATED,
-                        text: {
-                            text: "Created",
-                            type: TextObjectType.PLAINTEXT,
-                        },
-                    },
                     {
                         value: ModalsEnum.ISSUE_SORT_UPDATED,
                         text: {
                             text: "Updated",
+                            type: TextObjectType.PLAINTEXT,
+                        },
+                    },
+                    {
+                        value: ModalsEnum.ISSUE_STATE_CLOSED,
+                        text: {
+                            text: "Closed Issues",
                             type: TextObjectType.PLAINTEXT,
                         },
                     },
@@ -169,123 +197,154 @@ export async function userIssuesModal({
                         },
                     },
                 ],
-            }),
+            },
         ],
     });
 
     if (repoInfo.length == 0) {
-        block.addContextBlock({
+        blocks.push({
+            type: "context",
             elements: [
-                block.newPlainTextObject(
-                    "Sorry, there are no issues to display"
-                ),
+                {
+                    type: "plain_text",
+                    text: "Sorry, there are no issues to display",
+                },
             ],
         });
     } else {
-        repoInfo.map(
-            (value) => {
-                const repoURL = value.repo_url ?? "";
-                const repoName = repoURL.substring(29, repoURL.length);
-                block.addContextBlock({
-                    elements: [
-                        block.newImageElement({
-                            imageUrl: OcticonIcons.REPOSITORY,
-                            altText: "REPO_ICON",
-                        }),
-                        block.newPlainTextObject(repoName, false),
-                        block.newImageElement({
-                            imageUrl: value.user_avatar ?? "",
-                            altText: "User Image",
-                        }),
-                        block.newPlainTextObject(value.user_login ?? ""),
-                    ],
-                });
-                block.addSectionBlock({
-                    text: {
-                        text: `\`#${value.number}\` ${value.title}` ?? "None",
-                        type: TextObjectType.MARKDOWN,
-                    },
-                });
-                const lastUpdated = new Date(value.last_updated_at ?? "");
-                block.addContextBlock({
-                    elements: [
-                        block.newImageElement({
-                            imageUrl: OcticonIcons.COMMENTS,
-                            altText: "Comments",
-                        }),
-                        block.newPlainTextObject(
-                            `${value.comments}`,
-                            false
-                        ),
-                        block.newImageElement({
-                            imageUrl: OcticonIcons.ISSUE_OPEN,
-                            altText: "Assignees Icon",
-                        }),
-                        block.newPlainTextObject(
-                            value.assignees ? (value.assignees.length == 0
-                                ? "No Assignees"
-                                : `${value.assignees.length} Assignees`) : ""
-                        ),
-                        block.newImageElement({
-                            imageUrl:
-                                value.state == "open"
-                                    ? OcticonIcons.ISSUE_OPEN
-                                    : OcticonIcons.ISSUE_CLOSED,
-                            altText: "State",
-                        }),
-                        block.newPlainTextObject(`${value.state}`),
-                        block.newImageElement({
-                            imageUrl: OcticonIcons.PENCIL,
-                            altText: "Last Update At",
-                        }),
-                        block.newPlainTextObject(
-                            `Last Updated at ${lastUpdated.toUTCString()}`
-                        ),
-                    ],
-                });
+        repoInfo.map((value) => {
+            const repoURL = value.repo_url ?? "";
+            const repoName = repoURL.substring(29, repoURL.length);
 
-                block.addActionsBlock({
-                    elements: [
-                        block.newButtonElement({
-                            actionId: ModalsEnum.SHARE_ISSUE_ACTION,
-                            value: `${repoName}, ${value.number}`,
-                            text: {
-                                text: "Share Issue",
-                                type: TextObjectType.PLAINTEXT,
-                            },
-                            style: ButtonStyle.PRIMARY,
-                        }),
-                        block.newButtonElement({
-                            actionId: ModalsEnum.TRIGGER_ISSUE_DISPLAY_MODAL,
-                            value: `${repoName}, ${value.number}`,
-                            text: {
-                                text: "Open Issue",
-                                type: TextObjectType.PLAINTEXT,
-                            },
-                            style: ButtonStyle.PRIMARY,
-                        }),
-                        block.newButtonElement({
-                            actionId: ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE_PROFILE,
-                            value: `${repoName}, ${value.number}`,
-                            text: {
-                                text: "Assign Issue",
-                                type: TextObjectType.PLAINTEXT,
-                            },
-                            style: ButtonStyle.PRIMARY,
-                        }),
-                    ],
-                });
-                block.addDividerBlock();
-            }
-        );
+            blocks.push({
+                type: "context",
+                elements: [
+                    {
+                        type: "image",
+                        imageUrl: OcticonIcons.REPOSITORY,
+                        altText: "REPO_ICON",
+                    },
+                    {
+                        type: "plain_text",
+                        text: repoName,
+                    },
+                    {
+                        type: "image",
+                        imageUrl: value.user_avatar ?? "",
+                        altText: "User Image",
+                    },
+                    {
+                        type: "plain_text",
+                        text: value.user_login ?? "",
+                    },
+                ],
+            });
+
+            blocks.push({
+                type: "section",
+                text: {
+                    text: `\`#${value.number}\` ${value.title}` ?? "None",
+                    type: TextObjectType.MARKDOWN,
+                },
+            });
+            const lastUpdated = new Date(value.last_updated_at ?? "");
+
+            blocks.push({
+                type: "context",
+                elements: [
+                    {
+                        type: "image",
+                        imageUrl: OcticonIcons.COMMENTS,
+                        altText: "Comments",
+                    },
+                    {
+                        type: "plain_text",
+                        text: `${value.comments}`,
+                    },
+                    {
+                        type: "image",
+                        imageUrl: OcticonIcons.ISSUE_OPEN,
+                        altText: "Assignees Icon",
+                    },
+                    {
+                        type: "plain_text",
+                        text: value.assignees
+                            ? value.assignees.length == 0
+                                ? "No Assignees"
+                                : `${value.assignees.length} Assignees`
+                            : "",
+                    },
+                    {
+                        type: "image",
+                        imageUrl:
+                            value.state == "open"
+                                ? OcticonIcons.ISSUE_OPEN
+                                : OcticonIcons.ISSUE_CLOSED,
+                        altText: "State",
+                    },
+                    {
+                        type: 'plain_text',
+                        text: `${value.state}`,
+                    },
+                    {
+                        type: 'image',
+                        imageUrl: OcticonIcons.PENCIL,
+                        altText: "Last Update At",
+                    },
+                    {
+                        type: 'plain_text',
+                        text: `Last Updated at ${lastUpdated.toUTCString()}`,
+                    }
+                ],
+            });
+
+            blocks.push({
+                type: 'actions',
+                elements: [
+                    {
+                        type: 'button',
+                        actionId: ModalsEnum.SHARE_ISSUE_ACTION,
+                        value: `${repoName}, ${value.number}`,
+                        text: {
+                            text: "Share Issue",
+                            type: TextObjectType.PLAINTEXT,
+                        },
+                        style: ButtonStyle.PRIMARY,
+                        blockId: '',
+                        appId: id,
+                    },
+                    {
+                        type: 'button',
+                        actionId: ModalsEnum.TRIGGER_ISSUE_DISPLAY_MODAL,
+                        value: `${repoName}, ${value.number}`,
+                        text: {
+                            text: "Open Issue",
+                            type: TextObjectType.PLAINTEXT,
+                        },
+                        style: ButtonStyle.PRIMARY,
+                        blockId: '',
+                        appId: id,
+                    },
+                    {
+                        type: 'button',
+                        actionId: ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE_PROFILE,
+                        value: `${repoName}, ${value.number}`,
+                        text: {
+                            text: "Assign Issue",
+                            type: TextObjectType.PLAINTEXT,
+                        },
+                        style: ButtonStyle.PRIMARY,
+                        blockId: '',
+                        appId: id,
+                    },
+                ]
+            })
+            blocks.push({
+                type: 'divider',
+            })
+        });
     }
 
-    return {
-        id: viewId,
-        title: {
-            text: "Your Issues",
-            type: TextObjectType.PLAINTEXT,
-        },
-        blocks: block.getBlocks(),
-    };
+    modal.blocks = blocks;
+    return modal;
 }

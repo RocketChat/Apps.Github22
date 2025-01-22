@@ -31,9 +31,10 @@ export async function handleUserProfileRequest(
                 read: read,
                 persistence: persistence,
                 http: http,
-                slashcommandcontext: context
+                slashcommandcontext: context,
+                id: app.getID(),
             });
-            await modify.getUiController().openModalView(
+            await modify.getUiController().openSurfaceView(
                 modal,
                 {triggerId},
                 context.getSender()

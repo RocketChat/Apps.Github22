@@ -27,6 +27,7 @@ import { HandleInvalidRepoName } from "../handlers/HandleInvalidRepoName";
 import { handleMainModal } from "../handlers/MainModalHandler";
 import { createReminder } from "../handlers/CreateReminder";
 import { ManageReminders, handleReminder } from "../handlers/HandleRemider";
+import { getAccessTokenForUser } from "../persistance/auth";
 
 export class CommandUtility implements ExecutorProps {
     sender: IUser;
@@ -264,10 +265,12 @@ export class CommandUtility implements ExecutorProps {
         }
 
     private async handleTriParamCommand() {
+        let accessToken = await getAccessTokenForUser(this.read, this.sender, this.app.oauth2Config);
         const data = {
             repository: this.command[0],
             query: this.command[1],
             number: this.command[2],
+            accessToken: accessToken,
         };
 
         const isValidRepo = await HandleInvalidRepoName(
@@ -293,10 +296,11 @@ export class CommandUtility implements ExecutorProps {
                 persistence: this.persistence,
                 http: this.http,
                 slashcommandcontext: this.context,
+                id: this.app.getID(),
             });
             await this.modify
                 .getUiController()
-                .openModalView(modal, { triggerId }, this.context.getSender());
+                .openSurfaceView(modal, { triggerId }, this.context.getSender());
         } else {
             console.log("invalid Trigger ID !");
         }

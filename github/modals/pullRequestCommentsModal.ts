@@ -3,6 +3,7 @@ import {
     IModify,
     IPersistence,
     IRead,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit/blocks";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
@@ -13,9 +14,14 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
-import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
+import {
+    storeInteractionRoomData,
+    getInteractionRoomData,
+} from "../persistance/roomInteraction";
 import { parseDate, parseTime } from "../helpers/dateTime";
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 
 export async function pullRequestCommentsModal({
     data,
@@ -25,6 +31,7 @@ export async function pullRequestCommentsModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
     data?;
     modify: IModify;
@@ -33,10 +40,9 @@ export async function pullRequestCommentsModal({
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.PULL_REQUEST_COMMENTS_MODAL_VIEW;
-
-    const block = modify.getCreator().getBlockBuilder();
 
     const room =
         slashcommandcontext?.getRoom() ||
@@ -45,6 +51,28 @@ export async function pullRequestCommentsModal({
         slashcommandcontext?.getSender() ||
         uikitcontext?.getInteractionData().user;
 
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            text: ModalsEnum.PULL_REQUEST_COMMENT_VIEW_TITLE,
+            type: "plain_text",
+        },
+        blocks: [],
+        close: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Close",
+            },
+            appId: id,
+            actionId: '',
+            blockId: '',
+        },
+    };
+
+    let blocks: LayoutBlock[] = [];
     if (user?.id) {
         let roomId;
         if (room?.id) {
@@ -53,115 +81,123 @@ export async function pullRequestCommentsModal({
         } else {
             roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
         }
-        let pullData = data?.pullData;
-        let pullRequestComments = data?.pullRequestComments;
+        const pullData = data?.pullData;
+        const pullRequestComments = data?.pullRequestComments;
 
-        block.addSectionBlock({
+        blocks.push({
+            type: "section",
             text: {
                 text: `*${pullData?.title}*`,
                 type: TextObjectType.MARKDOWN,
             },
-            accessory: block.newButtonElement({
+            accessory: {
+                type: "button",
                 actionId: ModalsEnum.VIEW_FILE_ACTION,
                 text: {
                     text: ModalsEnum.VIEW_DIFFS_ACTION_LABEL,
                     type: TextObjectType.PLAINTEXT,
                 },
                 value: pullData?.diff_url,
-            }),
+                blockId: '',
+                appId: id,
+            },
         });
-        block.addContextBlock({
+
+        blocks.push({
+            type: "context",
             elements: [
-                block.newPlainTextObject(`Author: ${pullData?.user?.login} | `),
-                block.newPlainTextObject(`State : ${pullData?.state} | `),
-                block.newPlainTextObject(`Mergeable : ${pullData?.mergeable} |` ),
-                block.newPlainTextObject(`Total Comments : ${pullRequestComments?.length} |` ),
+                { type: "plain_text", text: `Author: ${pullData?.user?.login} | ` },
+                { type: "plain_text", text: `State: ${pullData?.state} | ` },
+                { type: "plain_text", text: `Mergeable: ${pullData?.mergeable} | ` },
+                { type: "plain_text", text: `Total Comments: ${pullRequestComments?.length} |` },
             ],
         });
-        
-        block.addActionsBlock({
+
+        blocks.push({
+            type: "actions",
             elements: [
-                block.newButtonElement({
+                {
+                    type: "button",
                     actionId: ModalsEnum.COMMENT_PR_ACTION,
                     text: {
                         text: ModalsEnum.COMMENT_PR_LABEL,
                         type: TextObjectType.PLAINTEXT,
                     },
                     value: `${data?.repo} ${data?.pullNumber}`,
-                }),
-                block.newButtonElement({
+                    appId: id,
+                    blockId: '',
+                },
+                {
+                    type: "button",
                     text: {
                         text: AppEnum.DEFAULT_TITLE,
                         type: TextObjectType.PLAINTEXT,
                     },
-                    url: pullData ?.html_url
-                }),
+                    url: pullData?.html_url,
+                    appId: id,
+                    blockId: '',
+                    actionId: '',
+                },
             ],
         });
 
-        block.addDividerBlock();
+        blocks.push({ type: "divider" });
 
-        if(pullRequestComments?.length === 0){
-            block.addSectionBlock({
+        if (pullRequestComments?.length === 0) {
+            blocks.push({
+                type: "section",
                 text: {
-                    text: `📝 No comments so far !`,
+                    text: "📝 No comments so far!",
                     type: TextObjectType.MARKDOWN,
                 },
             });
-        }
+        } else {
+            for (const comment of pullRequestComments) {
+                const username = comment?.user?.login;
+                const userProfileUrl = comment?.user?.html_url;
+                const commentBody = comment?.body;
+                const date = parseDate(comment?.created_at);
+                const time = parseTime(comment?.created_at);
 
-        let index = 1;
-
-        for (let comment of pullRequestComments) {
-            let username = comment?.user?.login;
-            let avatarUrl = comment?.user?.avatar_url;
-            let commentBody = comment?.body;
-            let userProfileUrl = comment?.user?.html_url
-
-            block.addSectionBlock({
-                text: {
-                    text: `*@${username}*`,
-                    type: TextObjectType.MARKDOWN,
-                },
-                accessory: block.newButtonElement({
-                    actionId: ModalsEnum.VIEW_USER_ACTION,
+                blocks.push({
+                    type: "section",
                     text: {
-                        text: ModalsEnum.VIEW_USER_LABEL,
-                        type: TextObjectType.PLAINTEXT,
+                        text: `*@${username}*`,
+                        type: TextObjectType.MARKDOWN,
                     },
-                    url:userProfileUrl
-                }),
-            });
-            block.addSectionBlock({
-                text: {
-                    text: `${commentBody}`,
-                    type: TextObjectType.MARKDOWN,
-                },
-            });
-            let date = parseDate(comment?.created_at);
-            let time = parseTime(comment?.created_at);
-            block.addContextBlock({
-                elements: [
-                    block.newPlainTextObject(`Created at : ${date} ${time} UTC`),
-                ],
-            });
-            block.addDividerBlock();
-            index++;
+                    accessory: {
+                        type: "button",
+                        actionId: ModalsEnum.VIEW_USER_ACTION,
+                        text: {
+                            text: ModalsEnum.VIEW_USER_LABEL,
+                            type: TextObjectType.PLAINTEXT,
+                        },
+                        url: userProfileUrl,
+                        appId: id,
+                        blockId: '',
+                    },
+                });
+
+                blocks.push({
+                    type: "section",
+                    text: {
+                        text: commentBody,
+                        type: TextObjectType.MARKDOWN,
+                    },
+                });
+
+                blocks.push({
+                    type: "context",
+                    elements: [
+                        { type: "plain_text", text: `Created at: ${date} ${time} UTC` },
+                    ],
+                });
+
+                blocks.push({ type: "divider" });
+            }
         }
     }
 
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.PULL_REQUEST_COMMENT_VIEW_TITLE,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Close",
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+    modal.blocks = blocks;
+    return modal;
 }

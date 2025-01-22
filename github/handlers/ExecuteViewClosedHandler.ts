@@ -33,8 +33,9 @@ export class ExecuteViewClosedHandler {
                     persistence: this.persistence,
                     http: this.http,
                     uikitcontext: context,
+                    id: this.app.getID(),
                 });
-                await this.modify.getUiController().updateModalView(
+                await this.modify.getUiController().updateSurfaceView(
                     modal,
                     {
                         triggerId: context.getInteractionData()
@@ -46,10 +47,10 @@ export class ExecuteViewClosedHandler {
             case ModalsEnum.SEARCH_RESULT_VIEW:{
                 const room = context.getInteractionData().room;
                 const user = context.getInteractionData().user;
-        
+
                 if (user?.id) {
                     let roomId;
-            
+
                     if (room?.id) {
                         roomId = room.id;
                         await storeInteractionRoomData(this.persistence, user.id, roomId);
@@ -69,7 +70,7 @@ export class ExecuteViewClosedHandler {
             case ModalsEnum.ISSUE_LIST_VIEW: {
                 const room = context.getInteractionData().room;
                 const user = context.getInteractionData().user;
-        
+
                 if (user?.id) {
                     let roomId;
                     if (room?.id) {

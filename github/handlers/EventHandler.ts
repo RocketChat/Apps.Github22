@@ -177,7 +177,7 @@ export async function UnsubscribeAllEvents(
             if (!isValidRepo) {
                 return;
             }
-            
+
             let events: Array<string> = [
                 "pull_request",
                 "push",
@@ -287,10 +287,11 @@ export async function ManageSubscriptions(
                 persistence: persistence,
                 http: http,
                 slashcommandcontext: context,
+                id: app.getID(),
             });
             await modify
                 .getUiController()
-                .openModalView(modal, { triggerId }, context.getSender());
+                .openSurfaceView(modal, { triggerId }, context.getSender());
         } else {
             console.log("Invalid Trigger ID !");
         }

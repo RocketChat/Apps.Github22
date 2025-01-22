@@ -3,6 +3,7 @@ import {
     IModify,
     IPersistence,
     IRead,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit/blocks";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
@@ -14,6 +15,7 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { IGitHubSearchResultData } from "../definitions/searchResultData";
 import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
@@ -26,6 +28,7 @@ export async function githubSearchResultShareModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
     data: IGitHubSearchResultData;
     modify: IModify;
@@ -34,10 +37,9 @@ export async function githubSearchResultShareModal({
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.SEARCH_RESULT_SHARE_VIEW;
-
-    const block = modify.getCreator().getBlockBuilder();
 
     const room =
         slashcommandcontext?.getRoom() ||
@@ -45,6 +47,36 @@ export async function githubSearchResultShareModal({
     const user =
         slashcommandcontext?.getSender() ||
         uikitcontext?.getInteractionData().user;
+
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            text: ModalsEnum.SEARCH_RESULT_SHARE_VIEW_TITLE,
+            type: "plain_text",
+        },
+        blocks: [],
+        submit: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                text: "Send",
+            },
+            appId: id,
+            blockId: "submit_block",
+            actionId: "submit_action",
+        },
+        close: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                text: "Close",
+            },
+            appId: id,
+            blockId: "close_block",
+            actionId: "close_action",
+        },
+    };
 
     if (user?.id) {
         let roomId;
@@ -69,40 +101,28 @@ export async function githubSearchResultShareModal({
                 }
             }
         }
-        
-        block.addInputBlock({
-            blockId: ModalsEnum.MULTI_SHARE_SEARCH_INPUT,
-            label: { 
-                text: ModalsEnum.MULTI_SHARE_SEARCH_INPUT_LABEL, 
-                type: TextObjectType.MARKDOWN 
+
+        modal.blocks = [
+            {
+                type: "input",
+                label: {
+                    type: 'plain_text',
+                    text: ModalsEnum.MULTI_SHARE_SEARCH_INPUT_LABEL,
+                },
+                element: {
+                    type: "plain_text_input",
+                    appId: id,
+                    actionId: ModalsEnum.MULTI_SHARE_SEARCH_INPUT_ACTION,
+                    blockId: ModalsEnum.MULTI_SHARE_SEARCH_INPUT,
+                    initialValue: `${finalString}`,
+                    multiline: true,
+                },
             },
-            element: block.newPlainTextInputElement({
-                initialValue : `${finalString}`,
-                multiline:true,
-                actionId: ModalsEnum.MULTI_SHARE_SEARCH_INPUT_ACTION,
-            })
-        });
+            {
+                type: "divider",
+            },
+        ];
     }
 
-    block.addDividerBlock();
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.SEARCH_RESULT_SHARE_VIEW_TITLE,
-        },
-        submit: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Send",
-            },
-        }),
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Close",
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+    return modal;
 }

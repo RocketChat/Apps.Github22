@@ -3,6 +3,7 @@ import {
     IModify,
     IPersistence,
     IRead,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit/blocks";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
@@ -10,11 +11,13 @@ import { ModalsEnum } from "../enum/Modals";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import {
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import {
     storeInteractionRoomData,
     getInteractionRoomData,
 } from "../persistance/roomInteraction";
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 
 export async function mergePullRequestModal({
     data,
@@ -24,23 +27,56 @@ export async function mergePullRequestModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
-    data?:any,
+    data?: any;
     modify: IModify;
     read: IRead;
     persistence: IPersistence;
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.MERGE_PULL_REQUEST_VIEW;
-    const block = modify.getCreator().getBlockBuilder();
     const room =
         slashcommandcontext?.getRoom() ||
         uikitcontext?.getInteractionData().room;
     const user =
         slashcommandcontext?.getSender() ||
         uikitcontext?.getInteractionData().user;
+
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            text: ModalsEnum.MERGE_PULL_REQUEST_VIEW_TITLE,
+            type: "plain_text",
+        },
+        blocks: [],
+        submit: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                text: "Merge",
+            },
+            appId: id,
+            blockId: "submit_block",
+            actionId: "submit_action",
+        },
+        close: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                text: "Close",
+            },
+            appId: id,
+            blockId: "close_block",
+            actionId: "close_action",
+        },
+    };
+
+    let blocks: LayoutBlock[] = [];
 
     if (user?.id) {
         let roomId;
@@ -52,7 +88,7 @@ export async function mergePullRequestModal({
             roomId = (
                 await getInteractionRoomData(
                     read.getPersistenceReader(),
-                    user.id
+                    user.id,
                 )
             ).roomId;
         }
@@ -60,87 +96,103 @@ export async function mergePullRequestModal({
         // shows indentations in input blocks but not inn section block
         let defualtPullNumberInput = "";
         let defaultRepoInfoInput = "";
-        if(data?.repo?.length){
+        if (data?.repo?.length) {
             defaultRepoInfoInput = data?.repo as string;
-        } 
-        if(data?.pullNumber?.length){
+        }
+        if (data?.pullNumber?.length) {
             defualtPullNumberInput = data?.pullNumber as string;
-        } 
-        block.addInputBlock({
-            blockId: ModalsEnum.REPO_NAME_INPUT,
+        }
+
+        blocks.push({
+            type: "input",
             label: {
+                type: "plain_text",
                 text: ModalsEnum.REPO_NAME_LABEL,
-                type: TextObjectType.PLAINTEXT,
             },
-            element: block.newPlainTextInputElement({
+            element: {
+                type: "plain_text_input",
+                appId: id,
                 actionId: ModalsEnum.REPO_NAME_INPUT_ACTION,
+                blockId: ModalsEnum.REPO_NAME_INPUT,
                 placeholder: {
+                    type: "plain_text",
                     text: ModalsEnum.REPO_NAME_PLACEHOLDER,
-                    type: TextObjectType.PLAINTEXT,
                 },
-                initialValue:defaultRepoInfoInput
-            }),
+                multiline: false,
+                initialValue: defaultRepoInfoInput,
+            },
         });
 
-        block.addInputBlock({
-            blockId: ModalsEnum.PULL_REQUEST_NUMBER_INPUT,
+        blocks.push({
+            type: "input",
             label: {
+                type: "plain_text",
                 text: ModalsEnum.PULL_REQUEST_NUMBER_LABEL,
-                type: TextObjectType.PLAINTEXT,
             },
-            element: block.newPlainTextInputElement({
+            element: {
+                type: "plain_text_input",
+                appId: id,
                 actionId: ModalsEnum.PULL_REQUEST_NUMBER_INPUT_ACTION,
+                blockId: ModalsEnum.PULL_REQUEST_NUMBER_INPUT,
                 placeholder: {
+                    type: "plain_text",
                     text: ModalsEnum.PULL_REQUEST_NUMBER_INPUT_PLACEHOLDER,
-                    type: TextObjectType.PLAINTEXT,
                 },
-                initialValue:defualtPullNumberInput
-            }),
+                multiline: false,
+                initialValue: defualtPullNumberInput,
+            },
         });
-
-        block.addInputBlock({
-            blockId: ModalsEnum.PULL_REQUEST_COMMIT_TITLE_INPUT,
+        blocks.push({
+            type: "input",
             label: {
+                type: "plain_text",
                 text: ModalsEnum.PULL_REQUEST_COMMIT_TITLE_LABEL,
-                type: TextObjectType.PLAINTEXT,
             },
-            element: block.newPlainTextInputElement({
+            element: {
+                type: "plain_text_input",
+                appId: id,
                 actionId: ModalsEnum.PULL_REQUEST_COMMIT_TITLE_ACTION,
+                blockId: ModalsEnum.PULL_REQUEST_COMMIT_TITLE_INPUT,
                 placeholder: {
+                    type: "plain_text",
                     text: ModalsEnum.PULL_REQUEST_COMMIT_TITLE_PLACEHOLDER,
-                    type: TextObjectType.PLAINTEXT,
                 },
-            }),
+                multiline: false,
+            },
+        });
+        blocks.push({
+            type: "input",
+            label: {
+                type: "plain_text",
+                text: ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_LABEL,
+            },
+            element: {
+                type: "plain_text_input",
+                appId: id,
+                actionId: ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_ACTION,
+                blockId: ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_INPUT,
+                placeholder: {
+                    type: "plain_text",
+                    text: ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_PLACEHOLDER,
+                },
+                multiline: true,
+            },
         });
 
-        block.addInputBlock({
-            blockId: ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_INPUT,
+        let newMultiStaticElemnt: any = [];
+
+        newMultiStaticElemnt.push();
+
+        blocks.push({
+            type: "input",
             label: {
-                text: ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_LABEL,
+                text: ModalsEnum.PULL_REQUEST_MERGE_METHOD_INPUT_LABEL,
                 type: TextObjectType.PLAINTEXT,
             },
-            element: block.newPlainTextInputElement({
-                actionId: ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_ACTION,
-                placeholder: {
-                    text: ModalsEnum.PULL_REQUEST_COMMIT_MESSAGE_PLACEHOLDER,
-                    type: TextObjectType.PLAINTEXT,
-                },
-                multiline:true
-            }),
-        });
-
-        let newMultiStaticElemnt = block.newStaticSelectElement({
-            actionId: ModalsEnum.PULL_REQUEST_MERGE_METHOD_OPTION,
-            options: [
-                {
-                    value: "rebase",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "Rebase",
-                        emoji: true,
-                    },
-                },
-                {
+            element: {
+                type: "static_select",
+                actionId: ModalsEnum.PULL_REQUEST_MERGE_METHOD_OPTION,
+                initialOption: {
                     value: "merge",
                     text: {
                         type: TextObjectType.PLAINTEXT,
@@ -148,52 +200,43 @@ export async function mergePullRequestModal({
                         emoji: true,
                     },
                 },
-                {
-                    value: "squash",
-                    text: {
-                        type: TextObjectType.PLAINTEXT,
-                        text: "Squash",
-                        emoji: true,
+                options: [
+                    {
+                        value: "rebase",
+                        text: {
+                            type: TextObjectType.PLAINTEXT,
+                            text: "Rebase",
+                            emoji: true,
+                        },
                     },
-                }
-            ],
-            placeholder: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Select Events",
+                    {
+                        value: "merge",
+                        text: {
+                            type: TextObjectType.PLAINTEXT,
+                            text: "Merge",
+                            emoji: true,
+                        },
+                    },
+                    {
+                        value: "squash",
+                        text: {
+                            type: TextObjectType.PLAINTEXT,
+                            text: "Squash",
+                            emoji: true,
+                        },
+                    },
+                ],
+                placeholder: {
+                    type: TextObjectType.PLAINTEXT,
+                    text: "Select Events",
+                },
+                blockId: ModalsEnum.PULL_REQUEST_MERGE_METHOD_INPUT,
+                appId: id,
             },
-        });
-
-        block.addInputBlock({
-            label: {
-                text: ModalsEnum.PULL_REQUEST_MERGE_METHOD_INPUT_LABEL,
-                type: TextObjectType.PLAINTEXT,
-            },
-            element: newMultiStaticElemnt,
-            blockId: ModalsEnum.PULL_REQUEST_MERGE_METHOD_INPUT,
         });
     }
 
-    block.addDividerBlock();
+    modal.blocks = blocks;
 
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.MERGE_PULL_REQUEST_VIEW_TITLE,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Close",
-            },
-        }),
-        submit: block.newButtonElement({
-            actionId: ModalsEnum.ADD_SUBSCRIPTION_ACTION,
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Merge",
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+    return modal;
 }

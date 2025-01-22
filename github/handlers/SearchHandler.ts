@@ -29,10 +29,11 @@ export async function handleSearch(
                 persistence: persistence,
                 http: http,
                 slashcommandcontext: context,
+                id: app.getID(),
             });
             await modify
                 .getUiController()
-                .openModalView(
+                .openSurfaceView(
                     modal,
                     { triggerId },
                     context.getSender()

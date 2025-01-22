@@ -3,6 +3,7 @@ import {
     IModify,
     IPersistence,
     IRead,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit/blocks";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
@@ -14,6 +15,7 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import {
     storeInteractionRoomData,
@@ -21,6 +23,7 @@ import {
 } from "../persistance/roomInteraction";
 import { Subscription } from "../persistance/subscriptions";
 import { ISubscription } from "../definitions/subscription";
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 
 export async function addPullRequestCommentsModal({
     data,
@@ -30,17 +33,18 @@ export async function addPullRequestCommentsModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
-    data?:any
+    data?: any;
     modify: IModify;
     read: IRead;
     persistence: IPersistence;
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.ADD_PULL_REQUEST_COMMENT_VIEW;
-    const block = modify.getCreator().getBlockBuilder();
     const room =
         slashcommandcontext?.getRoom() ||
         uikitcontext?.getInteractionData().room;
@@ -48,6 +52,39 @@ export async function addPullRequestCommentsModal({
         slashcommandcontext?.getSender() ||
         uikitcontext?.getInteractionData().user;
 
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            text: ModalsEnum.ADD_PULL_REQUEST_COMMENT_VIEW_TITLE,
+            type: "plain_text",
+        },
+        blocks: [],
+        submit: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Comment",
+            },
+            appId: id,
+            blockId: "",
+            actionId: "",
+        },
+        close: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Close",
+            },
+            appId: id,
+            blockId: "",
+            actionId: "",
+        },
+    };
+
+    let blocks: LayoutBlock[] = [];
     if (user?.id) {
         let roomId;
 
@@ -58,90 +95,82 @@ export async function addPullRequestCommentsModal({
             roomId = (
                 await getInteractionRoomData(
                     read.getPersistenceReader(),
-                    user.id
+                    user.id,
                 )
             ).roomId;
         }
 
         let repoName = "";
         let pullRequestNumber = "";
-        if(data?.repo?.length){
+        if (data?.repo?.length) {
             repoName = data?.repo;
         }
-        if(data?.pullNumber?.length){
+        if (data?.pullNumber?.length) {
             pullRequestNumber = data?.pullNumber;
         }
-        // shows indentations in input blocks but not inn section block
-        block.addInputBlock({
+
+        blocks.push({
+            type: "input",
             blockId: ModalsEnum.REPO_NAME_INPUT,
             label: {
                 text: ModalsEnum.REPO_NAME_LABEL,
                 type: TextObjectType.PLAINTEXT,
             },
-            element: block.newPlainTextInputElement({
+            element: {
+                type: "plain_text_input",
                 actionId: ModalsEnum.REPO_NAME_INPUT_ACTION,
                 placeholder: {
                     text: ModalsEnum.REPO_NAME_PLACEHOLDER,
                     type: TextObjectType.PLAINTEXT,
                 },
-                initialValue:repoName
-            }),
+                initialValue: repoName,
+                blockId: ModalsEnum.REPO_NAME_INPUT,
+                appId: id,
+            },
         });
-
-        block.addInputBlock({
+        blocks.push({
+            type: "input",
             blockId: ModalsEnum.PULL_REQUEST_NUMBER_INPUT,
             label: {
                 text: ModalsEnum.PULL_REQUEST_NUMBER_LABEL,
                 type: TextObjectType.PLAINTEXT,
             },
-            element: block.newPlainTextInputElement({
+            element: {
+                type: "plain_text_input",
                 actionId: ModalsEnum.PULL_REQUEST_NUMBER_INPUT_ACTION,
                 placeholder: {
                     text: ModalsEnum.PULL_REQUEST_NUMBER_INPUT_PLACEHOLDER,
                     type: TextObjectType.PLAINTEXT,
                 },
-                initialValue:pullRequestNumber
-            }),
+                initialValue: pullRequestNumber,
+                blockId: ModalsEnum.PULL_REQUEST_NUMBER_INPUT,
+                appId: id,
+            },
         });
-
-        block.addInputBlock({
-            blockId: ModalsEnum.PULL_REQUEST_COMMENT_INPUT,
+        blocks.push({
+            type: "input",
             label: {
                 text: ModalsEnum.PULL_REQUEST_COMMENT_INPUT_LABEL,
                 type: TextObjectType.PLAINTEXT,
             },
-            element: block.newPlainTextInputElement({
+            element: {
+                type: "plain_text_input",
                 actionId: ModalsEnum.PULL_REQUEST_COMMENT_INPUT_ACTION,
                 placeholder: {
                     text: ModalsEnum.PULL_REQUEST_COMMENT_INPUT_PLACEHOLDER,
                     type: TextObjectType.PLAINTEXT,
                 },
-                multiline: true
-            }),
-        });        
+                blockId: ModalsEnum.PULL_REQUEST_COMMENT_INPUT,
+                appId: id,
+                multiline: true,
+            },
+        });
     }
 
-    block.addDividerBlock();
+    blocks.push({
+        type: 'divider',
+    })
 
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.ADD_PULL_REQUEST_COMMENT_VIEW_TITLE,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Close",
-            },
-        }),
-        submit: block.newButtonElement({
-            actionId: ModalsEnum.ADD_SUBSCRIPTION_ACTION,
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Comment",
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+    modal.blocks = blocks;
+    return modal;
 }

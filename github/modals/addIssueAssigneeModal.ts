@@ -3,6 +3,7 @@ import {
     IModify,
     IPersistence,
     IRead,
+    IUIKitSurfaceViewParam,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { TextObjectType } from "@rocket.chat/apps-engine/definition/uikit/blocks";
 import { IUIKitModalViewParam } from "@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder";
@@ -13,11 +14,13 @@ import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashco
 import {
     UIKitBlockInteractionContext,
     UIKitInteractionContext,
+    UIKitSurfaceType,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import {
     storeInteractionRoomData,
     getInteractionRoomData,
 } from "../persistance/roomInteraction";
+import { LayoutBlock } from "@rocket.chat/ui-kit";
 
 export async function addIssueAssigneeModal({
     data,
@@ -27,20 +30,54 @@ export async function addIssueAssigneeModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    id,
 }: {
-    data: any,
+    data: any;
     modify: IModify;
     read: IRead;
     persistence: IPersistence;
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
-}): Promise<IUIKitModalViewParam> {
+    id: string;
+}): Promise<IUIKitSurfaceViewParam> {
     const viewId = ModalsEnum.ADD_ISSUE_ASSIGNEE_VIEW;
-    const block = modify.getCreator().getBlockBuilder();
-    const room = slashcommandcontext?.getRoom() || uikitcontext?.getInteractionData().room;
-    const user = slashcommandcontext?.getSender() || uikitcontext?.getInteractionData().user;
+    const room =
+        slashcommandcontext?.getRoom() ||
+        uikitcontext?.getInteractionData().room;
+    const user =
+        slashcommandcontext?.getSender() ||
+        uikitcontext?.getInteractionData().user;
 
+    const modal: IUIKitSurfaceViewParam = {
+        id: viewId,
+        type: UIKitSurfaceType.MODAL,
+        title: {
+            text: ModalsEnum.GITHUB_ISSUES_TITLE,
+            type: "plain_text",
+        },
+        blocks: [],
+        submit: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                text: "Assign",
+            },
+            appId: id,
+            blockId: "submit_block",
+            actionId: ModalsEnum.NEW_ISSUE_ACTION,
+        },
+        close: {
+            type: "button",
+            text: {
+                type: "plain_text",
+                text: "Close",
+            },
+            appId: id,
+            blockId: "close_block",
+            actionId: "close_action",
+        },
+    };
     if (user?.id) {
         let roomId;
         if (room?.id) {
@@ -50,132 +87,135 @@ export async function addIssueAssigneeModal({
             roomId = (
                 await getInteractionRoomData(
                     read.getPersistenceReader(),
-                    user.id
+                    user.id,
                 )
             ).roomId;
         }
 
-        if(data?.repository != undefined){
-            block.addInputBlock({
-                blockId: ModalsEnum.REPO_NAME_INPUT,
+        let blocks: LayoutBlock[] = [];
+
+        if (data?.repository != undefined) {
+            blocks.push({
+                type: "input",
                 label: {
+                    type: "plain_text",
                     text: ModalsEnum.REPO_NAME_LABEL,
-                    type: TextObjectType.PLAINTEXT,
                 },
-                element: block.newPlainTextInputElement({
+                element: {
+                    type: "plain_text_input",
+                    appId: id,
                     actionId: ModalsEnum.REPO_NAME_INPUT_ACTION,
                     placeholder: {
                         text: ModalsEnum.REPO_NAME_PLACEHOLDER,
-                        type: TextObjectType.PLAINTEXT,
+                        type: "plain_text",
                     },
-                    initialValue: data?.repository
-                }),
-            });
-        }else{
-            block.addInputBlock({
-                blockId: ModalsEnum.REPO_NAME_INPUT,
-                label: {
-                    text: ModalsEnum.REPO_NAME_LABEL,
-                    type: TextObjectType.PLAINTEXT,
+                    blockId: ModalsEnum.REPO_NAME_INPUT,
+                    initialValue: data?.repository,
                 },
-                element: block.newPlainTextInputElement({
+            });
+        } else {
+            blocks.push({
+                type: "input",
+                label: {
+                    type: "plain_text",
+                    text: ModalsEnum.REPO_NAME_LABEL,
+                },
+                element: {
+                    type: "plain_text_input",
+                    appId: id,
                     actionId: ModalsEnum.REPO_NAME_INPUT_ACTION,
+                    blockId: ModalsEnum.REPO_NAME_INPUT,
                     placeholder: {
                         text: ModalsEnum.REPO_NAME_PLACEHOLDER,
-                        type: TextObjectType.PLAINTEXT,
+                        type: "plain_text",
                     },
-                }),
+                },
             });
         }
 
-        if(data?.issueNumber){
-            block.addInputBlock({
-                blockId: ModalsEnum.ISSUE_NUMBER_INPUT,
+        if (data?.issueNumber) {
+            blocks.push({
+                type: "input",
                 label: {
+                    type: "plain_text",
                     text: ModalsEnum.ISSUE_NUMBER_INPUT_LABEL,
-                    type: TextObjectType.PLAINTEXT,
                 },
-                element: block.newPlainTextInputElement({
+                element: {
+                    type: "plain_text_input",
+                    appId: id,
                     actionId: ModalsEnum.ISSUE_NUMBER_INPUT_ACTION,
+                    blockId: ModalsEnum.ISSUE_NUMBER_INPUT,
                     placeholder: {
                         text: ModalsEnum.ISSUE_NUMBER_INPUT_PLACEHOLDER,
-                        type: TextObjectType.PLAINTEXT,
+                        type: "plain_text",
                     },
-                    initialValue: data.issueNumber
-                }),
+                    initialValue: data.issueNumber,
+                },
             });
-        }else{
-            block.addInputBlock({
-                blockId: ModalsEnum.ISSUE_NUMBER_INPUT,
+        } else {
+            blocks.push({
+                type: "input",
                 label: {
+                    type: "plain_text",
                     text: ModalsEnum.ISSUE_NUMBER_INPUT_LABEL,
-                    type: TextObjectType.PLAINTEXT,
                 },
-                element: block.newPlainTextInputElement({
+                element: {
+                    type: "plain_text_input",
+                    appId: id,
                     actionId: ModalsEnum.ISSUE_NUMBER_INPUT_ACTION,
+                    blockId: ModalsEnum.ISSUE_NUMBER_INPUT,
                     placeholder: {
                         text: ModalsEnum.ISSUE_NUMBER_INPUT_PLACEHOLDER,
-                        type: TextObjectType.PLAINTEXT,
+                        type: "plain_text",
                     },
-                }),
+                },
             });
         }
 
-        if(data?.assignees){
-            block.addInputBlock({
-                blockId: ModalsEnum.ISSUE_ASSIGNEE_INPUT,
+        if (data?.assignees) {
+            blocks.push({
+                type: "input",
                 label: {
+                    type: "plain_text",
                     text: ModalsEnum.ISSUE_ASSIGNEE_LABEL,
-                    type: TextObjectType.PLAINTEXT,
                 },
-                element: block.newPlainTextInputElement({
+                element: {
+                    type: "plain_text_input",
+                    appId: id,
                     actionId: ModalsEnum.ISSUE_ASSIGNEE_INPUT_ACTION,
+                    blockId: ModalsEnum.ISSUE_ASSIGNEE_INPUT,
                     placeholder: {
                         text: ModalsEnum.ISSUE_ASSIGNEE_PLACEHOLDER,
-                        type: TextObjectType.PLAINTEXT,
+                        type: "plain_text",
                     },
-                    initialValue: data.assignees
-                }),
+                    initialValue: data.assignees,
+                },
             });
-        }else{
-            block.addInputBlock({
-                blockId: ModalsEnum.ISSUE_ASSIGNEE_INPUT,
+        } else {
+            blocks.push({
+                type: "input",
                 label: {
+                    type: "plain_text",
                     text: ModalsEnum.ISSUE_ASSIGNEE_LABEL,
-                    type: TextObjectType.PLAINTEXT,
                 },
-                element: block.newPlainTextInputElement({
+                element: {
+                    type: "plain_text_input",
+                    appId: id,
                     actionId: ModalsEnum.ISSUE_ASSIGNEE_INPUT_ACTION,
+                    blockId: ModalsEnum.ISSUE_ASSIGNEE_INPUT,
                     placeholder: {
                         text: ModalsEnum.ISSUE_ASSIGNEE_PLACEHOLDER,
-                        type: TextObjectType.PLAINTEXT,
+                        type: "plain_text",
                     },
-                }),
+                },
             });
         }
+        blocks.push({
+            type: 'divider',
+        })
+
+        modal.blocks = blocks;
     }
 
-    block.addDividerBlock();
-
-    return {
-        id: viewId,
-        title: {
-            type: TextObjectType.PLAINTEXT,
-            text: ModalsEnum.GITHUB_ISSUES_TITLE,
-        },
-        close: block.newButtonElement({
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Close",
-            },
-        }),
-        submit: block.newButtonElement({
-            actionId: ModalsEnum.NEW_ISSUE_ACTION,
-            text: {
-                type: TextObjectType.PLAINTEXT,
-                text: "Assign",
-            },
-        }),
-        blocks: block.getBlocks(),
-    };
+    return modal;
 }
