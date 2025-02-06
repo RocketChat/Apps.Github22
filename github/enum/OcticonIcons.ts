@@ -1,6 +1,8 @@
 export enum OcticonIcons {
     ISSUE_OPEN = "https://raw.githubusercontent.com/primer/octicons/main/icons/issue-opened-24.svg",
+    PULL_REQUEST_OPEN = "https://raw.githubusercontent.com/primer/octicons/main/icons/git-pull-request-24.svg",
     ISSUE_CLOSED = "https://raw.githubusercontent.com/primer/octicons/main/icons/issue-closed-24.svg",
+    PULL_REQUEST_CLOSED = "https://raw.githubusercontent.com/primer/octicons/main/icons/git-pull-request-24.svg",
     COMMENTS = "https://raw.githubusercontent.com/primer/octicons/main/icons/comment-24.svg",
     COMMIT = "https://raw.githubusercontent.com/primer/octicons/main/icons/commit-24.svg",
     PERSON = "https://raw.githubusercontent.com/primer/octicons/main/icons/person-24.svg",

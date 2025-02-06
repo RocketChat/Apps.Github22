@@ -12,7 +12,7 @@ import { CreateReactionsBar } from "../lib/CreateReactionsBar";
 import { getInteractionRoomData, storeInteractionRoomData } from "../persistance/roomInteraction";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 
-export async function IssueDisplayModal ({
+export async function IssueAndPullRequestDisplayModal ({
     repoName,
     issueNumber,
     access_token,
@@ -21,7 +21,8 @@ export async function IssueDisplayModal ({
     persistence,
     http,
     slashcommandcontext,
-    uikitcontext
+    uikitcontext,
+    isIssue=true
 } : {
     repoName : String,
     issueNumber : String,
@@ -31,7 +32,8 @@ export async function IssueDisplayModal ({
     persistence: IPersistence,
     http: IHttp,
     slashcommandcontext?: SlashCommandContext,
-    uikitcontext?: UIKitInteractionContext
+    uikitcontext?: UIKitInteractionContext,
+    isIssue : boolean
 }) : Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.USER_ISSUE_VIEW;
     const block = modify.getCreator().getBlockBuilder();
@@ -97,26 +99,37 @@ export async function IssueDisplayModal ({
     issueInfo.body && BodyMarkdownRenderer({body : issueInfo.body, block : block})
 
     block.addActionsBlock({
-        elements : [
-            block.newButtonElement({
-                actionId : ModalsEnum.SHARE_ISSUE_ACTION,
-                value : `${repoName}, ${issueNumber}`,
-                text : {
-                    text : "Share Issue",
-                    type : TextObjectType.PLAINTEXT
-                },
-            }),
-            block.newButtonElement({
-                actionId : ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE,
-                value : `${repoName}, ${issueNumber}`,
-                text : {
-                    text : "Assign Issue",
-                    type : TextObjectType.PLAINTEXT
-                },
-            })
+        elements: [
+            ...(isIssue ? [
+                block.newButtonElement({
+                    actionId: ModalsEnum.SHARE_ISSUE_ACTION,
+                    value: `${repoName}, ${issueNumber}`,
+                    text: {
+                        text: `Share Issue`,
+                        type: TextObjectType.PLAINTEXT
+                    },
+                }),
+                block.newButtonElement({
+                    actionId: ModalsEnum.ADD_GITHUB_ISSUE_ASSIGNEE,
+                    value: `${repoName}, ${issueNumber}`,
+                    text: {
+                        text: "Assign Issue",
+                        type: TextObjectType.PLAINTEXT
+                    },
+                })
+            ] : [
+                block.newButtonElement({
+                    actionId: ModalsEnum.SHARE_PULL_REQUEST_ACTION,
+                    value: `${repoName}, ${issueNumber}`,
+                    text: {
+                        text: `Share Pull Request`,
+                        type: TextObjectType.PLAINTEXT
+                    },
+                })
+            ])
         ]
-    })
-
+    });
+    
     return {
         id : viewId,
         title : {

@@ -555,6 +555,58 @@ export async function getUserAssignedIssues(
     }
 }
 
+export async function getUserPullRequests(
+    http: IHttp,
+    username: String,
+    access_token: String,
+    filter: {
+        filter: String,
+        state: String,
+        sort: String
+    },
+): Promise<IGitHubIssue[]> {
+
+    let url;
+
+    switch (filter.filter) {
+        case ModalsEnum.CREATED_PULL_REQUEST_FILTER:
+            url = `https://api.github.com/search/issues?q=is:${filter.state}+is:pr+sort:${filter.sort.substring(5)}-desc+author:${username}`
+            break;
+        case ModalsEnum.MENTIONED_PULL_REQUEST_FILTER:
+            url = `https://api.github.com/search/issues?q=is:${filter.state}+is:pr+sort:${filter.sort.substring(5)}-desc+mentions:${username}`
+        default:
+            break;
+    }
+    try {
+        const response = await getRequest(
+            http,
+            access_token,
+            url,
+        );
+
+        const modifiedResponse: Array<IGitHubIssue> = response.items.map((value): IGitHubIssue => {
+            return {
+                issue_id: value.id as string,
+                issue_compact: value.body as string,
+                repo_url: value.repository_url as string,
+                user_login: value.user.login as string,
+                user_avatar: value.user.avatar_url as string,
+                number: value.number as number,
+                title: value.title as string,
+                body: value.body as string,
+                state: value.state as string,
+                last_updated_at: value.updated_at as string,
+                comments: value.comments as number,
+            }
+        })
+        return modifiedResponse;
+    }
+    catch (e) {
+        return [];
+    }
+}
+
+
 export async function getIssueData(
     repoInfo: String,
     issueNumber: String,

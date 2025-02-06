@@ -105,6 +105,17 @@ export async function userProfileModal({
                     },
                     style: ButtonStyle.PRIMARY
                 },
+            ),
+            block.newButtonElement(
+                {
+                    actionId: ModalsEnum.TRIGGER_PULL_REQUESTS_MODAL,
+                    value: "Trigger Pull Requests Modal",
+                    text: {
+                        type: TextObjectType.PLAINTEXT,
+                        text: "Pull Requests"
+                    },
+                    style: ButtonStyle.PRIMARY
+                },
             )
         ]
     })

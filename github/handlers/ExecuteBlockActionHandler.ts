@@ -44,7 +44,8 @@ import { IGitHubIssueData } from "../definitions/githubIssueData";
 import { shareProfileModal } from "../modals/profileShareModal";
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
 import { userIssuesModal } from "../modals/UserIssuesModal";
-import { IssueDisplayModal } from "../modals/IssueDisplayModal";
+import { userPullRequestsModal } from "../modals/UserPullRequestsModal";
+import { IssueAndPullRequestDisplayModal } from "../modals/IssueAndPullRequestDisplayModal";
 import { IGitHubIssue } from "../definitions/githubIssue";
 import { BodyMarkdownRenderer } from "../processors/bodyMarkdowmRenderer";
 import { CreateIssueStatsBar } from "../lib/CreateIssueStatsBar";
@@ -119,6 +120,76 @@ export class ExecuteBlockActionHandler {
                         };
                     }
                 }
+                case ModalsEnum.SHARE_PULL_REQUEST_ACTION: {
+                    let {user, value, room} = context.getInteractionData();
+                    const access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+
+                    const repoName = value?.split(",")[0] ?? "";
+                    const issueNumber = value?.split(",")[1] ?? "";
+
+                    const issueInfo : IGitHubIssue = await getIssueData(repoName, issueNumber, access_token.token, this.http);
+
+                    const block = this.modify.getCreator().getBlockBuilder();
+
+                    CreateIssueStatsBar(issueInfo, block);
+
+                    block.addSectionBlock({
+                        text : {
+                            text : `*${issueInfo.title}*` ?? "",
+                            type : TextObjectType.MARKDOWN
+                        }
+                    }),
+                    block.addActionsBlock({
+                        elements : [
+                            block.newButtonElement({
+                                text : {
+                                    text : "Open Pull Request in Browser",
+                                    type : TextObjectType.PLAINTEXT
+                                },
+                                url : issueInfo.html_url,
+                                style : ButtonStyle.PRIMARY
+                            })
+                        ]
+                    })
+                    issueInfo.body && BodyMarkdownRenderer({body : issueInfo.body, block : block});
+
+                    if(user?.id){
+                        if(room?.id){
+                            await sendMessage(this.modify, room!, user, `Pull Request`, block)
+                        }else{
+                            let roomId = (
+                                await getInteractionRoomData(
+                                    this.read.getPersistenceReader(),
+                                    user.id
+                                )
+                            ).roomId;
+                            room = await this.read.getRoomReader().getById(roomId) as IRoom;
+                            await sendMessage(this.modify, room, user, `Pull Request`, block)
+                        }
+                    }
+                    break;
+                }
+                case ModalsEnum.TRIGGER_PULL_REQUEST_DISPLAY_MODAL : {
+                    const {user, value} = context.getInteractionData();
+                    const access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+
+                    const repoInfo = value?.split(",")[0] ?? "";
+                    const issueNumber = value?.split(",")[1] ?? "";
+
+                    const issueDisplayModal = await IssueAndPullRequestDisplayModal({
+                        repoName : repoInfo,
+                        issueNumber : issueNumber,
+                        access_token : access_token.token,
+                        modify : this.modify,
+                        read : this.read,
+                        persistence : this.persistence,
+                        http : this.http,
+                        uikitcontext : context,
+                        isIssue:false
+                    })
+
+                    return context.getInteractionResponder().updateModalViewResponse(issueDisplayModal);
+                }                                  
                 case ModalsEnum.SHARE_ISSUE_ACTION : {
                     let {user, value, room} = context.getInteractionData();
                     const access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
@@ -175,7 +246,7 @@ export class ExecuteBlockActionHandler {
                     const repoInfo = value?.split(",")[0] ?? "";
                     const issueNumber = value?.split(",")[1] ?? "";
 
-                    const issueDisplayModal = await IssueDisplayModal({
+                    const issueDisplayModal = await IssueAndPullRequestDisplayModal({
                         repoName : repoInfo,
                         issueNumber : issueNumber,
                         access_token : access_token.token,
@@ -183,7 +254,8 @@ export class ExecuteBlockActionHandler {
                         read : this.read,
                         persistence : this.persistence,
                         http : this.http,
-                        uikitcontext : context
+                        uikitcontext : context,
+                        isIssue:true
                     })
 
                     return context.getInteractionResponder().updateModalViewResponse(issueDisplayModal);
@@ -255,6 +327,96 @@ export class ExecuteBlockActionHandler {
                     await this.persistence.updateByAssociation(record, filter);
 
                     return context.getInteractionResponder().updateModalViewResponse(issueModal);
+                }
+                case ModalsEnum.SWITCH_PULL_REQUEST_SORT :
+                case ModalsEnum.SWITCH_PULL_REQUEST_STATE :
+                case ModalsEnum.SWITCH_PULL_REQUEST_FILTER : {
+                    const record = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, "PULL_REQUEST_MAIN_FILTER");
+
+                    const pullRequestFilterArray = await this.read.getPersistenceReader().readByAssociation(record) as {filter: string, state: string, sort: string, order: string}[];
+
+                    const {user, value} = context.getInteractionData();
+
+                    let filter: {filter: string, state: string, sort: string, order: string} | undefined;
+
+                    const prev_sort = pullRequestFilterArray.length == 0 ? ModalsEnum.PULL_REQUEST_SORT_CREATED : pullRequestFilterArray[0].sort;
+                    const prev_filter = pullRequestFilterArray.length == 0 ? ModalsEnum.CREATED_PULL_REQUEST_FILTER : pullRequestFilterArray[0].filter;
+                    const prev_state = pullRequestFilterArray.length == 0 ? ModalsEnum.PULL_REQUEST_STATE_OPEN : pullRequestFilterArray[0].state;
+
+                    switch (value as string) {
+                        case ModalsEnum.MENTIONED_PULL_REQUEST_FILTER:
+                        case ModalsEnum.CREATED_PULL_REQUEST_FILTER:
+                            filter = {
+                                filter: value as string,
+                                sort: prev_sort,
+                                state: prev_state,
+                                order: ModalsEnum.PULL_REQUESTS_DESCENDING
+                            };
+                            break;
+                        case ModalsEnum.PULL_REQUEST_SORT_CREATED:
+                        case ModalsEnum.PULL_REQUEST_SORT_COMMENTS:
+                        case ModalsEnum.PULL_REQUEST_SORT_UPDATED:
+                            filter = {
+                                filter: prev_filter,
+                                sort: value as string,
+                                state: prev_state,
+                                order: ModalsEnum.PULL_REQUESTS_DESCENDING
+                            };
+                            break;
+                        case ModalsEnum.PULL_REQUEST_STATE_OPEN:
+                        case ModalsEnum.PULL_REQUEST_STATE_CLOSED:
+                            filter = {
+                                filter: prev_filter,
+                                sort: prev_sort,
+                                state: value as string,
+                                order: ModalsEnum.PULL_REQUESTS_DESCENDING
+                            };
+                            break;
+                        default:
+                            filter = {
+                                filter: ModalsEnum.CREATED_PULL_REQUEST_FILTER,
+                                sort: ModalsEnum.PULL_REQUEST_SORT_CREATED,
+                                state: ModalsEnum.PULL_REQUEST_STATE_OPEN,
+                                order: ModalsEnum.PULL_REQUESTS_DESCENDING
+                            };
+                    }
+
+                    let access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+                    const pullRequestModal = await userPullRequestsModal({
+                        access_token: access_token.token,
+                        filter: filter,
+                        modify: this.modify,
+                        read: this.read,
+                        persistence: this.persistence,
+                        http: this.http
+                    });
+
+                    await this.persistence.updateByAssociation(record, filter);
+
+                    return context.getInteractionResponder().updateModalViewResponse(pullRequestModal);
+                }
+
+                case ModalsEnum.TRIGGER_PULL_REQUESTS_MODAL : {
+                    const {user} = context.getInteractionData();
+
+                    let access_token = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
+
+                    const filter = {
+                        filter : ModalsEnum.CREATED_PULL_REQUEST_FILTER,
+                        state : ModalsEnum.PULL_REQUEST_STATE_OPEN,
+                        sort : ModalsEnum.PULL_REQUEST_SORT_CREATED
+                    }
+
+                    const pullRequestModal = await userPullRequestsModal({
+                        filter : filter,
+                        access_token : access_token.token,
+                        modify: this.modify,
+                        read : this.read,
+                        persistence : this.persistence,
+                        http : this.http,
+                        uikitcontext : context
+                    });
+                    return context.getInteractionResponder().openModalViewResponse(pullRequestModal);
                 }
                 case ModalsEnum.TRIGGER_ISSUES_MODAL : {
 
