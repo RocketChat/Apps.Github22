@@ -1,3 +1,7 @@
 {
-    "cmd_description": "Search, Share, Review, Merge, Subscribe GitHub Resources and do much more from Rocket.Chat."
+    "cmd_description": "Search, Share, Review, Merge, Subscribe GitHub Resources and do much more from Rocket.Chat.",
+    "pr_view_changes_label": "Show View Changes and View File in the pull request view",
+    "pr_view_merge_label": "Show Merge in the pull request view",
+    "pr_view_comments_label": "Show Comments in the pull request view",
+    "pr_view_approve_label": "Show Approve in the pull request view"
 }

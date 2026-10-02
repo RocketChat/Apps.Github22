@@ -21,6 +21,7 @@ import { deleteSubscriptionsModal } from "../modals/deleteSubscriptions";
 import { deleteSubscription, updateSubscription, getIssueTemplateCode, getPullRequestComments, getPullRequestData, getRepositoryIssues, getBasicUserInfo, getIssueData, getIssuesComments, approvePullRequest } from "../helpers/githubSDK";
 import { Subscription } from "../persistance/subscriptions";
 import { getAccessTokenForUser } from "../persistance/auth";
+import { AppSettingsEnum, isActionOn } from "../settings/settings";
 import { GithubApp } from "../GithubApp";
 import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
@@ -297,6 +298,9 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.VIEW_FILE_ACTION: {
+                    if (!(await isActionOn(this.read, AppSettingsEnum.PRViewChangesID))) {
+                        return context.getInteractionResponder().successResponse();
+                    }
                     const codeModal = await fileCodeModal({
                         data,
                         modify: this.modify,
@@ -594,6 +598,9 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.MERGE_PULL_REQUEST_ACTION:{
+                    if (!(await isActionOn(this.read, AppSettingsEnum.PRViewMergeID))) {
+                        return context.getInteractionResponder().successResponse();
+                    }
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
                     let { user } = await context.getInteractionData();
@@ -671,6 +678,9 @@ export class ExecuteBlockActionHandler {
                     return context.getInteractionResponder().openModalViewResponse(shareProfileMod);
                 }
                 case ModalsEnum.APPROVE_PULL_REQUEST_ACTION:{
+                    if (!(await isActionOn(this.read, AppSettingsEnum.PRViewApproveID))) {
+                        return context.getInteractionResponder().successResponse();
+                    }
                     
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
@@ -811,6 +821,9 @@ export class ExecuteBlockActionHandler {
                 }
 
                 case ModalsEnum.PR_COMMENT_LIST_ACTION:{
+                    if (!(await isActionOn(this.read, AppSettingsEnum.PRViewCommentsID))) {
+                        return context.getInteractionResponder().successResponse();
+                    }
                     let value: string = context.getInteractionData().value as string;
                     let splittedValues = value?.split(" ");
                     let { user } = await context.getInteractionData();
