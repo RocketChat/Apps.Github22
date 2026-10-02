@@ -13,6 +13,7 @@ import { SubcommandEnum } from "../enum/Subcommands";
 import { GithubApp } from "../GithubApp";
 import { basicQueryMessage } from "../helpers/basicQueryMessage";
 import { pullDetailsModal } from "../modals/pullDetailsModal";
+import { getAccessTokenForUser } from "../persistance/auth";
 import { ExecutorProps } from "../definitions/ExecutorProps";
 import { handleLogin, handleLogout } from "../handlers/AuthenticationHandler";
 import {
@@ -293,6 +294,7 @@ export class CommandUtility implements ExecutorProps {
                 persistence: this.persistence,
                 http: this.http,
                 slashcommandcontext: this.context,
+                accessToken: await getAccessTokenForUser(this.read, this.sender, this.app.oauth2Config),
             });
             await this.modify
                 .getUiController()

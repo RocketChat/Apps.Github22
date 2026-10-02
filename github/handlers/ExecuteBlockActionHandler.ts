@@ -297,6 +297,7 @@ export class ExecuteBlockActionHandler {
                     break;
                 }
                 case ModalsEnum.VIEW_FILE_ACTION: {
+                    const accessToken = await getAccessTokenForUser(this.read, data.user, this.app.oauth2Config) as IAuthData;
                     const codeModal = await fileCodeModal({
                         data,
                         modify: this.modify,
@@ -304,6 +305,7 @@ export class ExecuteBlockActionHandler {
                         persistence: this.persistence,
                         http: this.http,
                         uikitcontext: context,
+                        accessToken,
                     });
                     return context
                         .getInteractionResponder()
@@ -474,13 +476,15 @@ export class ExecuteBlockActionHandler {
                             number:PullRequestDetails[1]
                         }
                         if(triggerId && data){
+                            const accessToken = await getAccessTokenForUser(this.read, user, this.app.oauth2Config) as IAuthData;
                             const resultsModal = await pullDetailsModal({
                                 data,
                                 modify: this.modify,
                                 read: this.read,
                                 persistence: this.persistence,
                                 http: this.http,
-                                uikitcontext: context
+                                uikitcontext: context,
+                                accessToken,
                             });
                             return context
                                     .getInteractionResponder()

@@ -15,6 +15,7 @@ import {
     UIKitInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 import { storeInteractionRoomData, getInteractionRoomData } from "../persistance/roomInteraction";
+import { IAuthData } from "@rocket.chat/apps-engine/definition/oauth2/IOAuth2";
 
 export async function pullDetailsModal({
     data,
@@ -24,6 +25,7 @@ export async function pullDetailsModal({
     http,
     slashcommandcontext,
     uikitcontext,
+    accessToken,
 }: {
     data?;
     modify: IModify;
@@ -32,6 +34,7 @@ export async function pullDetailsModal({
     http: IHttp;
     slashcommandcontext?: SlashCommandContext;
     uikitcontext?: UIKitInteractionContext;
+    accessToken?: IAuthData;
 }): Promise<IUIKitModalViewParam> {
     const viewId = ModalsEnum.PULL_VIEW;
 
@@ -53,15 +56,27 @@ export async function pullDetailsModal({
             roomId = (await getInteractionRoomData(read.getPersistenceReader(), user.id)).roomId;
         }
 
-        const pullRawData = await http.get(
-            `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}`
-        );
+        let requestOptions = accessToken?.token
+            ? { headers: { Authorization: `token ${accessToken.token}` } }
+            : {};
+        const pullUrl = `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}`;
+
+        let pullRawData = await http.get(pullUrl, requestOptions);
+
+        // A revoked or expired token gets 401 even on a public repository, so retry without it.
+        if (pullRawData.statusCode === 401 && accessToken?.token) {
+            requestOptions = {};
+            pullRawData = await http.get(pullUrl);
+        }
+        const loggedIn = "headers" in requestOptions;
 
         // If pullsNumber doesn't exist, notify the user
         if (pullRawData.statusCode === 404) {
             block.addSectionBlock({
                 text: {
-                    text: `Pull request #${data?.number} doesn't exist.`,
+                    text: loggedIn
+                        ? `Pull request #${data?.number} doesn't exist.`
+                        : `Pull request #${data?.number} doesn't exist, or it is in a private repository. Log in with /github login to see private repositories.`,
                     type: TextObjectType.PLAINTEXT,
                 },
             });
@@ -84,7 +99,8 @@ export async function pullDetailsModal({
         const pullData = pullRawData.data;
 
         const pullRequestFilesRaw = await http.get(
-            `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}/files`
+            `https://api.github.com/repos/${data?.repository}/pulls/${data?.number}/files`,
+            requestOptions
         );
 
         const pullRequestFiles = pullRequestFilesRaw.data;
