@@ -1,3 +1,5 @@
 {
-    "cmd_description": "Search, Share, Review, Merge, Subscribe GitHub Resources and do much more from Rocket.Chat."
+    "cmd_description": "Search, Share, Review, Merge, Subscribe GitHub Resources and do much more from Rocket.Chat.",
+    "pr_link_actions_label": "Add a PR Actions button to GitHub pull request links in messages",
+    "pr_alert_actions_label": "Add a PR Actions button to pull request alerts"
 }

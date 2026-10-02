@@ -1,6 +1,6 @@
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { IHttp, IMessageBuilder, IMessageExtender, IModify, IPersistence, IRead } from "@rocket.chat/apps-engine/definition/accessors";
-import { IMessage, IMessageAttachment, MessageActionButtonsAlignment, MessageActionType } from "@rocket.chat/apps-engine/definition/messages";
+import { IMessage, IMessageAttachment, MessageActionButtonsAlignment, MessageActionType, MessageProcessingType } from "@rocket.chat/apps-engine/definition/messages";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 
 export async function handleGithubPRLinks(
@@ -37,6 +37,8 @@ export async function handleGithubPRLinks(
                     text: `PR Actions in ${repositoryName} #${pullNumber}`,
                     msg: `/github ${username}/${repositoryName} pulls ${pullNumber}`,
                     msg_in_chat_window: true,
+                    // Rocket.Chat 8.x runs slash commands only from the composer, so the default, sendMessage, posts this as plain text.
+                    msg_processing_type: MessageProcessingType.RespondWithMessage,
                 },
             ],
         };

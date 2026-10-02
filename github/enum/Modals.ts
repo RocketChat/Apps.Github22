@@ -143,6 +143,8 @@ export enum ModalsEnum {
     MULTI_SHARE_REMOVE_SEARCH_RESULT_LABEL="Remove",
     VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES='view-github-search-result-pr-changes',
     VIEW_GITHUB_SEARCH_RESULT_PR_CHANGES_LABEL="View Changes",
+    VIEW_PULL_REQUEST_ON_GITHUB_ACTION = "view-pull-request-on-github",
+    VIEW_PULL_REQUEST_ON_GITHUB_LABEL = "View on GitHub",
     GITHUB_SEARCH_ERROR_VIEW="github-search-error-view",
     SEARCH_RESULT_SHARE_VIEW_TITLE="GitHub Search",
     SEARCH_RESULT_SHARE_VIEW="github-search-result-share",

@@ -25,7 +25,7 @@ import {
 import { ExecuteViewClosedHandler } from "./handlers/ExecuteViewClosedHandler";
 import { ExecuteBlockActionHandler } from "./handlers/ExecuteBlockActionHandler";
 import { ExecuteViewSubmitHandler } from "./handlers/ExecuteViewSubmitHandler";
-import { IUser } from "@rocket.chat/apps-engine/definition/users";
+import { IUser, UserType } from "@rocket.chat/apps-engine/definition/users";
 import {
     IAuthData,
     IOAuth2Client,
@@ -84,7 +84,9 @@ export class GithubApp extends App implements IPreMessageSentExtend {
         if (await hasGitHubCodeSegmentLink(message)) {
             await handleGitHubCodeSegmentLink(message, read, http, message.sender, message.room, extend);
         }
-        if (await hasGithubPRLink(message)) {
+        const prLinkActions = await read.getEnvironmentReader().getSettings().getValueById(AppSettingsEnum.PRLinkActionsID);
+        // The app's own PR alerts carry a one-click button instead (endpoints/githubEndpoints.ts).
+        if (prLinkActions && message.sender.type !== UserType.APP && await hasGithubPRLink(message)) {
             await handleGithubPRLinks(message, read, http, message.sender, message.room, extend);
         }
 
