@@ -93,10 +93,12 @@ export class githubWebHooks extends ApiEndpoint {
             const room: IRoom = (await read
                 .getRoomReader()
                 .getById(roomId)) as IRoom;
+            // Alerts link the repo, the PR and the author's profile. Previews of those turn each alert into a large card.
             const textSender = await modify
                 .getCreator()
                 .startMessage()
-                .setText(messageText);
+                .setText(messageText)
+                .setParseUrls(false);
             if (room) {
                 textSender.setRoom(room);
             }
